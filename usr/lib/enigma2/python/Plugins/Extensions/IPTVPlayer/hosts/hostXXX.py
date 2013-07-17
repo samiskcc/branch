@@ -13,15 +13,17 @@ import Plugins.Extensions.IPTVPlayer.libs.urlparser as urlparser
 ###################################################
 import re, urllib    
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry
+from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN
 ###################################################
 
 ###################################################
 # Config options for HOST
 ###################################################
+#config.plugins.iptvplayer.PIN = ConfigPIN(default = 6666 , censor='*')
 
 def GetConfigList():
     optionList = []
+    #optionList.append(getConfigListEntry("PIN:", config.plugins.iptvplayer.PIN))
     return optionList
 ###################################################
 
