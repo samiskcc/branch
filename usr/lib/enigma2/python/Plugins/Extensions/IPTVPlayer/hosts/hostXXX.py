@@ -185,6 +185,7 @@ class Host:
            valTab.append(CDisplayListItem('CATEGORIES', 'Categories', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/category/browse'], 'pornhub-categories', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+
         if name == 'tube8-last':
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -207,6 +208,24 @@ class Host:
               valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0]], 'tube8-last', '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
+        if name == 'tube8-categories':
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           match = re.compile('<h2><a href="(.+?)">(.+?)</a></h2>', re.DOTALL).findall(data)
+           printDBG( 'Host listsItems len match: '+str(len(match)))
+           for i in range(len(match)):
+              for j in range(len(match[i])):
+                printDBG( 'Host listsItems match: '+str(i)+','+str(j)+': '+match[i][j])
+              valTab.append(CDisplayListItem(match[i][1], match[i][1], CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[i][0]], 'tube8-last', '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         if name == 'youporn-last':
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -227,43 +246,6 @@ class Host:
               valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0]], 'youporn-last', '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
-        if name == 'pornhub-last':
-           printDBG( 'Host listsItems begin name='+name )
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-           try:
-              data = self.cm.getURLRequestData(query_data)
-           except:
-              printDBG( 'Host listsItems query error' )
-              return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           match = re.compile(   '<div class="video_box".+?background: url(.+?) no-repeat.+?<h2 class="h5"><a href="(.+?)">\n(.+?)          .+?<span>Length:.+?			(.+?)		</p>', re.DOTALL).findall(data)
-           printDBG( 'Host listsItems len match: '+str(len(match)))
-           for i in range(len(match)):
-              for j in range(len(match[i])):
-                printDBG( 'Host listsItems match: '+str(i)+','+str(j)+': '+match[i][j])
-              valTab.append(CDisplayListItem(match[i][2].replace('<br />',' '), '['+match[i][3]+'] '+match[i][2].replace('<br />',' '), CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+match[i][1], 1)], 0, match[i][0][1:-1], None)) 
-           match = re.compile('<div class="next_nav">.+?<a href="(.+?)">NEXT</a>', re.DOTALL).findall(data)
-           if len(match)>0:
-              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0]], 'pornhub-last', '', None))                
-           printDBG( 'Host listsItems end' )
-           return valTab
-        if name == 'tube8-categories':
-           printDBG( 'Host listsItems begin name='+name )
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-           try:
-              data = self.cm.getURLRequestData(query_data)
-           except:
-              printDBG( 'Host listsItems query error' )
-              return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           match = re.compile('<h2><a href="(.+?)">(.+?)</a></h2>', re.DOTALL).findall(data)
-           printDBG( 'Host listsItems len match: '+str(len(match)))
-           for i in range(len(match)):
-              for j in range(len(match[i])):
-                printDBG( 'Host listsItems match: '+str(i)+','+str(j)+': '+match[i][j])
-              valTab.append(CDisplayListItem(match[i][1], match[i][1], CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[i][0]], 'tube8-last', '', None)) 
-           printDBG( 'Host listsItems end' )
-           return valTab
         if name == 'youporn-categories':
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -279,6 +261,27 @@ class Host:
               for j in range(len(match[i])):
                 printDBG( 'Host listsItems match: '+str(i)+','+str(j)+': '+match[i][j])
               valTab.append(CDisplayListItem(match[i][1], match[i][1], CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[i][0]], 'youporn-last', '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        if name == 'pornhub-last':
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           match = re.compile('<div class="video_box".+?background: url(.+?) no-repeat.+?<h2 class="h5"><a href="(.+?)" >(.+?)</a></h2>.+?<span>Length:.+?			(.+?)		</p>', re.DOTALL).findall(data)
+           printDBG( 'Host listsItems len match: '+str(len(match)))
+           for i in range(len(match)):
+              for j in range(len(match[i])):
+                printDBG( 'Host listsItems match: '+str(i)+','+str(j)+': '+match[i][j])
+              valTab.append(CDisplayListItem(match[i][2].replace('<br />',' '), '['+match[i][3]+'] '+match[i][2].replace('<br />',' '), CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+match[i][1], 1)], 0, match[i][0][1:-1], None)) 
+           match = re.compile('<div class="next_nav">.+?<a href="(.+?)">NEXT</a>', re.DOTALL).findall(data)
+           if len(match)>0:
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0]], 'pornhub-last', '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
         if name == 'pornhub-categories':
@@ -314,11 +317,12 @@ class Host:
            return videoUrl
         
         if self.MAIN_URL == 'http://m.tube8.com':
-           match = re.compile('<div class="play_video_link">.+?<a href="(.+?)" style="text-decoration:underline">', re.DOTALL).findall(data)
+           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
         if self.MAIN_URL == 'http://mobile.youporn.com':
-           match = re.compile('<div class="play_video">.+?<a href="(.+?)"', re.DOTALL).findall(data)
+           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
         if self.MAIN_URL == 'http://m.pornhub.com':
-           match = re.compile('<div class="play_video">.+?<a href="(.+?)"', re.DOTALL).findall(data)
+           #printDBG( 'Host getResolvedURL data: '+data )
+           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
             
         if len(match)>0:
            videoUrl = match[0]
