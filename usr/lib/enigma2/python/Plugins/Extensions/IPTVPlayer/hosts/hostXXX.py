@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.0.0.1"
+    XXXversion = "5.0.0.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -136,7 +136,7 @@ class Host:
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
         try:
            data = self.cm.getURLRequestData(query_data)
-           printDBG( 'Host init data: '+data )
+           #printDBG( 'Host init data: '+data )
            r=re.search( r'XXXversion = &quot;(.+)&quot;',data)
            if r:
               printDBG( 'r' )
@@ -195,7 +195,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('Popular Tags(.*?)End Section', data, re.S)
            phCats = re.findall('<a class=".*?" href="(.*?)">(.*?)</a>', parse.group(1), re.S)
            if phCats:
@@ -205,14 +205,14 @@ class Host:
                   phTitle = phTitle.title()
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'4tube-clips', '', None)) 
            #valTab.sort()
-           valTab.insert(0,CDisplayListItem("Websites","Websites",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/sites"]  ,            '4tube-clips','',None))
-           valTab.insert(0,CDisplayListItem("Pornstars","Pornstars", CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/pornstars"],          '4tube-clips','',None))
-           valTab.insert(0,CDisplayListItem("Full","Full",           CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos/full-length"], '4tube-clips','',None))
-           valTab.insert(0,CDisplayListItem("Featured","Featured",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/featured"],           '4tube-clips','',None))
-           valTab.insert(0,CDisplayListItem("Lastest","Lastest",     CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos"],             '4tube-clips','',None))
+           valTab.insert(0,CDisplayListItem("Websites","Websites",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/sites"]  ,            '4tube-sites',    '',None))
+           valTab.insert(0,CDisplayListItem("Pornstars","Pornstars", CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/pornstars"],          '4tube-pornstars','',None))
+           valTab.insert(0,CDisplayListItem("Full","Full",           CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos/full-length"], '4tube-clips',    '',None))
+           valTab.insert(0,CDisplayListItem("Featured","Featured",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/featured"],           '4tube-clips',    '',None))
+           valTab.insert(0,CDisplayListItem("Lastest","Lastest",     CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos"],             '4tube-clips',    '',None))
            printDBG( 'Host listsItems end' )
            return valTab
-        if name == '4tube-clips':
+        if '4tube-sites' == name:
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
@@ -222,6 +222,54 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="siteInfo"><span class="name"><a href="(.*?)">(.*?)</a></span><a href=".*?"><img class="thumb" src="(.*?)"',data,re.S) 
+           if phMovies:
+              for (phUrl, phTitle, phImage) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], '4tube-clips', phImage, None)) 
+           match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
+           #printDBG( 'Host listsItems len match: '+str(len(match)))
+           if len(match)>0:
+              #printDBG( 'Host listsItems match: '+match)
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], '4tube-sites', '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if '4tube-pornstars' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('pornstarInfoLarge_pornstar"><a title=.*?href="(.*?)".*?class="thumb" src="(.*?)" title="(.*?)"',data,re.S) 
+           if phMovies:
+              for (phUrl, phImage, phTitle) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl], '4tube-clips', phImage, None)) 
+           match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
+           #printDBG( 'Host listsItems len match: '+str(len(match)))
+           if len(match)>0:
+              #printDBG( 'Host listsItems match: '+match)
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], '4tube-pornstars', '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if '4tube-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="videoInfo-item".*?href="(.*?)".*?class="thumb" src="(.*?)" title="(.*?)".*?<span class="length">(.*?)</span>',data,re.S) 
            if phMovies:
               for (phUrl, phImage, phTitle, phRuntime) in phMovies:
@@ -435,8 +483,13 @@ class Host:
         # ########## #
         if 'UPDATE' == name:
            printDBG( 'Host listsItems begin name='+name )
-           valTab.append(CDisplayListItem('Local  version: '+self.XXXversion, 'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           valTab.append(CDisplayListItem('Remote version: '+self.XXXremote,  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           valTab.append(CDisplayListItem('Update Now - do zrobienia pozniej',   'Update Now', CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW', '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'UPDATE-NOW' == name:
+           printDBG( 'Host listsItems begin name='+name )
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -450,7 +503,7 @@ class Host:
         query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
         try:
            data = self.cm.getURLRequestData(query_data)
-           printDBG( 'Host getResolvedURL data: '+data )
+           #printDBG( 'Host getResolvedURL data: '+data )
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
