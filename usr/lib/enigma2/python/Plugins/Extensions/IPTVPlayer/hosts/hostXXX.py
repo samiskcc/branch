@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.0.0.0"
+    XXXversion = "5.0.0.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -136,10 +136,11 @@ class Host:
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
         try:
            data = self.cm.getURLRequestData(query_data)
-           printDBG( 'Host listsItems data: '+data )
-           match = re.search('XXXversion = "(.*?)"', data, re.S)
-           if match:
-              self.XXXremote = match[0]
+           printDBG( 'Host init data: '+data )
+           r=re.search( r'XXXversion = &quot;(.+)&quot;',data)
+           if r:
+              printDBG( 'r' )
+              self.XXXremote=r.groups(1)[0]
         except:
            printDBG( 'Host init query error' )
         printDBG( 'Host __init__ begin' )
