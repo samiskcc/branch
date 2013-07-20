@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.0.0.3"
+    XXXversion = "5.1.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -132,7 +132,7 @@ class Host:
         self.cm = pCommon.common()
         self.currList = []
 
-        _url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/blobs/master/usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/hosts/hostXXX.py'
+        _url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/blobs/master/IPTVPlayer/hosts/hostXXX.py'
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
         try:
            data = self.cm.getURLRequestData(query_data)
@@ -521,6 +521,8 @@ class Host:
               return []
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
+           os.system('rm -rf /tmp//tmp/iptv-host-xxx-iptv-host-xxx')
            printDBG( 'Host listsItems end' )
            return valTab
 
