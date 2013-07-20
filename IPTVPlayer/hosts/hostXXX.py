@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.0.0.2"
+    XXXversion = "5.0.0.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -221,7 +221,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="siteInfo"><span class="name"><a href="(.*?)">(.*?)</a></span><a href=".*?"><img class="thumb" src="(.*?)"',data,re.S) 
            if phMovies:
               for (phUrl, phTitle, phImage) in phMovies:
@@ -321,7 +321,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="content">.*?<a href="(.*?)" title="(.*?)".*?<img src="(.*?)".*?TIME:  (.*?)</div>', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime) in phMovies:
@@ -485,11 +485,42 @@ class Host:
            printDBG( 'Host listsItems begin name='+name )
            valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           valTab.append(CDisplayListItem('Update Now - do zrobienia pozniej',   'Update Now', CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW', '', None)) 
+           valTab.append(CDisplayListItem('Update Now',   'Update Now', CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-NOW' == name:
            printDBG( 'Host listsItems begin name='+name )
+           import os
+           output = open('/tmp/iptv-host-xxx.tar.gz','wb')
+           _url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/archive-tarball/master'
+           query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              output.write(self.cm.getURLRequestData(query_data))
+              output.close()
+              os.system('sync')
+           except:
+              if os.path.exists('/tmp/iptv-host-xxx.tar.gz'):
+                 os.remove('/tmp/iptv-host-xxx.tar.gz')
+              printDBG( 'Błąd pobierania master.tar.gz' )
+              return []
+           
+           try: 
+              os.system('cd /tmp; tar -xzf iptv-host-xxx.tar.gz; sync')
+           except:
+              printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
+              return []
+           if not os.path.exists('/tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer'):
+              printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
+              return []
+            
+           try:
+              os.system('cp -rf /tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
+              os.system('sync')
+           except:
+              printDBG( 'blad kopiowania' )
+              return []
+               
+           valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
