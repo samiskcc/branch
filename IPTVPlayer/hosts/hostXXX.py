@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.1.0.0"
+    XXXversion = "5.2.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -175,12 +175,12 @@ class Host:
         if name == 'main-menu':
            printDBG( 'Host listsItems begin name='+name )
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
-              valTab.append(CDisplayListItem('---UPDATE---',       'UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY, [''],                                     'UPDATE',  '', None)) 
-           valTab.append(CDisplayListItem('tube8.com mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
-           valTab.append(CDisplayListItem('youporn.com mobile', 'mobile.youporn.com', CDisplayListItem.TYPE_CATEGORY, ['http://mobile.youporn.com'],            'youporn', 'http://cdn1.static.youporn.phncdn.com/cb/bundles/youpornwebfront/images/l_youporn_black.png', None)) 
-           valTab.append(CDisplayListItem('pornhub.com mobile', 'm.pornhub.com',      CDisplayListItem.TYPE_CATEGORY, ['http://m.pornhub.com'],                 'pornhub', 'http://cdn1.static.pornhub.phncdn.com/images/pornhub_logo.png', None)) 
-           valTab.append(CDisplayListItem('HDPorn',             'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
-           valTab.append(CDisplayListItem('4tube',              'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/videos'],          '4tube',   'http://i.4tube.com/free-porn.png', None)) 
+              valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY, [''],                                     'UPDATE',  '', None)) 
+           valTab.append(CDisplayListItem('TUBE8 mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
+           valTab.append(CDisplayListItem('YOUPORN mobile', 'mobile.youporn.com', CDisplayListItem.TYPE_CATEGORY, ['http://mobile.youporn.com'],            'youporn', 'http://cdn1.static.youporn.phncdn.com/cb/bundles/youpornwebfront/images/l_youporn_black.png', None)) 
+           valTab.append(CDisplayListItem('PORNHUB mobile', 'm.pornhub.com',      CDisplayListItem.TYPE_CATEGORY, ['http://m.pornhub.com'],                 'pornhub', 'http://cdn1.static.pornhub.phncdn.com/images/pornhub_logo.png', None)) 
+           valTab.append(CDisplayListItem('HDPORN',         'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
+           valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/videos'],          '4tube',   'http://i.4tube.com/free-porn.png', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         
@@ -229,10 +229,18 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], '4tube-clips', phImage, None)) 
+           match = re.findall('<a class="page " href="(.*?)"', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], '4tube-sites', '', None))                
+           match = re.findall('<a class="last" href="(.*?)" title="Last page">', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Last Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], name, '', None))                
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
-           #printDBG( 'Host listsItems len match: '+str(len(match)))
-           if len(match)>0:
-              #printDBG( 'Host listsItems match: '+match)
+           if match:
               valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], '4tube-sites', '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
@@ -253,11 +261,19 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl], '4tube-clips', phImage, None)) 
+           match = re.findall('<a class="page " href="(.*?)"', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], name, '', None))                
+           match = re.findall('<a class="last" href="(.*?)" title="Last page">', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Last Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], name, '', None))                
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
-           #printDBG( 'Host listsItems len match: '+str(len(match)))
-           if len(match)>0:
-              #printDBG( 'Host listsItems match: '+match)
-              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], '4tube-pornstars', '', None))                
+           if match:
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
         if '4tube-clips' == name:
@@ -278,11 +294,19 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,phRuntime+' '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<a class="page " href="(.*?)"', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], name, '', None))                
+           match = re.findall('<a class="last" href="(.*?)" title="Last page">', data, re.S)
+           if match:
+              for (phPageUrl) in match: 
+                  printDBG( 'Host listsItems phPageUrl: '  +phPageUrl )
+                  valTab.append(CDisplayListItem('Last Page', phPageUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phPageUrl], name, '', None))                
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
-           printDBG( 'Host listsItems len match: '+str(len(match)))
-           if len(match)>0:
-              #printDBG( 'Host listsItems match: '+match)
-              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], '4tube-clips', '', None))                
+           if match:
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [match[0]], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
