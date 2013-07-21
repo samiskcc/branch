@@ -533,12 +533,12 @@ class Host:
            except:
               printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
               os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp//tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
            if not os.path.exists('/tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer'):
               printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
               os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp//tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
             
            try:
@@ -547,7 +547,7 @@ class Host:
            except:
               printDBG( 'blad kopiowania' )
               os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp//tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
