@@ -19,8 +19,6 @@ from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, 
 ###################################################
 # Config options for HOST
 ###################################################
-#config.plugins.iptvplayer.PIN = ConfigPIN(default = 6666 , censor='*')
-
 def GetConfigList():
     optionList = []
     #optionList.append(getConfigListEntry("PIN:", config.plugins.iptvplayer.PIN))
@@ -36,9 +34,8 @@ def gettytul():
 ###################################################
 # Get PIN possible
 ###################################################
-def getpin():
+def isProtectedByPinCode(self):
     return True
-
 
 class IPTVHost(IHost):
     LOGO_NAME = 'XXXlogo.png'
@@ -122,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.4.1.0"
+    XXXversion = "5.5.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
