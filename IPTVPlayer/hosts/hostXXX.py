@@ -116,7 +116,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.5.1.0"
+    XXXversion = "5.5.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -526,12 +526,12 @@ class Host:
               os.system('cd /tmp; tar -xzf iptv-host-xxx.tar.gz; sync')
            except:
               printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
-              os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
+              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
            if not os.path.exists('/tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer'):
               printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
-              os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
+              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
             
@@ -540,12 +540,12 @@ class Host:
               os.system('sync')
            except:
               printDBG( 'blad kopiowania' )
-              os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
+              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
               return []
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           os.system('rm -rf /tmp/iptv-host-xxx.tar.gz')
+           os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
            os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
            printDBG( 'Host listsItems end' )
            return valTab
