@@ -31,12 +31,6 @@ def GetConfigList():
 def gettytul():
     return 'XXX'
 
-###################################################
-# Get PIN possible
-###################################################
-def isProtectedByPinCode(self):
-    return True
-
 class IPTVHost(IHost):
     LOGO_NAME = 'XXXlogo.png'
     PATH_TO_LOGO = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/icons/' + LOGO_NAME )
@@ -48,6 +42,9 @@ class IPTVHost(IHost):
         self.currList = []
         self.prevList = []
         printDBG( "init end" )
+        
+    def isProtectedByPinCode(self):
+        return True
     
     def getLogoPath(self):  
         return RetHost(RetHost.OK, value = [self.PATH_TO_LOGO])
@@ -119,7 +116,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "5.5.0.0"
+    XXXversion = "5.5.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
