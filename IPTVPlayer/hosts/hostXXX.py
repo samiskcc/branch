@@ -116,7 +116,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "7.0.0.0"
+    XXXversion = "7.1.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -192,23 +192,24 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phCats = re.findall('class="categoriesbox"\sid=".*?"><a\shref="(.*?)".*?title=".*?"><img\ssrc="(.*?)"><h2>(.*?)</h2>', data, re.S)
+           phCats = re.findall('class="categoriesbox" id=".*?"><a href="(.*?)" title="(.*?)"><img src="(.*?)"', data, re.S)
            if phCats:
-              for (phUrl, phImage, phTitle) in phCats:
+              for (phUrl, phTitle, phImage) in phCats:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phImage: '+phImage )
                   phTitle = phTitle.replace(' movies', '')
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'eporner-clips', phImage, None)) 
-           valTab.insert(0,CDisplayListItem("HD",        "HD",        CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/hd/"], 'eporner-clips', '',None))
-           valTab.insert(0,CDisplayListItem("Top Rated", "Top Rated", CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/top_rated/"], 'eporner-clips', '',None))
-           valTab.insert(0,CDisplayListItem("Popular",   "Popular",   CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/weekly_top/"], 'eporner-clips', '',None))
-           valTab.insert(0,CDisplayListItem("On Air",    "On Air",    CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/currently/"], 'eporner-clips', '',None))
-           valTab.insert(0,CDisplayListItem("New",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/"], 'eporner-clips', '',None))
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'eporner-clips', phImage, phUrl)) 
+           valTab.insert(0,CDisplayListItem("HD",        "HD",        CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/hd/"], 'eporner-clips', '','/hd/'))
+           valTab.insert(0,CDisplayListItem("Top Rated", "Top Rated", CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/top_rated/"], 'eporner-clips', '','/top_rated/'))
+           valTab.insert(0,CDisplayListItem("Popular",   "Popular",   CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/weekly_top/"], 'eporner-clips', '','/weekly_top/'))
+           valTab.insert(0,CDisplayListItem("On Air",    "On Air",    CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/currently/"], 'eporner-clips', '','/currently/'))
+           valTab.insert(0,CDisplayListItem("New",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://www.eporner.com/"], 'eporner-clips', '',''))
            printDBG( 'Host listsItems end' )
            return valTab
         if 'eporner-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               data = self.cm.getURLRequestData(query_data)
@@ -236,9 +237,14 @@ class Host:
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   printDBG( 'Host listsItems phViews: '+phViews )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] [ Views: '+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<li class="page_next"><a href="(.*?)"', data, re.S)
+           match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
            if match:
-              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0].replace('&amp;','&')], name, '', None))                
+              printDBG( 'Host listsItems page match: '+match[0] )
+              match = re.findall("<a href='(.*?)'", match[0], re.S)
+           if match:
+              for phUrl in match:
+                  printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -291,7 +297,7 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] [ Views: '+phViews+'] [Added: '+phAdded+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<li class="page_next"><a href="(.*?)"', data, re.S)
            if match:
-              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0].replace('&amp;','&')], name, '', None))                
+              valTab.append(CDisplayListItem('Next', 'Next Page', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0].replace('&amp;','&')], name, '', None))        
            printDBG( 'Host listsItems end' )
            return valTab
         
