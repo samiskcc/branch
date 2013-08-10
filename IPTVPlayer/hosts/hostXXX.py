@@ -21,7 +21,6 @@ from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, 
 ###################################################
 def GetConfigList():
     optionList = []
-    #optionList.append(getConfigListEntry("PIN:", config.plugins.iptvplayer.PIN))
     return optionList
 ###################################################
 
@@ -116,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "7.1.0.0"
+    XXXversion = "8.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -177,6 +176,119 @@ class Host:
            valTab.append(CDisplayListItem('HDPORN',         'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/videos'],          '4tube',   'http://i.4tube.com/free-porn.png', None)) 
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
+           #valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
+           valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'redtube' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.redtube.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('class="video">.*?<a href="(.*?)" title="(.*?)">.*?src="(.*?)" />', data, re.S)
+           if phCats:
+              for (phUrl, phTitle, phImage) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'redtube-clips', phImage, None)) 
+           valTab.insert(0,CDisplayListItem("Most Favored", "Most Favored", CDisplayListItem.TYPE_CATEGORY,["http://www.redtube.com/mostfavored?period=alltime"], 'redtube-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Most Viewed",  "Most Viewed",  CDisplayListItem.TYPE_CATEGORY,["http://www.redtube.com/mostviewed?period=alltime"],  'redtube-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Top Rated",    "Top Rated",    CDisplayListItem.TYPE_CATEGORY,["http://www.redtube.com/top?period=alltime"],         'redtube-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Newest",       "Newest",       CDisplayListItem.TYPE_CATEGORY,["http://www.redtube.com/"],                           'redtube-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'redtube-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="video".*?<a href="(.*?)".*?title="(.*?)".*?class="te" src="(.*?)".*?class="time".*?span class="d">(.*?)</span>.*?style="float:left;">(.*?)</div>', data, re.S)
+           if phMovies:
+              for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
+                  printDBG( 'Host listsItems phViews: '+phViews )
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] [views : '+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
+           if match:
+              printDBG( 'Host listsItems page match: '+match[0] )
+              match = re.findall("<a href='(.*?)'", match[0], re.S)
+           if match:
+              for phUrl in match:
+                  printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'xhamster' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://xhamster.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('title">Straight</div>(.*?)iconTrans"></div>', data, re.S)
+           phCats = re.findall('<a\sclass="btnBig"\shref="(.*?)1.html">.*?\n\s\s+([a-z].*?)</a>', parse.group(1), re.S|re.I)
+           if phCats:
+              for (phUrl, phTitle) in phCats:
+                  phTitle = phTitle.strip(' ')
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem("New",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/new/"], 'xhamster-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'xhamster-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           if re.search('vDate', data, re.S):
+              parse = re.search('<div\sclass=\'vDate(.*)</html>', data, re.S)
+           else:
+              parse = re.search('<html>(.*)</html>', data, re.S)
+           phMovies = re.findall('class=\'video\'><a\shref=\'(.*?/movies/.*?)\'.*?class=\'hRotator\'\s><img\ssrc=\'(.*?)\'.*?alt="(.*?)".*?start2.*?<b>(.*?)</b>', parse.group(1), re.S)
+           if phMovies:
+              for (phUrl, phImage, phTitle, phRuntime) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
+           if match:
+              printDBG( 'Host listsItems page match: '+match[0] )
+              match = re.findall("<a href='(.*?)'", match[0], re.S)
+           if match:
+              for phUrl in match:
+                  printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -688,6 +800,24 @@ class Host:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
 
+        if self.MAIN_URL == 'http://www.redtube.com':
+           videoPage = re.findall("source src='(.*?)'", data, re.S)
+           if videoPage:
+              for (phurl) in videoPage:
+                url = '%s' % (phurl)
+                videos = urllib.unquote(url)
+                return videos
+           return ''
+
+        if self.MAIN_URL == 'http://xhamster.com':
+           xhServer = re.findall("'srv': '(.*?)'", data)
+           xhFile = re.findall("'file': '(.*?)'", data)
+           if re.match('.*?http%3A', xhFile[0]):
+              xhStream = urllib2.unquote(xhFile[0])
+           else:
+              xhStream = xhServer[0]+"/key="+xhFile[0]
+           return xhStream
+        
         if self.MAIN_URL == 'http://www.eporner.com':
            videoPage = re.findall(r"player4\\([^\\]*)\\", data, re.S)
            if videoPage:
