@@ -192,7 +192,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phCats = re.findall('class="video">.*?<a href="(.*?)" title="(.*?)">.*?src="(.*?)" />', data, re.S)
            if phCats:
               for (phUrl, phTitle, phImage) in phCats:
@@ -215,7 +215,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="video".*?<a href="(.*?)".*?title="(.*?)".*?class="te" src="(.*?)".*?class="time".*?span class="d">(.*?)</span>.*?style="float:left;">(.*?)</div>', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
@@ -224,15 +224,15 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   printDBG( 'Host listsItems phViews: '+phViews )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] [views : '+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] ['+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('navNext.*?<b>Next', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
-              match = re.findall("<a href='(.*?)'", match[0], re.S)
+              match = re.findall('href.*?"(.*?)"', match[0], re.S)
            if match:
               for phUrl in match:
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
