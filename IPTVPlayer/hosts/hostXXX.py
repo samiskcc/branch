@@ -115,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "8.0.0.0"
+    XXXversion = "9.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -176,8 +176,8 @@ class Host:
            valTab.append(CDisplayListItem('HDPORN',         'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/videos'],          '4tube',   'http://i.4tube.com/free-porn.png', None)) 
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
-           #valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
            valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
+           valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -227,12 +227,12 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] ['+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('navNext.*?<b>Next', data, re.S)
            if match:
-              printDBG( 'Host listsItems page match: '+match[0] )
+              #printDBG( 'Host listsItems page match: '+match[0] )
               match = re.findall('href.*?"(.*?)"', match[0], re.S)
            if match:
               for phUrl in match:
-                  printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+                  #printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -247,16 +247,16 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('title">Straight</div>(.*?)iconTrans"></div>', data, re.S)
-           phCats = re.findall('<a\sclass="btnBig"\shref="(.*?)1.html">.*?\n\s\s+([a-z].*?)</a>', parse.group(1), re.S|re.I)
+           phCats = re.findall('<a class="btnBig" href="(.*?)">.*?\n\s\s+([a-z].*?)</a>', parse.group(1), re.S|re.I)
            if phCats:
               for (phUrl, phTitle) in phCats:
                   phTitle = phTitle.strip(' ')
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
-           valTab.insert(0,CDisplayListItem("New",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/new/"], 'xhamster-clips', '',None))
+           valTab.insert(0,CDisplayListItem("New",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/"], 'xhamster-clips', '',None))
            printDBG( 'Host listsItems end' )
            return valTab
         if 'xhamster-clips' == name:
@@ -268,7 +268,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            if re.search('vDate', data, re.S):
               parse = re.search('<div\sclass=\'vDate(.*)</html>', data, re.S)
            else:
@@ -281,14 +281,13 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
+           match = re.findall("<div class='pager'>.*?>Next<", data, re.S)
            if match:
-              printDBG( 'Host listsItems page match: '+match[0] )
-              match = re.findall("<a href='(.*?)'", match[0], re.S)
+              match = re.findall("href='(.*?)'", match[0], re.S)
            if match:
-              for phUrl in match:
+                  phUrl = match[-1]
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+                  valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
