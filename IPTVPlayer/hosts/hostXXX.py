@@ -115,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "9.0.0.0"
+    XXXversion = "10.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -170,7 +170,8 @@ class Host:
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
               valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY, [''],                                     'UPDATE',  '', None)) 
            valTab.append(CDisplayListItem('TUBE8 mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
-           valTab.append(CDisplayListItem('YOUPORN mobile', 'mobile.youporn.com', CDisplayListItem.TYPE_CATEGORY, ['http://mobile.youporn.com'],            'youporn', 'http://cdn1.static.youporn.phncdn.com/cb/bundles/youpornwebfront/images/l_youporn_black.png', None)) 
+           valTab.append(CDisplayListItem('YOUPORN mobile', 'mobile.youporn.com', CDisplayListItem.TYPE_CATEGORY, ['http://mobile.youporn.com'],            'youporn',               'http://cdn1.static.youporn.phncdn.com/cb/bundles/youpornwebfront/images/l_youporn_black.png', None)) 
+           valTab.append(CDisplayListItem('YOUPORN',        'wwww.youporn.com',   CDisplayListItem.TYPE_CATEGORY, ['http://www.youporn.com/categories/alphabetical/'],'fullyouporn', 'http://cdn1.static.youporn.phncdn.com/cb/bundles/youpornwebfront/images/l_youporn_black.png', None)) 
            valTab.append(CDisplayListItem('PORNHUB mobile', 'm.pornhub.com',      CDisplayListItem.TYPE_CATEGORY, ['http://m.pornhub.com'],                 'pornhub', 'http://cdn1.static.pornhub.phncdn.com/images/pornhub_logo.png', None)) 
            valTab.append(CDisplayListItem('PORNHUB',        'www.pornhub.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.pornhub.com/categories'],    'fullpornhub', 'http://cdn1.static.pornhub.phncdn.com/images/pornhub_logo.png', None)) 
            valTab.append(CDisplayListItem('HDPORN',         'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
@@ -178,6 +179,96 @@ class Host:
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
            valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'fullyouporn' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.youporn.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('class="cat_pic">.*?<a\shref="/category(.*?)".*?<img\ssrc="(.*?)"\salt="(.*?)"><span\sclass="cat_overlay', data, re.S)
+           if phCats:
+              for (phUrl, phImage, phTitle) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  phUrl = self.MAIN_URL+"/category" + phUrl
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fullyouporn-clips', phImage, None)) 
+           valTab.insert(0,CDisplayListItem("Channels",           "Channels",           CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/channels/most_subscribed/alltime/"], 'fullyouporn-channels', '',None))
+           #valTab.insert(0,CDisplayListItem("Popular by Country", "Popular by Country", CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/categories/"],                       'fullyouporn-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Most Discussed",     "Most Discussed",     CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/most_discussed/"],                   'fullyouporn-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Most Favorited",     "Most Favorited",     CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/most_favorited/"],                   'fullyouporn-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Most Viewed",        "Most Viewed",        CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/most_viewed/"],                      'fullyouporn-clips', '',None))
+           valTab.insert(0,CDisplayListItem("Top Rated",          "Top Rated",          CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/top_rated/"],                        'fullyouporn-clips', '',None))
+           valTab.insert(0,CDisplayListItem("New",                "New",                CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/"],                                  'fullyouporn-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'fullyouporn-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('Sub menu dropdown.*?/Sub menu dropdown(.*?)Our Friends', data, re.S)
+           if not parse:
+              parse = re.search('Sub menu dropdown.*?/Sub menu dropdown(.*?)pagination', data, re.S)
+           phMovies = re.findall('class="wrapping-video-box">.*?<a\shref="(.*?)">.*?<img\ssrc="(.*?)\?.*?"\salt="(.*?)".*?class="duration">(.*?)<span>length.*?class="views">(.*?)\s<span>views', parse.group(1), re.S)
+           if phMovies:
+              for (phUrl, phImage, phTitle, phRuntime, phViews) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
+                  printDBG( 'Host listsItems phViews: '+phViews )
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] ['+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<nav id="pagination">.*?</nav>', data, re.S)
+           if match:
+              #printDBG( 'Host listsItems page match: '+match[0] )
+              match = re.findall('href="(.*?)"', match[0], re.S)
+           if match:
+                  phUrl = match[-1]
+                  #printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'fullyouporn-channels' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('<div\sclass="img"><a\shref="(.*?)"><img\ssrc="(.*?)"\salt="(.*?)"', data, re.S)
+           if phCats:
+              for (phUrl, phImage, phTitle) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  phUrl = self.MAIN_URL + phUrl
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fullyouporn-clips', phImage, None)) 
+           match = re.findall('<nav id="pagination">.*?</nav>', data, re.S)
+           if match:
+              #printDBG( 'Host listsItems page match: '+match[0] )
+              match = re.findall('href="(.*?)"', match[0], re.S)
+           if match:
+                  phUrl = match[-1]
+                  #printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -798,6 +889,16 @@ class Host:
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
+
+        if self.MAIN_URL == 'http://www.youporn.com':
+           videoPage = re.findall('video.src\s=\s\'(.*?)\';', data, re.S)
+           if videoPage:
+              for (phurl) in videoPage:
+                url = '%s' % (phurl)
+                videos = urllib.unquote(url)
+                videos = videos.replace('&amp;','&')
+                return videos
+           return ''
 
         if self.MAIN_URL == 'http://www.redtube.com':
            videoPage = re.findall("source src='(.*?)'", data, re.S)
