@@ -115,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "10.0.0.0"
+    XXXversion = "11.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -179,6 +179,53 @@ class Host:
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
            valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
+           valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
+           #valTab.append(CDisplayListItem('test','test',CDisplayListItem.TYPE_VIDEO, [CUrlItem('', 'http://hentaigasm.com/jwplayer/lol.php?id=WTJkTFduZDNNVE56UmtSTVQxbFdaMjFqZDFNPQ', 0)], 0, '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'hentaigasm' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://hentaigasm.com' 
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('Genres(.*?)widget-comments', data, re.S)
+           phCats = re.findall("<a href='(.*?)'.*?>(.*?)<", parse.group(1), re.S)
+           if phCats:
+              for (phUrl, phTitle) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'hentaigasm-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem("New", "New",        CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL], 'hentaigasm-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'hentaigasm-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('<div class="thumb">.*?title="(.*?)" href="(.*?)".*?<img src="(.*?)"', data, re.S)
+           if phMovies:
+              for (phTitle, phUrl, phImage) in phMovies:
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  #phImage.replace(' ','%20')
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           match = re.search("<div class='wp-pagenavi'>(.*?)</div>", data, re.S)
+           if match: match = re.findall("href='(.*?)'", match.group(1), re.S)
+           if match:
+                  phUrl = match[-1]
+                  #printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -889,6 +936,12 @@ class Host:
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
+
+        if self.MAIN_URL == 'http://hentaigasm.com':
+           videoUrl = re.search('<div id="player_1111"></div>.*?file: "(.*?)"', data, re.S)
+           if videoUrl:
+              return videoUrl.group(1)
+           return ''
 
         if self.MAIN_URL == 'http://www.youporn.com':
            videoPage = re.findall('video.src\s=\s\'(.*?)\';', data, re.S)
