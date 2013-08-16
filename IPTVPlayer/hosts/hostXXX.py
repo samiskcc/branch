@@ -115,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "11.0.0.0"
+    XXXversion = "12.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -180,7 +180,57 @@ class Host:
            valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
            valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
            valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
-           #valTab.append(CDisplayListItem('test','test',CDisplayListItem.TYPE_VIDEO, [CUrlItem('', 'http://hentaigasm.com/jwplayer/lol.php?id=WTJkTFduZDNNVE56UmtSTVQxbFdaMjFqZDFNPQ', 0)], 0, '', None)) 
+           valTab.append(CDisplayListItem('XVIDEOS',        'www.xvideos.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.xvideos.com'],               'xvideos', 'http://img100.xvideos.com/videos/thumbs/xvideos.gif', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'xvideos' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.xvideos.com' 
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('id="categories"(.*?)</div>', data, re.S)
+           phCats = re.findall('<a href="(.*?)">(.*?)<', parse.group(1), re.S)
+           if phCats:
+              for (phUrl, phTitle) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'xvideos-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],     'xvideos-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL],              'xvideos-clips', '', None)) 
+
+           #valTab.append(CDisplayListItem('Pornstars',   'Pornstars',   CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/pornstars'], 'xvideos-clips', '', None)) 
+           #valTab.append(CDisplayListItem('Best Videos', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/channels'],  'xvideos-clips', '', None)) 
+           #valTab.append(CDisplayListItem('Best Videos', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'], 'xvideos-clips', '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'xvideos-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)">(.*?)</a>', data, re.S)
+           if phMovies:
+              for (phImage, phUrl, phTitle ) in phMovies:
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  phTitle = decodeHtml(phTitle)
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<li><a class="nP" href="(.*?)"', data, re.S)
+           if match:
+              phUrl = match[-1]
+              if phUrl[0] <> '/'[0]:
+                 phUrl = '/'+phUrl
+              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -937,6 +987,12 @@ class Host:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
 
+        if self.MAIN_URL == 'http://www.xvideos.com':
+           videoUrl = re.search('flv_url=(.*?)&', data, re.S)
+           if videoUrl:
+              return decodeUrl(videoUrl.group(1))
+           return ''
+
         if self.MAIN_URL == 'http://hentaigasm.com':
            videoUrl = re.search('<div id="player_1111"></div>.*?file: "(.*?)"', data, re.S)
            if videoUrl:
@@ -1041,7 +1097,77 @@ class Host:
         return videoUrl
 
 
+############################################
+# functions for host
+############################################
+def decodeUrl(text):
+	text = text.replace('%3A',':')
+	text = text.replace('%2F','/')
+	text = text.replace('%3F','?')
+	text = text.replace('%3D','=')
+	text = text.replace('%26','&')
+	return text
 
+def decodeHtml(text):
+	text = text.replace('&auml;','ä')
+	text = text.replace('\u00e4','ä')
+	text = text.replace('&#228;','ä')
+
+	text = text.replace('&Auml;','Ä')
+	text = text.replace('\u00c4','Ä')
+	text = text.replace('&#196;','Ä')
+	
+	text = text.replace('&ouml;','ö')
+	text = text.replace('\u00f6','ö')
+	text = text.replace('&#246;','ö')
+	
+	text = text.replace('&ouml;','Ö')
+	text = text.replace('\u00d6','Ö')
+	text = text.replace('&#214;','Ö')
+	
+	text = text.replace('&uuml;','ü')
+	text = text.replace('\u00fc','ü')
+	text = text.replace('&#252;','ü')
+	
+	text = text.replace('&Uuml;','Ü')
+	text = text.replace('\u00dc','Ü')
+	text = text.replace('&#220;','Ü')
+	
+	text = text.replace('&szlig;','ß')
+	text = text.replace('\u00df','ß')
+	text = text.replace('&#223;','ß')
+	
+	text = text.replace('&amp;','&')
+	text = text.replace('&quot;','\"')
+	text = text.replace('&gt;','>')
+	text = text.replace('&apos;',"'")
+	text = text.replace('&acute;','\'')
+	text = text.replace('&ndash;','-')
+	text = text.replace('&bdquo;','"')
+	text = text.replace('&rdquo;','"')
+	text = text.replace('&ldquo;','"')
+	text = text.replace('&lsquo;','\'')
+	text = text.replace('&rsquo;','\'')
+	text = text.replace('&#034;','\'')
+	text = text.replace('&#038;','&')
+	text = text.replace('&#039;','\'')
+	text = text.replace('&#160;',' ')
+	text = text.replace('\u00a0',' ')
+	text = text.replace('&#174;','')
+	text = text.replace('&#225;','a')
+	text = text.replace('&#233;','e')
+	text = text.replace('&#243;','o')
+	text = text.replace('&#8211;',"-")
+	text = text.replace('\u2013',"-")
+	text = text.replace('&#8216;',"'")
+	text = text.replace('&#8217;',"'")
+	text = text.replace('&#8220;',"'")
+	text = text.replace('&#8221;','"')
+	text = text.replace('&#8222;',',')
+	
+	text = text.replace('&#8230;','...')
+	text = text.replace('\u2026','...')
+	return text	
 
 ############################################
 # functions for fullpornhub
