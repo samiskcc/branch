@@ -115,7 +115,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "12.0.0.0"
+    XXXversion = "12.0.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1101,11 +1101,19 @@ class Host:
 # functions for host
 ############################################
 def decodeUrl(text):
-	text = text.replace('%3A',':')
-	text = text.replace('%2F','/')
-	text = text.replace('%3F','?')
-	text = text.replace('%3D','=')
+	text = text.replace('%20',' ')
+	text = text.replace('%21','!')
+	text = text.replace('%22','"')
+	text = text.replace('%23','&')
+	text = text.replace('%24','$')
+	text = text.replace('%25','%')
 	text = text.replace('%26','&')
+	text = text.replace('%2F','/')
+	text = text.replace('%3A',':')
+	text = text.replace('%3B',';')
+	text = text.replace('%3D','=')
+	text = text.replace('%3F','?')
+	text = text.replace('%40','@')
 	return text
 
 def decodeHtml(text):
