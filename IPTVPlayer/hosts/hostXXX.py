@@ -11,7 +11,11 @@ import Plugins.Extensions.IPTVPlayer.libs.urlparser as urlparser
 ###################################################
 # FOREIGN import
 ###################################################
-import re, urllib, urllib2, base64, math    
+import re, urllib, urllib2, base64, math 
+try:
+    import simplejson
+except:
+    import json as simplejson   
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN
 ###################################################
@@ -115,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "13.0.0.0"
+    XXXversion = "13.0.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -130,18 +134,18 @@ class Host:
         try:
            data = self.cm.getURLRequestData(query_data)
            #printDBG( 'Host init data: '+data )
-           r=re.search( r'XXXversion = &quot;(.+)&quot;',data)
+           r=re.search( r'XXXversion.*?&quot;(.*?)&quot;',data)
            if r:
               printDBG( 'r' )
-              self.XXXremote=r.groups(1)[0]
+              self.XXXremote=r.group(1)
         except:
            printDBG( 'Host init query error' )
-        printDBG( 'Host __init__ begin' )
+        printDBG( 'Host __init__ end' )
         
     def setCurrList(self, list):
         printDBG( 'Host setCurrList begin' )
         self.currList = list
-        printDBG( 'Host setCurrList begin' )
+        printDBG( 'Host setCurrList end' )
         return 
 
     def getInitList(self):
@@ -181,7 +185,41 @@ class Host:
            valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
            valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
            valTab.append(CDisplayListItem('XVIDEOS',        'www.xvideos.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.xvideos.com'],               'xvideos', 'http://img100.xvideos.com/videos/thumbs/xvideos.gif', None)) 
-           valTab.append(CDisplayListItem('SHOWUP',         'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
+           valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
+           #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        # ########## #
+        if 'zbiornik' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://zbiornik.com' 
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'zbiornik.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': 'http://zbiornik.com/#ENTER', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error cookie' )
+              return valTab
+           #printDBG( 'Host listsItems data cookie: '+data )
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           ph1 = re.search('var streams=(.*?)}];', data, re.S)
+           if ph1: ph1 = ph1.group(1)+'}]'
+           result = simplejson.loads(ph1)
+           if result:
+              for item in result:
+                  printDBG( 'Host listsItems nick: '+item["nick"] )
+                  printDBG( 'Host listsItems broadcasturl: '+item["broadcasturl"] )
+                  printDBG( 'Host listsItems topic: '+item["topic"] )
+                  printDBG( 'Host listsItems goalDsc: '+item["goalDsc"] )
+                  phImage = 'http://cm2.zbiornik.com/cams/'+str(item["broadcasturl"])+'-224.jpg'
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  streamUrl = 'rtmp://'+str(item["server"])+'/videochat playpath='+str(item["broadcasturl"])+' swfUrl=http://pl.zbiornik.com/wowza.swf?v42 live=1 pageUrl=http://pl.zbiornik.com/live/'
+                  printDBG( 'Host listsItems streamUrl: '+streamUrl )
+                  valTab.append(CDisplayListItem(str(item["nick"]),str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 1)], 0, phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -194,11 +232,6 @@ class Host:
            except:
               printDBG( 'Host listsItems query error cookie' )
               return valTab
-           #try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
-           #except:
-           #   printDBG( 'Host listsItems query error' )
-           #   printDBG( 'Host listsItems query error url: '+url )
-           #   return valTab
            #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="stream-meta".*?data-original="(.*?)".*?href="(.*?)".*?class="stream-name">(.*?)<.*?class="stream-desc">(.*?)<', data, re.S)
            if phMovies:
@@ -208,14 +241,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phDesc: '+phDesc )
                   phImage = self.MAIN_URL+'/'+phImage
-                  #phTitle = decodeHtml(phTitle)
                   valTab.append(CDisplayListItem(phTitle,phDesc,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<li><a class="nP" href="(.*?)"', data, re.S)
-           if match:
-              phUrl = match[-1]
-              if phUrl[0] <> '/'[0]:
-                 phUrl = '/'+phUrl
-              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -1031,7 +1057,10 @@ class Host:
         printDBG( 'Host getResolvedURL url: '+url )
         videoUrl = ''
         valTab = []
-        
+
+        if self.MAIN_URL == 'http://zbiornik.com':
+           return str(url)
+
         if self.MAIN_URL == 'http://showup.tv':
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'showup.cookie'
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
@@ -1039,7 +1068,7 @@ class Host:
               printDBG( 'Host getResolvedURL query error' )
               printDBG( 'Host getResolvedURL query error url: '+url )
               return valTab
-           printDBG( 'Host getResolvedURL data: '+data )
+           #printDBG( 'Host getResolvedURL data: '+data )
            parse = re.search("var streamID = '(.*?)'.*?var srvE = '(.*?)'", data, re.S)
            if parse:
               printDBG( 'Host gr1: '+ parse.group(1))
