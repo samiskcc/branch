@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "13.0.1.0"
+    XXXversion = "13.1.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1009,8 +1009,20 @@ class Host:
         if 'UPDATE-NOW' == name:
            printDBG( 'Host listsItems begin name='+name )
            import os
+           try: data = self.cm.getURLRequestData({ 'url': 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/commits/', 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           except: 
+              printDBG( 'Host listsItems query error' )
+              return []
+           match = re.search('/iptv-host-xxx/iptv-host-xxx/archive/.*?tar.gz', data, re.S)
+           if match: 
+              printDBG( 'Host update match' )
+              printDBG( 'Host update match url: '+match.group(0) )
+              _url = 'https://gitorious.org'+match.group(0)
+           else:
+              printDBG( 'Host update no match' )
+              return [] 
            output = open('/tmp/iptv-host-xxx.tar.gz','wb')
-           _url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/archive-tarball/master'
+           #_url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/archive-tarball/master'
            query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               output.write(self.cm.getURLRequestData(query_data))
