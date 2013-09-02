@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "14.0.0.0"
+    XXXversion = "14.0.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1104,12 +1104,11 @@ class Host:
            if match: 
               printDBG( 'Host update match' )
               printDBG( 'Host update match url: '+match.group(0) )
-              _url = 'https://gitorious.org'+match.group(0)
+              _url = 'http://gitorious.org'+match.group(0)
            else:
               printDBG( 'Host update no match' )
               return [] 
            output = open('/tmp/iptv-host-xxx.tar.gz','wb')
-           #_url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/archive-tarball/master'
            query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               output.write(self.cm.getURLRequestData(query_data))
@@ -1119,21 +1118,22 @@ class Host:
               if os.path.exists('/tmp/iptv-host-xxx.tar.gz'):
                  os.remove('/tmp/iptv-host-xxx.tar.gz')
               printDBG( 'Błąd pobierania master.tar.gz' )
-              return []
-           
+              valTab.append(CDisplayListItem('ERROR - Blad pobierania: '+_url,   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+              return valTab           
            try: 
               os.system('cd /tmp; tar -xzf iptv-host-xxx.tar.gz; sync')
            except:
               printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
-              return []
+              valTab.append(CDisplayListItem('ERROR - Blad rozpakowania /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+              return valTab
            if not os.path.exists('/tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer'):
               printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
-              return []
-            
+              valTab.append(CDisplayListItem('ERROR - Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+              return valTab           
            try:
               os.system('cp -rf /tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
               os.system('sync')
@@ -1141,7 +1141,8 @@ class Host:
               printDBG( 'blad kopiowania' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
               os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
-              return []
+              valTab.append(CDisplayListItem('ERROR - blad kopiowania',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+              return valTab
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
