@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.1.0.0"
+    XXXversion = "15.2.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
