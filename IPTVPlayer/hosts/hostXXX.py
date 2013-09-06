@@ -202,7 +202,8 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('class="box-flex box-cat-wrapper-right"(.*?)</li></ul></div>', data, re.S)
+           parse = re.search('categoriesFooterFontSize(.*?)</ul>', data, re.S)
+           if not parse: return []
            phCats = re.findall("<a href='(.*?)'.*?>(.*?)<", parse.group(1), re.S)
            if phCats:
               for (phUrl, phTitle) in phCats:
