@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.2.0.0"
+    XXXversion = "15.2.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -718,8 +718,8 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           if url == "http://www.eporner.com/top_rated/":
-              phMovies = re.findall('<div\sclass="mbtit"><a\shref="(.*?)"\stitle="(.*?)".*?src="(.*?)".*?<span>.*?<\/span>\s(.*?)<\/div>', data, re.S)
+           if url[0:33] == "http://www.eporner.com/top_rated/":
+              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>', data, re.S)
               if phMovies:
                  for (phUrl, phTitle, phImage, phRuntime) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -728,7 +728,7 @@ class Host:
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            else:
-              phMovies = re.findall('<div\sclass="mbtit"><a\shref="(.*?)"\stitle="(.*?)".*?src="(.*?)".*?<span>.*?<\/span>\s(.*?)<\/div>.*?eye.png.*?<\/span>\s(.*?)<\/div>', data, re.S)
+              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>.*?eye.png.*?</span>(.*?)</div>', data, re.S)
               if phMovies:
                  for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
