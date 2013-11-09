@@ -3,9 +3,9 @@
 ###################################################
 # LOCAL import
 ###################################################
-from Plugins.Extensions.IPTVPlayer.ihost import IHost, CDisplayListItem, RetHost, CUrlItem
+from Plugins.Extensions.IPTVPlayer.components.ihost import IHost, CDisplayListItem, RetHost, CUrlItem
 import Plugins.Extensions.IPTVPlayer.libs.pCommon as pCommon
-from Plugins.Extensions.IPTVPlayer.iptvtools import printDBG, CSelOneLink
+from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSelOneLink
 import Plugins.Extensions.IPTVPlayer.libs.urlparser as urlparser
 
 ###################################################
@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.2.1.0"
+    XXXversion = "15.3.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
