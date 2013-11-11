@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.3.0.0"
+    XXXversion = "15.4.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -728,7 +728,7 @@ class Host:
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            else:
-              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>.*?eye.png.*?</span>(.*?)</div>', data, re.S)
+              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>.*?</span>(.*?)</div>', data, re.S)
               if phMovies:
                  for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -1300,15 +1300,10 @@ class Host:
            except:
               printDBG( 'Host getResolvedURL query error xml' )
               return videoUrl
-           videoPage = re.findall('<hd.file>(.*?)</hd.file>', data, re.S)
+           videoPage = re.findall('file: "(.*?)"', data, re.S)
            if videoPage:
               for phurl in videoPage:
                   return phurl
-           else:
-              videoPage = re.findall('<file>(.*?)</file>', data, re.S)
-              if videoPage:
-                 for phurl in videoPage:
-                     return phurl
            return ''
 
         if self.MAIN_URL == 'http://www.pornhub.com':
