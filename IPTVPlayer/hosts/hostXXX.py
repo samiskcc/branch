@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.4.0.0"
+    XXXversion = "15.4.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -181,7 +181,7 @@ class Host:
            valTab.append(CDisplayListItem('PORNHUB',        'www.pornhub.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.pornhub.com/categories'],    'fullpornhub', 'http://cdn1.static.pornhub.phncdn.com/images/pornhub_logo.png', None)) 
            valTab.append(CDisplayListItem('HDPORN',         'www.hdporn.net',     CDisplayListItem.TYPE_CATEGORY, ['http://www.hdporn.net/channels/'],      'hdporn',  'http://www.hdporn.net/gfx/logo.gif', None)) 
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/videos'],          '4tube',   'http://i.4tube.com/free-porn.png', None)) 
-           #valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
+           valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            valTab.append(CDisplayListItem('REDTUBE',        'www.redtube.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.redtube.com/channels'],      'redtube', 'http://img02.redtubefiles.com/_thumbs/design/logo/redtube_260x52_black.png', None)) 
            valTab.append(CDisplayListItem('XHAMSTER',       'xhamster.com',       CDisplayListItem.TYPE_CATEGORY, ['http://xhamster.com/channels.php'],     'xhamster','http://eu-st.xhamster.com/images/tpl2/logo.png', None)) 
            valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
@@ -1289,11 +1289,11 @@ class Host:
            return xhStream
         
         if self.MAIN_URL == 'http://www.eporner.com':
-           videoPage = re.findall(r"player4\\([^\\]*)\\", data, re.S)
+           videoPage = re.findall('<!-- mediaspace -->.*?src="(.*?)"', data, re.S)
            if videoPage:
               for phurl in videoPage:
                   printDBG( 'Host getResolvedURL phurl: '+phurl )
-                  xml = 'http://www.eporner.com/config5%s' % (phurl)
+                  xml = 'http://www.eporner.com%s' % (phurl)
            printDBG( 'Host getResolvedURL xml: '+xml )
            try:
               data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
