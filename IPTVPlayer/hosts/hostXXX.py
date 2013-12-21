@@ -798,6 +798,7 @@ class Host:
            phMovies = re.findall('<div\sclass="wrap">.*?<a\shref="(.*?)".*?\stitle="(.*?)".*?data-mediumthumb="(.*?)".*?<var\sclass="duration">(.*?)</var>.*?<span\sclass="views"><var>(.*?)<.*?<var\sclass="added">(.*?)<', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime, phViews, phAdded) in phMovies:
+                  phUrl = self.MAIN_URL+phUrl
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
