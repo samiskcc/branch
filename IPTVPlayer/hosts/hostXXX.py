@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.5.1.0"
+    XXXversion = "15.5.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -749,11 +749,12 @@ class Host:
            match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
-              match = re.findall("<a href='(.*?)'", match[0], re.S)
+              match = re.findall("<a href='(.*?)' title='(.*?)'", match[0], re.S)
            if match:
-              for phUrl in match:
+              for (phUrl, phTitle) in match:
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  valTab.append(CDisplayListItem('Page', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+                  printDBG( 'Host listsItems page phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle, 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
 
