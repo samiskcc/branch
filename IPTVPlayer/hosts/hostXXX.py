@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.5.0.0"
+    XXXversion = "15.5.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -823,7 +823,7 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('Popular Tags(.*?)End Section', data, re.S)
+           parse = re.search('Popular Tags(.*?)clearDiv', data, re.S)
            phCats = re.findall('<a class=".*?" href="(.*?)">(.*?)</a>', parse.group(1), re.S)
            if phCats:
               for (phUrl, phTitle) in phCats:
@@ -1341,10 +1341,20 @@ class Host:
            else: return ''
 
         if self.MAIN_URL == 'http://www.4tube.com':
-           videoPage = re.findall('sources:\s\[\{"file":"(.*?)"', data, re.S)
-           if videoPage:
-              videoUrl = videoPage[0].replace('\/','/')
-              return videoUrl
+           videoID = re.findall('idMedia:\s(.*?),', data, re.S)
+           videoFormat = re.findall('sources:\s\[(.*?)\]', data, re.S)
+           if videoID and videoFormat:
+              posturl = "http://tkn.4tube.com/%s/desktop/%s" % (videoID[0], videoFormat[0].replace(',','+'))
+              printDBG( 'Host getResolvedURL posturl: '+posturl )
+              try:
+                 data = self.cm.getURLRequestData({'url': posturl, 'header': {'Origin':'http://www.4tube.com'},'use_host': False, 'use_cookie': False, 'use_post': True, 'return_data': True},{})
+              except:
+                 printDBG( 'Host getResolvedURL query error posturl' )
+                 return ''
+              #printDBG( 'Host getResolvedURL posturl data: '+data )
+              videoUrl = re.findall('token":"(.*?)"', data, re.S)
+              if videoUrl: return videoUrl[-1]                 
+              else: return ''
            else: return ''
         
         if self.MAIN_URL == 'http://www.hdporn.net':
