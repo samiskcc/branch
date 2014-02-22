@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.5.2.0"
+    XXXversion = "15.5.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1296,13 +1296,18 @@ class Host:
            return ''
 
         if self.MAIN_URL == 'http://xhamster.com':
-           xhServer = re.findall("'srv': '(.*?)'", data)
-           xhFile = re.findall("'file': '(.*?)'", data)
-           if re.match('.*?http%3A', xhFile[0]):
-              xhStream = urllib2.unquote(xhFile[0])
+           xhFile = re.findall('type=\'video/mp4\'\sfile="(.*?)"', data)
+           if xhFile:
+              return xhFile[0]
            else:
-              xhStream = xhServer[0]+"/key="+xhFile[0]
-           return xhStream
+              return ''
+           #xhServer = re.findall("'srv': '(.*?)'", data)
+           #xhFile = re.findall("'file': '(.*?)'", data)
+           #if re.match('.*?http%3A', xhFile[0]):
+           #   xhStream = urllib2.unquote(xhFile[0])
+           #else:
+           #   xhStream = xhServer[0]+"/key="+xhFile[0]
+           #return xhStream
         
         if self.MAIN_URL == 'http://www.eporner.com':
            videoPage = re.findall('<!-- mediaspace -->.*?src="(.*?)"', data, re.S)
