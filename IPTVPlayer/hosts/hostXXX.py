@@ -36,7 +36,7 @@ def gettytul():
 
 class IPTVHost(IHost):
     LOGO_NAME = 'XXXlogo.png'
-    PATH_TO_LOGO = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/icons/' + LOGO_NAME )
+    PATH_TO_LOGO = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/icons/logos/' + LOGO_NAME )
 
     def __init__(self):
         printDBG( "init begin" )
@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.5.3.0"
+    XXXversion = "15.6.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
