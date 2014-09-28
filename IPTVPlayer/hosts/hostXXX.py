@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.6.0.0"
+    XXXversion = "15.7.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -727,25 +727,14 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           if url[0:33] == "http://www.eporner.com/top_rated/":
-              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>', data, re.S)
-              if phMovies:
+           phMovies = re.findall('<div class="mbtit".*?><a href="(.*?)" title="(.*?)".*?src="(.*?)".*?"mbtim">(.*?)</div>', data, re.S)
+           if phMovies:
                  for (phUrl, phTitle, phImage, phRuntime) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           else:
-              phMovies = re.findall('class="mbtit".*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?<span>.*?</span>(.*?)</div>.*?</span>(.*?)</div>', data, re.S)
-              if phMovies:
-                 for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
-                  printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phTitle: '+phTitle )
-                  printDBG( 'Host listsItems phImage: '+phImage )
-                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
-                  printDBG( 'Host listsItems phViews: '+phViews )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] [ Views: '+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<center> <div class="numlist2">.*?</center>', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
