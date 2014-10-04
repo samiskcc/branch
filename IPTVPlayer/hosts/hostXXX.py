@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.0.0"
+    XXXversion = "15.8.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -826,14 +826,12 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'4tube-clips', '', None)) 
            #valTab.sort()
            valTab.sort(key=lambda poz: poz.name)
-           valTab.insert(0,CDisplayListItem("--- Websites ---","Websites",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/sites"]  ,            '4tube-sites',    '',None))
+           valTab.insert(0,CDisplayListItem("--- Channels ---","Channels",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/channels"]  ,         '4tube-channels', '',None))
            valTab.insert(0,CDisplayListItem("--- Pornstars ---","Pornstars", CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/pornstars"],          '4tube-pornstars','',None))
-           valTab.insert(0,CDisplayListItem("--- Full ---","Full",           CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos/full-length"], '4tube-clips',    '',None))
-           valTab.insert(0,CDisplayListItem("--- Featured ---","Featured",   CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/featured"],           '4tube-clips',    '',None))
            valTab.insert(0,CDisplayListItem("--- Lastest ---","Lastest",     CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos"],             '4tube-clips',    '',None))
            printDBG( 'Host listsItems end' )
            return valTab
-        if '4tube-sites' == name:
+        if '4tube-channels' == name:
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
@@ -1356,8 +1354,9 @@ class Host:
            else: return ''
         
         if self.MAIN_URL == 'http://www.hdporn.net':
-           match = re.findall('<param name="flashvars" value="file=(.*?)&provider=', data, re.S)
-           return match[0]
+           match = re.findall('<source\ssrc="(.*?)"', data, re.S)
+           if match: return match[0]
+           else: return []
         if self.MAIN_URL == 'http://m.tube8.com':
            match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
            return match[0]
