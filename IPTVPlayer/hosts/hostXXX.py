@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.1.0"
+    XXXversion = "15.8.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -497,14 +497,15 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phCats = re.findall('class="cat_pic">.*?<a\shref="/category(.*?)".*?<img\ssrc="(.*?)"\salt="(.*?)"><span\sclass="cat_overlay', data, re.S)
+           #phCats = re.findall('class="cat_pic">.*?<a\shref="/category(.*?)".*?<img\ssrc="(.*?)"\salt="(.*?)"><span\sclass="cat_overlay', data, re.S)
+           phCats = re.findall('<li\sclass=".*?"><a\shref="/category/(.*?)"\sclass=""\stitle="(.*?)"><span', data, re.S)
            if phCats:
-              for (phUrl, phImage, phTitle) in phCats:
+              for (phUrl, phTitle) in phCats:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phImage: '+phImage )
+                  #printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  phUrl = self.MAIN_URL+"/category" + phUrl
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fullyouporn-clips', phImage, None)) 
+                  phUrl = self.MAIN_URL+"/category/" + phUrl
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fullyouporn-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.insert(0,CDisplayListItem("--- Channels ---",           "Channels",           CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/channels/most_subscribed/alltime/"], 'fullyouporn-channels', '',None))
            #valTab.insert(0,CDisplayListItem("Popular by Country", "Popular by Country", CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/categories/"],                       'fullyouporn-clips', '',None))
@@ -528,15 +529,16 @@ class Host:
            parse = re.search('Sub menu dropdown.*?/Sub menu dropdown(.*?)Our Friends', data, re.S)
            if not parse:
               parse = re.search('Sub menu dropdown.*?/Sub menu dropdown(.*?)pagination', data, re.S)
-           phMovies = re.findall('class="wrapping-video-box">.*?<a\shref="(.*?)">.*?<img\ssrc="(.*?)\?.*?"\salt="(.*?)".*?class="duration">(.*?)<span>length.*?class="views">(.*?)\s<span>views', parse.group(1), re.S)
+           phMovies = re.findall('class="videoBox.*?<a\shref="(.*?)">.*?<img\ssrc=".*?"\salt="(.*?)".*?data-thumbnail="(.*?)".*?class="duration">(.*?)</span>.*?class="rating\sup"><i>(.*?)</i>', parse.group(1), re.S)
            if phMovies:
-              for (phUrl, phImage, phTitle, phRuntime, phViews) in phMovies:
+              for (phUrl, phTitle, phImage, phRuntime, phViews) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   printDBG( 'Host listsItems phViews: '+phViews )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] ['+phViews+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                  phUrl = phUrl.replace("&amp;","&")
+                  valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+phRuntime+'] ['+phViews+'] '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<nav id="pagination">.*?</nav>', data, re.S)
            if match:
               #printDBG( 'Host listsItems page match: '+match[0] )
