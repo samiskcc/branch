@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.4.0"
+    XXXversion = "15.8.5.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -422,7 +422,7 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)">(.*?)</a>', data, re.S)
+           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)" title="(.*?)"', data, re.S)
            if phMovies:
               for (phImage, phUrl, phTitle ) in phMovies:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
