@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.5.0"
+    XXXversion = "15.8.6.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -931,8 +931,8 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'hdporn-clips', phImage, phUrl)) 
            valTab.sort(key=lambda poz: poz.name)
-           valTab.insert(0,CDisplayListItem("--- Top Rated ---","Top Rated",           CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+"/top-rated/"]  , 'hdporn-clips','',''))
-           valTab.insert(0,CDisplayListItem("--- Most Popular ---","Most Popular",     CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+"/most-viewed/"], 'hdporn-clips','',''))
+           valTab.insert(0,CDisplayListItem("--- Top Rated ---","Top Rated",           CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+"/top-rated/"]  , 'hdporn-clips','',phUrl))
+           valTab.insert(0,CDisplayListItem("--- Most Popular ---","Most Popular",     CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+"/most-viewed/"], 'hdporn-clips','',phUrl))
            printDBG( 'Host listsItems end' )
            return valTab
         if name == 'hdporn-clips':
@@ -947,7 +947,7 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="content">.*?<a href="(.*?)" title="(.*?)".*?<img src="(.*?)".*?TIME:  (.*?)</div>', data, re.S)
+           phMovies = re.findall('class="content.*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?TIME:  (.*?)</div>', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -956,9 +956,11 @@ class Host:
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<div id="pagination">.*?</div>', data, re.S)
+           if not match: return valTab
            printDBG( 'Host listsItems len match: '+str(len(match)))
            #printDBG( 'Host listsItems match: '+match[0])
            match = re.findall("</a><a href='(.*?)'>", match[0], re.S)
+           if not match: return valTab
            printDBG( 'Host listsItems len match: '+str(len(match)))
            #printDBG( 'Host listsItems match: '+match[0])
            if len(match)>0:
