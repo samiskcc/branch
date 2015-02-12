@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.6.0"
+    XXXversion = "15.8.7.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -449,7 +449,8 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('Genres(.*?)widget-comments', data, re.S)
+           parse = re.search('Genres(.*?)</div></div>', data, re.S)
+           if not parse: return valTab
            phCats = re.findall("<a href='(.*?)'.*?>(.*?)<", parse.group(1), re.S)
            if phCats:
               for (phUrl, phTitle) in phCats:
