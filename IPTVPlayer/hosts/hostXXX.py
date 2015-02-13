@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.7.0"
+    XXXversion = "15.8.8.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -259,6 +259,7 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('ALL SEX VIDEOS:(.*?)<a href="http://www.xnxx.com/tags/">More', data, re.S)
+           if not parse: return valTab
            phCats = re.findall('<a href="(.*?)">(.*?)<', parse.group(1), re.S)
            if phCats:
               for (phUrl, phTitle) in phCats:
@@ -297,8 +298,13 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
+           if not data: return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('<li><div align="center".*?href="(.*?)".*?src="(.*?)".*?#FFFFFF;">(.*?)<.*?#5C99FE">(.*?)<', data, re.S)
+           try: phMovies = re.findall('<li><div align="center">.*?href="(.*?)".*?src="(.*?)".*?title="(.*?)".*?#5C99FE">(.*?)<', data, re.S)
+           except:
+              printDBG( 'Host listsItems phmovies error' )
+              return valTab           
+           #printDBG( 'Host listsItems phmovies ' )
            if phMovies:
               for (phUrl, phImage, phTitle, phTime ) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
