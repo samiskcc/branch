@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.8.8.0"
+    XXXversion = "15.8.8.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -128,12 +128,11 @@ class Host:
         printDBG( 'Host __init__ begin' )
         self.cm = pCommon.common()
         self.currList = []
-
-        _url = 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/blobs/master/IPTVPlayer/hosts/hostXXX.py'
+        _url = 'http://gitlab.com/iptv-host-xxx/iptv-host-xxx/blob/master/IPTVPlayer/hosts/hostXXX.py'
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
         try:
            data = self.cm.getURLRequestData(query_data)
-           #printDBG( 'Host init data: '+data )
+           printDBG( 'Host init data: '+data )
            r=re.search( r'XXXversion.*?&quot;(.*?)&quot;',data)
            if r:
               printDBG( 'r' )
@@ -1122,24 +1121,22 @@ class Host:
            printDBG( 'Host listsItems begin name='+name )
            valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           valTab.append(CDisplayListItem('Update Now',   'Update Now', CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW', '', None)) 
+           valTab.append(CDisplayListItem('ZMIANY W WERSJI',                    'ZMIANY W WERSJI',   CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-ZMIANY', '', None)) 
+           valTab.append(CDisplayListItem('Update Now',                         'Update Now',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'UPDATE-ZMIANY' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           valTab.append(CDisplayListItem('ZMIANY W WERSJI',                    'ZMIANY W WERSJI',   CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-ZMIANY', '', None)) 
+           valTab.append(CDisplayListItem('Update Now',                         'Update Now',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-NOW' == name:
            printDBG( 'Host listsItems begin name='+name )
            import os
-           try: data = self.cm.getURLRequestData({ 'url': 'http://gitorious.org/iptv-host-xxx/iptv-host-xxx/commits/', 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
-           except: 
-              printDBG( 'Host listsItems query error' )
-              return []
-           match = re.search('/iptv-host-xxx/iptv-host-xxx/archive/.*?tar.gz', data, re.S)
-           if match: 
-              printDBG( 'Host update match' )
-              printDBG( 'Host update match url: '+match.group(0) )
-              _url = 'http://gitorious.org'+match.group(0)
-           else:
-              printDBG( 'Host update no match' )
-              return [] 
+           _url = 'http://gitlab.com/iptv-host-xxx/iptv-host-xxx/repository/archive.tar.gz?ref=master'              
            output = open('/tmp/iptv-host-xxx.tar.gz','wb')
            query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
@@ -1157,28 +1154,28 @@ class Host:
            except:
               printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx.git')
               valTab.append(CDisplayListItem('ERROR - Blad rozpakowania /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
-           if not os.path.exists('/tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer'):
+           if not os.path.exists('/tmp/iptv-host-xxx.git/IPTVPlayer'):
               printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx.git')
               valTab.append(CDisplayListItem('ERROR - Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab           
            try:
-              os.system('cp -rf /tmp/iptv-host-xxx-iptv-host-xxx/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
+              os.system('cp -rf /tmp/iptv-host-xxx.git/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
               os.system('sync')
            except:
               printDBG( 'blad kopiowania' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
+              os.system('rm -rf /tmp/iptv-host-xxx.git')
               valTab.append(CDisplayListItem('ERROR - blad kopiowania',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-           os.system('rm -rf /tmp/iptv-host-xxx-iptv-host-xxx')
+           os.system('rm -rf /tmp/iptv-host-xxx.git')
            printDBG( 'Host listsItems end' )
            return valTab
 
