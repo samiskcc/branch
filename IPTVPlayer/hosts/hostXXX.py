@@ -1273,11 +1273,12 @@ class Host:
            return ''
 
         if self.MAIN_URL == 'http://www.redtube.com':
-           videoPage = re.findall('video_url=(.*?)"', data, re.S)
+           videoPage = re.findall('vpVideoSource = "(.*?)"', data, re.S)
            if videoPage:
               for (phurl) in videoPage:
                 url = '%s' % (phurl)
                 videos = urllib.unquote(url)
+                videos = videos.replace(r"\/",r"/")
                 return videos
            return ''
 
