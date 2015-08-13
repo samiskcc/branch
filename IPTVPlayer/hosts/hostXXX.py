@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.9.1.0"
+    XXXversion = "15.9.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1283,9 +1283,9 @@ class Host:
            return ''
 
         if self.MAIN_URL == 'http://xhamster.com':
-           xhFile = re.findall('type=\'video/mp4\'\sfile="(.*?)"', data)
+           xhFile = re.findall('"file":"(.*?)"', data)
            if xhFile:
-              return xhFile[0]
+              return xhFile[0].replace(r"\/",r"/")
            else:
               return ''
            #xhServer = re.findall("'srv': '(.*?)'", data)
@@ -1322,9 +1322,23 @@ class Host:
               match = re.compile('"quality_480p":"([^"]+)"').findall(data)
            if not match:
               match = re.compile('"quality_240p":"([^"]+)"').findall(data)
+           if not match:
+              match = re.compile("quality_720p = '(.*?)'").findall(data)
+           if not match:
+              match = re.compile("quality_480p = '(.*?)'").findall(data)
+           if not match:
+              match = re.compile("quality_240p = '(.*?)'").findall(data)
+           if not match:
+              printDBG( 'Host getResolvedURL not match1' )  
+              return ''
+           return match[0]   
+           '''
            fetchurl = match
            fetchurl = urllib2.unquote(match[0])
            match = re.compile('"video_title":"([^"]+)"').findall(data)
+           if not match:
+              printDBG( 'Host getResolvedURL not match2' )  
+              return ''
            title = urllib.unquote_plus(match[0])
            printDBG( 'Host getResolvedURL decrypt begin ' )
            printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
@@ -1333,6 +1347,7 @@ class Host:
            if phStream:
               return phStream
            else: return ''
+           '''
 
         if self.MAIN_URL == 'http://www.4tube.com':
            #printDBG( 'Host getResolvedURL data: '+data )
