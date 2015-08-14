@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.9.2.0"
+    XXXversion = "15.9.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -132,7 +132,7 @@ class Host:
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
         try:
            data = self.cm.getURLRequestData(query_data)
-           printDBG( 'Host init data: '+data )
+           #printDBG( 'Host init data: '+data )
            r=re.search( r'XXXversion.*?&quot;(.*?)&quot;',data)
            if r:
               printDBG( 'r' )
@@ -1132,7 +1132,7 @@ class Host:
            except:
               printDBG( 'Host listsItems query error' )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phCats = re.findall("<entry>.*?<title>(.*?)</title>.*?<updated>(.*?)</updated>.*?<name>(.*?)</name>", data, re.S)
            if phCats:
               for (phTitle, phUpdated, phName ) in phCats:
@@ -1297,11 +1297,9 @@ class Host:
            #return xhStream
         
         if self.MAIN_URL == 'http://www.eporner.com':
-           videoPage = re.findall('<!-- mediaspace -->.*?src="(.*?)"', data, re.S)
-           if videoPage:
-              for phurl in videoPage:
-                  printDBG( 'Host getResolvedURL phurl: '+phurl )
-                  xml = 'http://www.eporner.com%s' % (phurl)
+           videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
+           if not videoPage: return []
+           xml = self.MAIN_URL+videoPage[0]
            printDBG( 'Host getResolvedURL xml: '+xml )
            try:
               data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
@@ -1310,9 +1308,8 @@ class Host:
               return videoUrl
            videoPage = re.findall('file: "(.*?)"', data, re.S)
            if videoPage:
-              for phurl in videoPage:
-                  return phurl
-           return ''
+              return videoPage[0]
+           return []
 
         if self.MAIN_URL == 'http://www.pornhub.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
