@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.9.3.0"
+    XXXversion = "15.9.4.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1287,64 +1287,33 @@ class Host:
            if xhFile:
               return xhFile[0].replace(r"\/",r"/")
            else:
-              return ''
-           #xhServer = re.findall("'srv': '(.*?)'", data)
-           #xhFile = re.findall("'file': '(.*?)'", data)
-           #if re.match('.*?http%3A', xhFile[0]):
-           #   xhStream = urllib2.unquote(xhFile[0])
-           #else:
-           #   xhStream = xhServer[0]+"/key="+xhFile[0]
-           #return xhStream
+              return []
         
         if self.MAIN_URL == 'http://www.eporner.com':
            videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
            if not videoPage: return []
            xml = self.MAIN_URL+videoPage[0]
            printDBG( 'Host getResolvedURL xml: '+xml )
-           try:
-              data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-           except:
-              printDBG( 'Host getResolvedURL query error xml' )
-              return videoUrl
+           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+           except: 
+                   printDBG( 'Host getResolvedURL query error xml' )
+                   return videoUrl
            videoPage = re.findall('file: "(.*?)"', data, re.S)
-           if videoPage:
-              return videoPage[0]
+           if videoPage: return videoPage[0]
            return []
 
         if self.MAIN_URL == 'http://www.pornhub.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
-           if not match:
-              match = re.compile('"quality_720p":"([^"]+)"').findall(data)
-           if not match:
-              match = re.compile('"quality_480p":"([^"]+)"').findall(data)
-           if not match:
-              match = re.compile('"quality_240p":"([^"]+)"').findall(data)
-           if not match:
-              match = re.compile("quality_720p = '(.*?)'").findall(data)
-           if not match:
-              match = re.compile("quality_480p = '(.*?)'").findall(data)
-           if not match:
-              match = re.compile("quality_240p = '(.*?)'").findall(data)
-           if not match:
-              printDBG( 'Host getResolvedURL not match1' )  
-              return ''
+           if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
+           if not match: match = re.compile('"quality_480p":"([^"]+)"').findall(data)
+           if not match: match = re.compile('"quality_240p":"([^"]+)"').findall(data)
+           if not match: match = re.compile("quality_720p = '(.*?)'").findall(data)
+           if not match: match = re.compile("quality_480p = '(.*?)'").findall(data)
+           if not match: match = re.compile("quality_240p = '(.*?)'").findall(data)
+           if not match: 
+                         printDBG( 'Host getResolvedURL not match1' )  
+                         return []
            return match[0]   
-           '''
-           fetchurl = match
-           fetchurl = urllib2.unquote(match[0])
-           match = re.compile('"video_title":"([^"]+)"').findall(data)
-           if not match:
-              printDBG( 'Host getResolvedURL not match2' )  
-              return ''
-           title = urllib.unquote_plus(match[0])
-           printDBG( 'Host getResolvedURL decrypt begin ' )
-           printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
-           printDBG( 'Host getResolvedURL title: '+title )
-           phStream = decrypt(fetchurl, title, 256)
-           if phStream:
-              return phStream
-           else: return ''
-           '''
 
         if self.MAIN_URL == 'http://www.4tube.com':
            #printDBG( 'Host getResolvedURL data: '+data )
