@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "15.9.5.0"
+    XXXversion = "15.9.7.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -186,6 +186,7 @@ class Host:
            valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
            valTab.append(CDisplayListItem('XVIDEOS',        'www.xvideos.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.xvideos.com'],               'xvideos', 'http://img100.xvideos.com/videos/thumbs/xvideos.gif', None)) 
            valTab.append(CDisplayListItem('XNXX',           'www.xnxx.com',       CDisplayListItem.TYPE_CATEGORY, ['http://www.xnxx.com'],                  'xnxx',    'http://img100.xvideos.com/xnxx.com/pics/xnxx.gif', None)) 
+           #valTab.append(CDisplayListItem('PORNUSY.PL',     'www.pornusy.pl',     CDisplayListItem.TYPE_CATEGORY, ['http://www.pornusy.pl'],                'pornusy', 'http://www.pornusy.pl/porno.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
@@ -196,6 +197,7 @@ class Host:
         if 'fulltube8' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://www.tube8.com' 
+           parser = 'http://www.tube8.com' 
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host listsItems query error' )
@@ -960,7 +962,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<div id="pagination">.*?</div>', data, re.S)
            if not match: return valTab
            printDBG( 'Host listsItems len match: '+str(len(match)))
@@ -1190,19 +1192,56 @@ class Host:
 
         return valTab
 
+    def getParser(self, url):
+        printDBG( 'Host getParser begin' )
+        printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
+        printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://showup.tv':            return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.tube8.com':        return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.xnxx.com':         return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.xvideos.com':      return self.MAIN_URL
+        if self.MAIN_URL == 'http://hentaigasm.com':       return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.youporn.com':      return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.redtube.com':      return self.MAIN_URL
+        if self.MAIN_URL == 'http://xhamster.com':         return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.eporner.com':      return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.pornhub.com':      return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.4tube.com':        return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.hdporn.net':       return self.MAIN_URL
+        if self.MAIN_URL == 'http://m.tube8.com':          return self.MAIN_URL
+        if self.MAIN_URL == 'http://mobile.youporn.com':   return self.MAIN_URL
+        if self.MAIN_URL == 'http://m.pornhub.com':        return self.MAIN_URL
+        if url.startswith('http://www.tube8.com'):         return 'http://www.tube8.com'
+        if url.startswith('http://www.xnxx.com'):          return 'http://www.xnxx.com'
+        if url.startswith('http://www.xvideos.com'):       return 'http://www.xvideos.com'
+        if url.startswith('http://hentaigasm.com'):        return 'http://hentaigasm.com'
+        if url.startswith('http://www.youporn.com'):       return 'http://www.youporn.com'
+        if url.startswith('http://www.redtube.com'):       return 'http://www.redtube.com'
+        if url.startswith('http://xhamster.com'):          return 'http://xhamster.com'
+        if url.startswith('http://www.eporner.com'):       return 'http://www.eporner.com'
+        if url.startswith('http://www.pornhub.com'):       return 'http://www.pornhub.com'
+        if url.startswith('http://www.4tube.com'):         return 'http://www.4tube.com'
+        if url.startswith('http://www.hdporn.net'):        return 'http://www.hdporn.net'
+        if url.startswith('http://m.tube8.com'):           return 'http://m.tube8.com'
+        if url.startswith('http://mobile.youporn.com'):    return 'http://mobile.youporn.com'
+        if url.startswith('http://m.pornhub.com'):         return 'http://m.pornhub.com'
+        return ''
+
     def getResolvedURL(self, url):
         printDBG( 'Host getResolvedURL begin' )
         printDBG( 'Host getResolvedURL url: '+url )
         videoUrl = ''
-        valTab = []
+        parser = self.getParser(url)
+        printDBG( 'Host getResolvedURL parser: '+parser )
+        if parser == '': return ''
 
-        if self.MAIN_URL == 'http://showup.tv':
+        if parser == 'http://showup.tv':
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'showup.cookie'
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host getResolvedURL query error' )
               printDBG( 'Host getResolvedURL query error url: '+url )
-              return valTab
+              return ''
            #printDBG( 'Host getResolvedURL data: '+data )
            parse = re.search("var streamID = '(.*?)'.*?var srvE = '(.*?)'", data, re.S)
            if parse:
@@ -1223,48 +1262,57 @@ class Host:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
 
-        if self.MAIN_URL == 'http://www.tube8.com':
+        if parser == 'http://www.tube8.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_480p":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_240p":"([^"]+)"').findall(data)
            if not match: return ''
-           fetchurl = match
            fetchurl = urllib2.unquote(match[0])
-           match = re.compile('"video_title":"([^"]+)"').findall(data)
-           title = urllib.unquote_plus(match[0])
-           printDBG( 'Host getResolvedURL decrypt begin ' )
+           fetchurl = fetchurl.replace(r"\/",r"/")
            printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
-           printDBG( 'Host getResolvedURL title: '+title )
-           phStream = decrypt(fetchurl, title, 256)
-           if phStream: return phStream
-           else: return ''
+           return fetchurl 
 
-        if self.MAIN_URL == 'http://www.xnxx.com':
+        if parser == 'http://www.xnxx.com':
            videoUrl = re.search('flv_url=(.*?)&', data, re.S)
            if videoUrl: return decodeUrl(videoUrl.group(1))
            return ''
 
-        if self.MAIN_URL == 'http://www.xvideos.com':
+        if parser == 'http://www.xvideos.com':
            videoUrl = re.search('flv_url=(.*?)&', data, re.S)
            if videoUrl: return decodeUrl(videoUrl.group(1))
            return ''
 
-        if self.MAIN_URL == 'http://hentaigasm.com':
+        if parser == 'http://hentaigasm.com':
            videoUrl = re.search('<div id="player_1111"></div>.*?file: "(.*?)"', data, re.S)
            if videoUrl: return videoUrl.group(1)
            return ''
 
-        if self.MAIN_URL == 'http://www.youporn.com':
-           videoPage = re.findall('video.src\s=\s\'(.*?)\';', data, re.S)
+        if parser == 'http://www.youporn.com':
+           match = re.findall(r'encryptedQuality720URL\s=\s\'([a-zA-Z0-9+/]+={0,2})\',', data)
+           if match:
+              fetchurl = urllib2.unquote(match[0])
+              printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
+              match = re.compile("video_title = '(.*?)'").findall(data)
+              if match:
+                 title = urllib.unquote_plus(match[0])
+                 #title = '%s_720p' % title
+                 printDBG( 'Host getResolvedURL title: '+title )
+                 printDBG( 'Host getResolvedURL decrypt begin ' )
+                 phStream = decrypt(fetchurl, title, 32)
+                 if phStream: 
+                    printDBG( 'Host getResolvedURL decrypted url: '+phStream )
+                    return phStream
+           videoPage = re.findall('videoSrc\s=\s\'(.*?)\',', data, re.S)
            if videoPage:
-              videos = '%s' % (videoPage[0])
+              videos = videoPage[-1] 
               videos = urllib.unquote(videos)
               videos = videos.replace('&amp;','&')
+              printDBG( 'Host getResolvedURL normal url: '+videos )
               return videos
            return ''
 
-        if self.MAIN_URL == 'http://www.redtube.com':
+        if parser == 'http://www.redtube.com':
            videoPage = re.findall('vpVideoSource = "(.*?)"', data, re.S)
            if videoPage:
               videos = '%s' % (videoPage[0])
@@ -1273,15 +1321,15 @@ class Host:
               return videos
            return ''
 
-        if self.MAIN_URL == 'http://xhamster.com':
+        if parser == 'http://xhamster.com':
            xhFile = re.findall('"file":"(.*?)"', data)
            if xhFile: return xhFile[0].replace(r"\/",r"/")
-           else: return []
+           else: return ''
         
-        if self.MAIN_URL == 'http://www.eporner.com':
+        if parser == 'http://www.eporner.com':
            videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
-           if not videoPage: return []
-           xml = self.MAIN_URL+videoPage[0]
+           if not videoPage: return ''
+           xml = parser+videoPage[0]
            printDBG( 'Host getResolvedURL xml: '+xml )
            try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
            except: 
@@ -1289,9 +1337,9 @@ class Host:
                    return videoUrl
            videoPage = re.findall('file: "(.*?)"', data, re.S)
            if videoPage: return videoPage[0]
-           return []
+           return ''
 
-        if self.MAIN_URL == 'http://www.pornhub.com':
+        if parser == 'http://www.pornhub.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_480p":"([^"]+)"').findall(data)
@@ -1301,10 +1349,10 @@ class Host:
            if not match: match = re.compile("quality_240p = '(.*?)'").findall(data)
            if not match: 
                          printDBG( 'Host getResolvedURL not match' )  
-                         return []
+                         return ''
            return match[0]   
 
-        if self.MAIN_URL == 'http://www.4tube.com':
+        if parser == 'http://www.4tube.com':
            #printDBG( 'Host getResolvedURL data: '+data )
            videoID = re.findall('data-id="(\d+)".*?data-quality="(\d+)"', data, re.S)
            if videoID:
@@ -1312,7 +1360,7 @@ class Host:
               for x in videoID:
                   res += x[1] + "+"
               res.strip('+')
-              posturl = "%s/%s/desktop/%s" % (self.MAIN_URL.replace('www','tkn'), videoID[-1][0], res)
+              posturl = "%s/%s/desktop/%s" % (parser.replace('www','tkn'), videoID[-1][0], res)
               printDBG( 'Host getResolvedURL posturl: '+posturl )
               try:
                  data = self.cm.getURLRequestData({'url': posturl, 'header': {'Origin':'http://www.4tube.com'},'use_host': False, 'use_cookie': False, 'use_post': True, 'return_data': True},{})
@@ -1322,26 +1370,26 @@ class Host:
               #printDBG( 'Host getResolvedURL posturl data: '+data )
               videoUrl = re.findall('token":"(.*?)"', data, re.S)
               if videoUrl: return videoUrl[-1]                 
-              else: return []
-           else: return []
+              else: return ''
+           else: return ''
         
-        if self.MAIN_URL == 'http://www.hdporn.net':
-           match = re.findall('<source\ssrc="(.*?)"', data, re.S)
+        if parser == 'http://www.hdporn.net':
+           match = re.findall('source src="(.*?)"', data, re.S)
            if match: return match[0]
-           else: return []
-        if self.MAIN_URL == 'http://m.tube8.com':
-           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
-           return match[0]
-        if self.MAIN_URL == 'http://mobile.youporn.com':
-           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
-           return match[0]
-        if self.MAIN_URL == 'http://m.pornhub.com':
+           else: return ''
+
+        if parser == 'http://m.tube8.com':
            match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
            return match[0]
 
-        #for phurl in match: printDBG( 'Host getResolvedURL phurl: '+phurl )
-        #if len(match)>0:
-        #   videoUrl = match[0]
+        if parser == 'http://mobile.youporn.com':
+           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
+           return match[0]
+
+        if parser == 'http://m.pornhub.com':
+           match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
+           return match[0]
+
         printDBG( 'Host getResolvedURL end' )
         return videoUrl
 
