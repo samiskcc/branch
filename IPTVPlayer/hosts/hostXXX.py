@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "16.0.0.0"
+    XXXversion = "16.0.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1192,37 +1192,40 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
-        if self.MAIN_URL == 'http://showup.tv':            return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.tube8.com':        return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.xnxx.com':         return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.xvideos.com':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://hentaigasm.com':       return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.youporn.com':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.redtube.com':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://xhamster.com':         return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.eporner.com':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.pornhub.com':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.4tube.com':        return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.hdporn.net':       return self.MAIN_URL
-        if self.MAIN_URL == 'http://m.tube8.com':          return self.MAIN_URL
-        if self.MAIN_URL == 'http://mobile.youporn.com':   return self.MAIN_URL
-        if self.MAIN_URL == 'http://m.pornhub.com':        return self.MAIN_URL
-        if url.startswith('http://www.tube8.com'):         return 'http://www.tube8.com'
-        if url.startswith('http://www.xnxx.com'):          return 'http://www.xnxx.com'
-        if url.startswith('http://www.xvideos.com'):       return 'http://www.xvideos.com'
-        if url.startswith('http://hentaigasm.com'):        return 'http://hentaigasm.com'
-        if url.startswith('http://www.youporn.com'):       return 'http://www.youporn.com'
-        if url.startswith('http://www.redtube.com'):       return 'http://www.redtube.com'
-        if url.startswith('http://embed.redtube.com'):       return 'http://www.redtube.com'
+        if url.startswith('http://www.pornusy.pl'):         return 'http://www.pornusy.pl'
+        if url.startswith('http://www.tube8.com/embed/'):   return 'http://www.tube8.com/embed/'
+        if url.startswith('http://www.tube8.com'):          return 'http://www.tube8.com'
+        if self.MAIN_URL == 'http://www.tube8.com':         return self.MAIN_URL
+        if url.startswith('http://embed.redtube.com'):      return 'http://embed.redtube.com'
+        if url.startswith('http://www.redtube.com'):        return 'http://www.redtube.com'
+        if self.MAIN_URL == 'http://www.redtube.com':       return self.MAIN_URL
+        if url.startswith('http://www.youporn.com/embed/'): return 'http://www.youporn.com/embed/'
+        if url.startswith('http://www.youporn.com'):        return 'http://www.youporn.com'
+        if self.MAIN_URL == 'http://www.youporn.com':       return self.MAIN_URL
+        if self.MAIN_URL == 'http://showup.tv':             return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.xnxx.com':          return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.xvideos.com':       return self.MAIN_URL
+        if self.MAIN_URL == 'http://hentaigasm.com':        return self.MAIN_URL
+        if self.MAIN_URL == 'http://xhamster.com':          return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.eporner.com':       return self.MAIN_URL
+        if url.startswith('http://www.pornhub.com/embed/'): return 'http://www.pornhub.com/embed/'
+        if url.startswith('http://www.pornhub.com'):        return 'http://www.pornhub.com'
+        if self.MAIN_URL == 'http://www.pornhub.com':       return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.4tube.com':         return self.MAIN_URL
+        if self.MAIN_URL == 'http://www.hdporn.net':        return self.MAIN_URL
+        if self.MAIN_URL == 'http://m.tube8.com':           return self.MAIN_URL
+        if self.MAIN_URL == 'http://mobile.youporn.com':    return self.MAIN_URL
+        if self.MAIN_URL == 'http://m.pornhub.com':         return self.MAIN_URL
+        if url.startswith('http://www.xnxx.com'):           return 'http://www.xnxx.com'
+        if url.startswith('http://www.xvideos.com'):        return 'http://www.xvideos.com'
+        if url.startswith('http://hentaigasm.com'):         return 'http://hentaigasm.com'
         if url.startswith('http://xhamster.com'):          return 'http://xhamster.com'
         if url.startswith('http://www.eporner.com'):       return 'http://www.eporner.com'
-        if url.startswith('http://www.pornhub.com'):       return 'http://www.pornhub.com'
         if url.startswith('http://www.4tube.com'):         return 'http://www.4tube.com'
         if url.startswith('http://www.hdporn.net'):        return 'http://www.hdporn.net'
         if url.startswith('http://m.tube8.com'):           return 'http://m.tube8.com'
         if url.startswith('http://mobile.youporn.com'):    return 'http://mobile.youporn.com'
         if url.startswith('http://m.pornhub.com'):         return 'http://m.pornhub.com'
-        if url.startswith('http://www.pornusy.pl'):        return 'http://www.pornusy.pl'
         return ''
 
     def getResolvedURL(self, url):
@@ -1243,12 +1246,11 @@ class Host:
            #printDBG( 'Host getResolvedURL data: '+data )
            parse = re.search('<iframe src="(.*?)"', data, re.S)
            if parse:
-              url = parse.group(1).replace(r"embed/",r"")
+              if parse.group(1).startswith('http://www.pornusy.pl'):
+                 printDBG( 'Host getResolvedURL pornusy.pl: zapetlony parser: '+parse.group(1) )
+                 return ''
+              return self.getResolvedURL(parse.group(1))
            else: return ''
-
-        parser = self.getParser(url)
-        printDBG( 'Host getResolvedURL parser: '+parser )
-        if parser == '': return ''
 
         if parser == 'http://showup.tv':
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'showup.cookie'
@@ -1268,7 +1270,15 @@ class Host:
               return videoUrl
            return ''
         
+        if parser == 'http://www.tube8.com/embed/':
+           return self.getResolvedURL(url.replace(r"embed/",r""))
         
+        if parser == 'http://www.youporn.com/embed/':
+           return self.getResolvedURL(url.replace(r"embed/",r"watch/"))
+
+        if parser == 'http://www.pornhub.com/embed/':
+           return self.getResolvedURL(url.replace(r"embed/",r"view_video.php?viewkey="))
+		   
         query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
         try:
            data = self.cm.getURLRequestData(query_data)
@@ -1327,10 +1337,13 @@ class Host:
               return videos
            return ''
 
-        if parser == 'http://www.redtube.com':
+        if parser == 'http://embed.redtube.com':
            videoPage = re.findall("<source src='(.*?)'", data, re.S)
            if videoPage:
               return videoPage[0]
+           return ''
+
+        if parser == 'http://www.redtube.com':
            videoPage = re.findall('vpVideoSource = "(.*?)"', data, re.S)
            if videoPage:
               videos = '%s' % (videoPage[0])
@@ -1357,6 +1370,11 @@ class Host:
            if videoPage: return videoPage[0]
            return ''
 
+        if parser == 'http://www.pornhub.com/embed/':
+           match = re.findall("container.*?src.*?'(.*?)'", data, re.S)
+           if match: return match[0]
+           return ''
+        
         if parser == 'http://www.pornhub.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
            if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
