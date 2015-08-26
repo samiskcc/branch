@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "16.0.1.0"
+    XXXversion = "16.0.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1130,28 +1130,28 @@ class Host:
            except:
               printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx.git')
+              os.system('rm -rf /tmp/iptv-host-xxx*')
               valTab.append(CDisplayListItem('ERROR - Blad rozpakowania /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
-           if not os.path.exists('/tmp/iptv-host-xxx.git/IPTVPlayer'):
-              printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
-              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx.git')
-              valTab.append(CDisplayListItem('ERROR - Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-              return valTab           
+           #if not os.path.exists('/tmp/iptv-host-xxx*/IPTVPlayer'):
+           #   printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
+           #   os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
+           #   os.system('rm -rf /tmp/iptv-host-xxx*')
+           #   valTab.append(CDisplayListItem('ERROR - Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           #   return valTab           
            try:
-              os.system('cp -rf /tmp/iptv-host-xxx.git/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
+              os.system('cp -rf /tmp/iptv-host-xxx*/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
               os.system('sync')
            except:
               printDBG( 'blad kopiowania' )
               os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx.git')
+              os.system('rm -rf /tmp/iptv-host-xxx*')
               valTab.append(CDisplayListItem('ERROR - blad kopiowania',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
                
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-           os.system('rm -rf /tmp/iptv-host-xxx.git')
+           os.system('rm -rf /tmp/iptv-host-xxx*')
            printDBG( 'Host listsItems end' )
            return valTab
 
