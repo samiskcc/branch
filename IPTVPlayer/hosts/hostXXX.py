@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "16.0.2.0"
+    XXXversion = "16.0.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1366,7 +1366,7 @@ class Host:
            except: 
                    printDBG( 'Host getResolvedURL query error xml' )
                    return videoUrl
-           videoPage = re.findall('file: "(.*?)"', data, re.S)
+           videoPage = re.findall('file: ?"(.*?)"', data, re.S)
            if videoPage: return videoPage[0]
            return ''
 
