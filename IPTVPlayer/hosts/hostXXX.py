@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "16.0.3.0"
+    XXXversion = "17.0.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -186,7 +186,8 @@ class Host:
            valTab.append(CDisplayListItem('HENTAIGASM',     'hentaigasm.com',     CDisplayListItem.TYPE_CATEGORY, ['http://hentaigasm.com'],                'hentaigasm','http://hentaigasm.com/wp-content/themes/detube/images/logo.png', None)) 
            valTab.append(CDisplayListItem('XVIDEOS',        'www.xvideos.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.xvideos.com'],               'xvideos', 'http://img100.xvideos.com/videos/thumbs/xvideos.gif', None)) 
            valTab.append(CDisplayListItem('XNXX',           'www.xnxx.com',       CDisplayListItem.TYPE_CATEGORY, ['http://www.xnxx.com'],                  'xnxx',    'http://img100.xvideos.com/xnxx.com/pics/xnxx.gif', None)) 
-           valTab.append(CDisplayListItem('PORNUSY.PL',     'www.pornusy.pl',     CDisplayListItem.TYPE_CATEGORY, ['http://www.pornusy.pl/polskie-porno'],                'pornusy', 'http://www.pornusy.pl/porno.png', None)) 
+           valTab.append(CDisplayListItem('PORNUSY.PL',     'www.pornusy.pl',     CDisplayListItem.TYPE_CATEGORY, ['http://www.pornusy.pl/polskie-porno'],  'pornusy', 'http://www.pornusy.pl/porno.png', None)) 
+           valTab.append(CDisplayListItem('BEEG',           'beeg.com',           CDisplayListItem.TYPE_CATEGORY, ['http://beeg.com'],                      'beeg',    'http://staticloads.com/img/logo/logo.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
@@ -1186,12 +1187,69 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
 
+        if 'beeg' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://beeg.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('<li><a target="_self" href="(.*?)"  ?title="(.*?)"', data, re.S)
+           if phCats:
+              for (phUrl, phTitle) in phCats:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'beeg-clips', '', None)) 
+           valTab.sort(key=lambda poz: poz.name)
+           valTab.insert(0,CDisplayListItem("--- Longest ---", "Longest", CDisplayListItem.TYPE_CATEGORY,["http://beeg.com/tag/long+videos"], 'beeg-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Newest ---",  "Newest",  CDisplayListItem.TYPE_CATEGORY,["http://beeg.com/"],                'beeg-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'beeg-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           m = re.search('tumb_id  =\[(.*)\].*?var tumb_alt',data,re.S)
+           n = re.search('tumb_alt =\[(.*)\].*?var writestr',data,re.S)
+           mx = m.group(1) + ","
+           nx = n.group(1) + ","
+           phId = re.findall('(.*?),', mx, re.S)
+           phThumb = re.findall('\'(.*?)\',', nx, re.S)
+           x = 0
+           if phId:
+              for phVideoId in phId:
+                  phUrl = 'http://beeg.com/%s' % phVideoId
+                  phImage = 'http://cdn.anythumb.com/236x177/%s.jpg' % phVideoId
+                  phTitle = phThumb[x]
+                  phTitle = phTitle.replace("\\'","'")
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                  x = x + 1
+           match = re.findall('id="paging_prev".*?<a href="(.*?)"', data, re.S)
+           if match:
+              valTab.append(CDisplayListItem('Next', match[0], CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match[0]], name, '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         return valTab
 
     def getParser(self, url):
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://beeg.com':              return self.MAIN_URL
         if url.startswith('http://www.pornusy.pl'):         return 'http://www.pornusy.pl'
         if url.startswith('http://www.tube8.com/embed/'):   return 'http://www.tube8.com/embed/'
         if url.startswith('http://www.tube8.com'):          return 'http://www.tube8.com'
@@ -1286,6 +1344,12 @@ class Host:
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
+
+        if parser == 'http://beeg.com':
+           videoPage = re.findall("'file': '(.*?)'", data, re.S)
+           if videoPage:
+              return videoPage[0]
+           return ''
 
         if parser == 'http://www.tube8.com':
            match = re.compile('"video_url":"([^"]+)"').findall(data)
