@@ -1221,7 +1221,9 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            m = re.search('tumb_id  =\[(.*)\].*?var tumb_alt',data,re.S)
+           if not m: return []
            n = re.search('tumb_alt =\[(.*)\].*?var writestr',data,re.S)
+           if not n: return []
            mx = m.group(1) + ","
            nx = n.group(1) + ","
            phId = re.findall('(.*?),', mx, re.S)
@@ -1231,8 +1233,7 @@ class Host:
               for phVideoId in phId:
                   phUrl = 'http://beeg.com/%s' % phVideoId
                   phImage = 'http://cdn.anythumb.com/236x177/%s.jpg' % phVideoId
-                  phTitle = phThumb[x]
-                  phTitle = phTitle.replace("\\'","'")
+                  phTitle = phThumb[x].replace("\\'","'")
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
