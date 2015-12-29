@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.2"
+    XXXversion = "19.0.0.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -199,6 +199,7 @@ class Host:
            valTab.append(CDisplayListItem('YOUJIZZ',     'http://www.youjizz.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.youjizz.com/categories'],'YOUJIZZ', 'http://www.sample-made.com/cms/content/uploads/2015/05/youjizz_logo-450x400.jpg', None)) 
            valTab.append(CDisplayListItem('DACHIX',     'http://www.dachix.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.dachix.com/categories'],'DACHIX', 'http://thumbs.dachix.com/images/dachixcom_logo_noir.png', None)) 
            valTab.append(CDisplayListItem('DRTUBER',     'http://www.drtuber.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.drtuber.com/categories'],'DRTUBER', 'http://static.drtuber.com/templates/frontend/mobile/images/logo.png', None)) 
+           valTab.append(CDisplayListItem('TNAFLIX',     'https://www.tnaflix.com', CDisplayListItem.TYPE_CATEGORY, ['https://www.tnaflix.com/channels.php'],'TNAFLIX', 'https://pbs.twimg.com/profile_images/1109542593/logo_400x400.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
@@ -1836,12 +1837,64 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab 
 
+        if 'TNAFLIX' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'https://www.tnaflix.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('title="List of tags".*?="/video.php(.*?)>Channels</strong>', data, re.S) 
+           if parse:
+              genre = re.findall('<a href="(.*?)">(.*?)</a>', parse.group(1), re.S)
+              if genre:
+                 for phUrl, phTitle in genre:
+                    phTitle = decodeHtml(phTitle)
+                    printDBG( 'Host listsItems phUrl: '  +phUrl )
+                    printDBG( 'Host listsItems phTitle: '+phTitle )
+                    valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'TNAFLIX-clips', '', None)) 
+                    valTab.sort(key=lambda poz: poz.name)
+           #valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["https://www.tnaflix.com/new/1/"], 'TNAFLIX-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'TNAFLIX-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('<a  href="(.*?)".*?class="nHover"><h2>(.*?)</h2>.*?class="duringTime">(.*?)</span>.*?<img src="(.*?)"', data, re.S)  
+           if phMovies:
+              for (phUrl, phTitle, phRuntime, phImage ) in phMovies:
+                  phImage = 'http:'+phImage
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
+                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('class="navLink".*?ref="(.*?)"', data, re.S)
+           if match:
+              phUrl = match[0]
+              printDBG( 'Host listsItems page phUrl: '+phUrl )
+              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         return valTab
 
     def getParser(self, url):
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'https://www.tnaflix.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.myfreecams.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.drtuber.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.dachix.com':        return self.MAIN_URL
@@ -2267,6 +2320,13 @@ class Host:
                     printDBG( 'Host listsItems data: '+url )
                     return url
            return ''
+
+        if parser == 'https://www.tnaflix.com':
+           videoPage = re.search('downloadTabBlock.*?href="(.*?)"', data, re.S) 
+           if videoPage:
+              return urllib2.unquote('http:'+videoPage.group(1)) 
+           return ''
+
 
         printDBG( 'Host getResolvedURL end' )
         return videoUrl
