@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.1"
+    XXXversion = "19.0.0.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1963,16 +1963,13 @@ class Host:
         
         if parser == 'http://www.myfreecams.com':
            for serwer in range(491, 340, -1):
+              data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              query_data = { 'url': newurl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
               try:
-                 data = self.cm.getURLRequestData(query_data)
+                 data = urllib2.urlopen(newurl)
               except:
-                 printDBG( 'Host listsItems query error' )
-                 printDBG( 'Host listsItems query error newurl:'+newurl )
-              #printDBG( 'Host listsItems freecam data: '+data )
+                 printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
-              printDBG( 'Host getResolvedURL freecam newurl: '+newurl )
            return ''
 
         if parser == 'http://www.tube8.com/embed/':
