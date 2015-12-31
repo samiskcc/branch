@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.3"
+    XXXversion = "19.0.0.4"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1075,7 +1075,7 @@ class Host:
            valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem('ZMIANY W WERSJI',                    'ZMIANY W WERSJI',   CDisplayListItem.TYPE_CATEGORY, ['https://gitlab.com/iptv-host-xxx/iptv-host-xxx/commits/master.atom'], 'UPDATE-ZMIANY', '', None)) 
-           valTab.append(CDisplayListItem('Update Now',                         'Update Now',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
+           valTab.append(CDisplayListItem('Update Now & Restart Enigma2',                         'Update Now & Restart Enigma2',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-ZMIANY' == name:
@@ -1089,10 +1089,12 @@ class Host:
            phCats = re.findall("<entry>.*?<title>(.*?)</title>.*?<updated>(.*?)</updated>.*?<name>(.*?)</name>", data, re.S)
            if phCats:
               for (phTitle, phUpdated, phName ) in phCats:
+                  phUpdated = phUpdated.replace('T', '   ')
+                  phUpdated = phUpdated.replace('Z', '   ')
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phUpdated: '+phUpdated )
                   printDBG( 'Host listsItems phName: '+phName )
-                  valTab.append(CDisplayListItem(phUpdated+' ' +phName,phTitle,CDisplayListItem.TYPE_CATEGORY, [''],'', '', None)) 
+                  valTab.append(CDisplayListItem(phUpdated+' '+phName+'  >>  '+phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [''],'', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-NOW' == name:
@@ -1134,10 +1136,15 @@ class Host:
               os.system('rm -rf /tmp/iptv-host-xxx*')
               valTab.append(CDisplayListItem('ERROR - blad kopiowania',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
-               
-           valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+
            os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
            os.system('rm -rf /tmp/iptv-host-xxx*')
+
+           try:
+              from enigma import quitMainloop
+              quitMainloop(3)
+           except: 
+              valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
