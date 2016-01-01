@@ -1,7 +1,7 @@
 #!/bin/sh
 cp $1/iptvupdate/custom/xxx.sh $2/iptvupdate/custom/xxx.sh
 status=$?
-if [$status -ne 0]; then
+if [ $status -ne 0 ]; then
 	echo "B³¹d krytyczny. Plik $0 nie mo¿e zostaæ skopiowany, error[$status]."
 	exit 1	
 fi
