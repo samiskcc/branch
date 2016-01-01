@@ -119,7 +119,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.4"
+    XXXversion = "19.0.0.5"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -203,6 +203,7 @@ class Host:
            valTab.sort(key=lambda poz: poz.name)
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
+           valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            printDBG( 'Host listsItems end' )
@@ -1075,7 +1076,8 @@ class Host:
            valTab.append(CDisplayListItem(self.XXXversion+' - Local version',   'Local  XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem(self.XXXremote+ ' - Remote version',  'Remote XXXversion', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            valTab.append(CDisplayListItem('ZMIANY W WERSJI',                    'ZMIANY W WERSJI',   CDisplayListItem.TYPE_CATEGORY, ['https://gitlab.com/iptv-host-xxx/iptv-host-xxx/commits/master.atom'], 'UPDATE-ZMIANY', '', None)) 
-           valTab.append(CDisplayListItem('Update Now & Restart Enigma2',                         'Update Now & Restart Enigma2',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
+           valTab.append(CDisplayListItem('Update Now',                         'Update Now',        CDisplayListItem.TYPE_CATEGORY, [''], 'UPDATE-NOW',    '', None)) 
+           valTab.append(CDisplayListItem('Update Now & Restart Enigma2',                         'Update Now & Restart Enigma2',        CDisplayListItem.TYPE_CATEGORY, ['restart'], 'UPDATE-NOW',    '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-ZMIANY' == name:
@@ -1139,12 +1141,12 @@ class Host:
 
            os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
            os.system('rm -rf /tmp/iptv-host-xxx*')
-
-           try:
-              from enigma import quitMainloop
-              quitMainloop(3)
-           except: 
-              valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
+           if url:
+              try:
+                 from enigma import quitMainloop
+                 quitMainloop(3)
+              except: pass
+           valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -1895,12 +1897,35 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
 
+        if 'LIVEJASMIN' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://new.livejasmin.com' 
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'livejasmin.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': 'http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error cookie' )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('class="perf_container ".*?img src="(.*?)".*?alt="(.*?)"', data, re.S) 
+           if phCats:
+              for (phImage, phTitle) in phCats: 
+                  org = phTitle
+                  phTitle = phTitle[:-13]
+                  printDBG( 'Host listsItems org: '  +org )
+                  printDBG( 'Host listsItems phTitle: '  +phTitle )
+                  printDBG( 'Host listsItems phImage: '  +phImage )
+
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', "http://new.livejasmin.com/en/chat/"+phTitle, 1)], 0, phImage, None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab 
+
         return valTab
 
     def getParser(self, url):
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://new.livejasmin.com':        return self.MAIN_URL
         if self.MAIN_URL == 'https://www.tnaflix.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.myfreecams.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.drtuber.com':        return self.MAIN_URL
@@ -2030,6 +2055,21 @@ class Host:
               except:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
+           return ''
+
+        if parser == 'http://new.livejasmin.com':
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'livejasmin.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return ''
+           #printDBG( 'Host getResolvedURL data: '+data )
+           videoPage = re.search('performerid":"(.*?)".*?proxyip":"(.*?)"', data, re.S) 
+           if videoPage.group(1) and videoPage.group(2):
+              printDBG( 'Host listsItems videoPage.group(2): '+videoPage.group(2) )
+              printDBG( 'Host listsItems videoPage.group(1): '+videoPage.group(1) )
+              return (videoPage.group(2)+'/'+videoPage.group(1)) 
            return ''
 
         if parser == 'http://www.tube8.com/embed/':
