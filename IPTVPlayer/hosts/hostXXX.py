@@ -23,8 +23,10 @@ from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, 
 ###################################################
 # Config options for HOST
 ###################################################
+config.plugins.iptvplayer.xxxwymagajpin = ConfigYesNo(default = True)
 def GetConfigList():
     optionList = []
+    optionList.append( getConfigListEntry( "Wymagaj pin:", config.plugins.iptvplayer.xxxwymagajpin ) )
     return optionList
 ###################################################
 
@@ -47,7 +49,7 @@ class IPTVHost(IHost):
         printDBG( "init end" )
         
     def isProtectedByPinCode(self):
-        return True
+        return config.plugins.iptvplayer.xxxwymagajpin.value
     
     def getLogoPath(self):  
         return RetHost(RetHost.OK, value = [self.PATH_TO_LOGO])
@@ -119,7 +121,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.6"
+    XXXversion = "19.0.0.7"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
