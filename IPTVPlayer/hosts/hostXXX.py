@@ -121,7 +121,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.8"
+    XXXversion = "19.0.0.9"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -447,12 +447,14 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   phTitle = decodeHtml(phTitle)
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<li><a class="nP" href="(.*?)"', data, re.S)
-           if match:
-              phUrl = match[-1]
-              if phUrl[0] <> '/'[0]:
-                 phUrl = '/'+phUrl
-              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+           next = re.search('pagination(.*?)>Next<', data, re.S)
+           if next:
+              match = re.findall('a href="(.*?)"', next.group(1), re.S)
+              if match:
+                 phUrl = match[-1]
+                 if phUrl[0] <> '/'[0]:
+                    phUrl = '/'+phUrl
+                 valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
         if 'hentaigasm' == name:
