@@ -121,7 +121,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.10"
+    XXXversion = "19.0.0.11"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -646,10 +646,11 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            if re.search('vDate', data, re.S):
-              parse = re.search('<div\sclass=\'vDate(.*)</html>', data, re.S)
+              parse = re.search('<div\sclass="vDate(.*)</html>', data, re.S)
            else:
               parse = re.search('<html>(.*)</html>', data, re.S)
-           phMovies = re.findall('class=\'video\'><a\shref=\'(.*?/movies/.*?)\'.*?class=\'hRotator\'\s><img\ssrc=\'(.*?)\'.*?alt="(.*?)".*?start2.*?<b>(.*?)</b>', parse.group(1), re.S)
+           if not parse: return valTab
+           phMovies = re.findall('<a\shref="(.*?/movies/.*?)".*?<img\ssrc=\'(.*?)\'.*?alt="(.*?)".*?start2.*?<b>(.*?)</b>', parse.group(1), re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phRuntime) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
