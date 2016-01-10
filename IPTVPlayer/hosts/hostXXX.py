@@ -18,6 +18,7 @@ except:
     import json as simplejson   
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN
+from time import sleep 
 ###################################################
 
 ###################################################
@@ -121,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.11"
+    XXXversion = "19.0.0.12"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -207,7 +208,7 @@ class Host:
            valTab.sort(key=lambda poz: poz.name)
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
-           valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
+           valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            printDBG( 'Host listsItems end' )
@@ -1108,7 +1109,7 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
         if 'UPDATE-NOW' == name:
-           printDBG( 'Host listsItems begin name='+name )
+           printDBG( 'HostXXX listsItems begin name='+name )
            import os
            _url = 'https://gitlab.com/iptv-host-xxx/iptv-host-xxx/repository/archive.tar.gz?ref=master'              
            output = open('/tmp/iptv-host-xxx.tar.gz','wb')
@@ -1116,46 +1117,86 @@ class Host:
            try:
               output.write(self.cm.getURLRequestData(query_data))
               output.close()
-              os.system('sync')
+              os.system ('sync')
+              printDBG( 'HostXXX pobieranie iptv-host-xxx.tar.gz' )
            except:
               if os.path.exists('/tmp/iptv-host-xxx.tar.gz'):
                  os.remove('/tmp/iptv-host-xxx.tar.gz')
-              printDBG( 'Błąd pobierania master.tar.gz' )
+              printDBG( 'HostXXX Błąd pobierania master.tar.gz' )
               valTab.append(CDisplayListItem('ERROR - Blad pobierania: '+_url,   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-              return valTab           
+              return valTab
+
+           filepath = '/tmp/iptv-host-xxx.tar.gz'
+           if os.path.exists(filepath):
+              printDBG( 'HostXXX Jest plik '+filepath )
+           else:
+              printDBG( 'HostXXX Brak pliku '+filepath )
+
+           cmd = 'tar -xzf "%s" -C "%s" 2>&1' % ( '/tmp/iptv-host-xxx.tar.gz', '/tmp' )  
            try: 
-              os.system('cd /tmp; tar -xzf iptv-host-xxx.tar.gz; sync')
+              os.system (cmd)
+              os.system ('sync')
+              printDBG( 'HostXXX rozpakowanie iptv-host-xxx.tar.gz' )
            except:
-              printDBG( 'Błąd rozpakowania iptv-host-xxx.tar.gz' )
-              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx*')
+              printDBG( 'HostXXX Błąd rozpakowania iptv-host-xxx.tar.gz' )
+              os.system ('rm -f /tmp/iptv-host-xxx.tar.gz')
+              os.system ('rm -rf /tmp/iptv-host-xxx*')
               valTab.append(CDisplayListItem('ERROR - Blad rozpakowania /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
-           #if not os.path.exists('/tmp/iptv-host-xxx*/IPTVPlayer'):
-           #   printDBG( 'Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz' )
-           #   os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-           #   os.system('rm -rf /tmp/iptv-host-xxx*')
-           #   valTab.append(CDisplayListItem('ERROR - Niepoprawny format pliku /tmp/iptv-host-xxx.tar.gz',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           #   return valTab           
+
+           printDBG( 'HostXXX sleep' )
+           sleep(2) 
+
            try:
-              os.system('cp -rf /tmp/iptv-host-xxx*/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
-              os.system('sync')
+              import commands
+              katalog = commands.getoutput('ls /tmp | grep iptv-host-xxx-master*')
+              filepath = "/tmp/%s/IPTVPlayer" % katalog
+              if os.path.exists(filepath):
+                 printDBG( 'HostXXX Jest rozpakowany katalog '+filepath )
+              else:
+                 printDBG( 'HostXXX Brak katalogu '+filepath )
            except:
-              printDBG( 'blad kopiowania' )
-              os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-              os.system('rm -rf /tmp/iptv-host-xxx*')
+              printDBG( 'HostXXX error commands.getoutput ' )
+
+           printDBG( 'HostXXX sleep' )
+           sleep(2) 
+
+           try:
+              os.system ('cp -rf /tmp/iptv-host-xxx*/IPTVPlayer/* /usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/')
+              os.system ('sync')
+              printDBG( 'HostXXX kopiowanie hostXXX do IPTVPlayer' )
+           except:
+              printDBG( 'HostXXX blad kopiowania' )
+              os.system ('rm -f /tmp/iptv-host-xxx.tar.gz')
+              os.system ('rm -rf /tmp/iptv-host-xxx*')
               valTab.append(CDisplayListItem('ERROR - blad kopiowania',   'ERROR', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
               return valTab
 
-           os.system('rm -f /tmp/iptv-host-xxx.tar.gz')
-           os.system('rm -rf /tmp/iptv-host-xxx*')
+           printDBG( 'HostXXX sleep' )
+           sleep(2) 
+
+           try:
+              cmd = '/usr/lib/enigma2/python/Plugins/Extensions/IPTVPlayer/hosts/hostXXX.py'
+              with open(cmd, 'r') as f:  
+                 data = f.read()
+                 f.close() 
+                 wersja = re.search('XXXversion = "(.*?)"', data, re.S)
+                 printDBG( 'HostXXX aktualna wersja wtyczki '+wersja.group(1) )
+           except:
+              printDBG( 'HostXXX error openfile ' )
+
+
+           printDBG( 'HostXXX usuwanie plikow tymczasowych' )
+           os.system ('rm -f /tmp/iptv-host-xxx.tar.gz')
+           os.system ('rm -rf /tmp/iptv-host-xxx*')
+
            if url:
               try:
                  from enigma import quitMainloop
                  quitMainloop(3)
               except: pass
            valTab.append(CDisplayListItem('Update End. Please manual restart enigma2',   'Restart', CDisplayListItem.TYPE_CATEGORY, [''], '', '', None)) 
-           printDBG( 'Host listsItems end' )
+           printDBG( 'HostXXX listsItems end' )
            return valTab
 
         if 'pornusy' == name:
@@ -1907,13 +1948,28 @@ class Host:
 
         if 'LIVEJASMIN' == name:
            printDBG( 'Host listsItems begin name='+name )
+           #valTab.insert(0,CDisplayListItem('--- boy ---', 'boy', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/boy'], 'LIVEJASMIN-clips', '', None))
+           #valTab.insert(0,CDisplayListItem('--- gay ---', 'gay', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/gay'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Transgender ---', 'Transgender', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/transgender'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Couple ---', 'Couple', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/couple'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Mature ---', 'Mature', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/mature'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Fetish ---', 'Fetish', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/fetish'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Lesbian ---', 'Lesbian', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/lesbian'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Soul_mate ---', 'Soul_mate', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/soul_mate'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Hot_flirt ---', 'Hot_flirt', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/hot_flirt'], 'LIVEJASMIN-clips', '', None))
+           valTab.insert(0,CDisplayListItem('--- Girl ---', 'Girl', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl'], 'LIVEJASMIN-clips', '', None))
+           printDBG( 'Host listsItems end' )
+           return valTab 
+
+        if 'LIVEJASMIN-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://new.livejasmin.com' 
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'livejasmin.cookie'
-           try: data = self.cm.getURLRequestData({ 'url': 'http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host listsItems query error cookie' )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            phCats = re.findall('class="perf_container ".*?img src="(.*?)".*?alt="(.*?)"', data, re.S) 
            if phCats:
               for (phImage, phTitle) in phCats: 
@@ -1922,7 +1978,6 @@ class Host:
                   printDBG( 'Host listsItems org: '  +org )
                   printDBG( 'Host listsItems phTitle: '  +phTitle )
                   printDBG( 'Host listsItems phImage: '  +phImage )
-
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', "http://new.livejasmin.com/en/chat/"+phTitle, 1)], 0, phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab 
