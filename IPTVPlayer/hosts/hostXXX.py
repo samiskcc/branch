@@ -122,7 +122,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.12"
+    XXXversion = "19.0.0.13"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2568,10 +2568,10 @@ class Host:
            return match[0]
 
         if parser == 'http://www.cam4.pl':
-           Movies = re.findall('chatUrl=(.*?)&amp.*?videoAppUrl=(.*?)&.*?videoPlayUrl=(.*?)&amp', data, re.S) 
+           Movies = re.findall('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)&.*?videoPlayUrl=(.*?)&', data, re.S) 
            if Movies:
-              for (chatUrl, videoAppUrl, videoPlayUrl) in Movies:
-                  Url = '%s playpath=%s swfUrl=http://edgecast.cam4s.com/client/Cam4Chatless_1.29_s_guest.swf pageUrl=%s' % (videoAppUrl, videoPlayUrl, url)
+              for (swfUrl, chatUrl, videoAppUrl, videoPlayUrl) in Movies:
+                  Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
                   printDBG( 'Host listsItems Url: '  +Url )
                   return Url
            else: return ''
