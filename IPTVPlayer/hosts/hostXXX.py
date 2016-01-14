@@ -123,7 +123,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.15"
+    XXXversion = "19.0.0.16"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1617,14 +1617,14 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           Movies = re.findall('u=(.*?)".*?\stitle="(.*?)".*?src="(.*?)"', data, re.S) 
+           printDBG( 'Host listsItems data: '+data )
+           Movies = re.findall('\'bla\', \'(.*?)\'.*?u=(.*?)".*?\stitle="(.*?)".*?src="(.*?)"', data, re.S) 
            if Movies:
-              for (Url, Title, Image) in Movies:
+              for (serwer, Url, Title, Image) in Movies:
                   printDBG( 'Host listsItems Url: '  +Url )
                   printDBG( 'Host listsItems Title: '  +Title )
                   printDBG( 'Host listsItems Image: '  +Image )
-                  valTab.append(CDisplayListItem(decodeHtml(Title),Title,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, Image, None)) 
+                  valTab.append(CDisplayListItem(serwer+'  ->  '+Title,serwer+'  ->  '+Title,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, Image, None)) 
            match = re.findall('pageNumbers.*?pageOrder', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
@@ -2283,6 +2283,16 @@ class Host:
         if url.startswith('http://theclassicporn.com'):        return 'http://theclassicporn.com'
         if url.startswith('http://www.tnaflix.com'):        return 'https://www.tnaflix.com'
         if url.startswith('https://alpha.tnaflix.com'):        return 'https://alpha.tnaflix.com'
+        if url.startswith('http://www.faphub.xxx'):        return 'http://www.faphub.xxx'
+        if url.startswith('http://www.sleazyneasy.com'):        return 'http://www.sleazyneasy.com'
+        if url.startswith('http://www.proporn.com'):        return 'http://www.proporn.com'
+        if url.startswith('http://www.tryboobs.com'):        return 'http://www.tryboobs.com'
+        if url.startswith('http://www.empflix.com'):        return 'http://www.empflix.com'
+        if url.startswith('http://www.viptube.com'):        return 'http://www.nuvid.com'
+        if url.startswith('http://pervclips.com'):        return 'http://www.wankoz.com'
+        if url.startswith('http://www.jizz.us'):        return 'http://www.x3xtube.com'
+        if url.startswith('http://www.pornstep.com'):        return 'http://www.pornstep.com'
+        if url.startswith('http://www.azzzian.com'):        return 'http://www.katestube.com'
 
         return ''
 
@@ -2521,6 +2531,49 @@ class Host:
               printDBG( 'Host videoPage:'+videoPage[0])
               return 'http:'+videoPage[0]
            return ''
+
+        if parser == 'http://www.faphub.xxx':
+           videoPage = re.findall("url: '(.*?)'", data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+   
+        if parser == 'http://www.sleazyneasy.com':
+           videoPage = re.findall("url: '(.*?)'", data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+
+        if parser == 'http://www.proporn.com':
+           videoPage = re.findall('source src="(.*?)"', data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+   
+        if parser == 'http://www.tryboobs.com':
+           videoPage = re.findall("video_url: '(.*?)'", data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+
+        if parser == 'http://www.empflix.com':
+           videoPage = re.findall("video_url: '(.*?)'", data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+   
+        if parser == 'http://www.pornstep.com':
+           videoPage = re.findall('videoFile="(.*?)"', data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
+
 
         if parser == 'http://www.tube8.com':
            match = re.findall('"quality_\d+p":"(http.*?)"', data)
