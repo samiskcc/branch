@@ -123,7 +123,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.14"
+    XXXversion = "19.0.0.15"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2162,7 +2162,7 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', '', None)) 
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', phImage, None)) 
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
            if match:
               next = decodeHtml(match[0])
@@ -2386,7 +2386,7 @@ class Host:
         query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
         try:
            data = self.cm.getURLRequestData(query_data)
-           #printDBG( 'Host getResolvedURL data: '+data )
+           printDBG( 'Host getResolvedURL data: '+data )
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
@@ -2662,9 +2662,10 @@ class Host:
            return match[0]
 
         if parser == 'http://www.cam4.pl':
-           Movies = re.findall('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)&.*?videoPlayUrl=(.*?)&', data, re.S) 
+           Movies = re.findall('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
            if Movies:
               for (swfUrl, chatUrl, videoAppUrl, videoPlayUrl) in Movies:
+                  videoAppUrl = videoAppUrl+'live'
                   Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
                   printDBG( 'Host listsItems Url: '  +Url )
                   return Url
