@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.1.0"
+    XXXversion = "19.0.1.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -241,7 +241,7 @@ class Host:
         if 'HISTORY' == name:
            printDBG( 'Host listsItems begin name='+name )
            for histItem in self.history.getHistoryList():
-               valTab.append(CDisplayListItem(histItem['pattern'], 'Szukaj ', CDisplayListItem.TYPE_CATEGORY, [histItem['pattern'],histItem['type']], 'search', '', None))          
+               valTab.append(CDisplayListItem(histItem['pattern'], 'Szukaj ', CDisplayListItem.TYPE_CATEGORY, [histItem['pattern'],histItem['type']], 'SEARCH', '', None))          
            printDBG( 'Host listsItems end' )
            return valTab           
         # ########## #
@@ -251,9 +251,6 @@ class Host:
            if Index==-1: 
               self.history.addHistoryItem( pattern, 'video')
            if self.SEARCH_proc == '': return []               
-           if self.SEARCH_proc == 'fulltube8-clips':
-              url='http://www.tube8.com/searches.html?q='+pattern
-              
            valTab = self.listsItems(-1, url, self.SEARCH_proc)
            printDBG( 'Host listsItems end' )              
            return valTab
@@ -312,11 +309,16 @@ class Host:
            #valTab.insert(0,CDisplayListItem('--- Hot ---', 'Hot',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hot/'],       'xnxx-clips', '', None)) 
            #valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],      'xnxx-clips', '', None)) 
            #valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/new/'],       'xnxx-clips', '', None)) 
-           self.SEARCH_proc='fulltube8-clips'
+           self.SEARCH_proc='fulltube8-search'
            valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
            valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+        if 'fulltube8-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://www.tube8.com/searches.html?q='+url, 'fulltube8-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if 'fulltube8-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
