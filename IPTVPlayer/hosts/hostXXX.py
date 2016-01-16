@@ -5,7 +5,7 @@
 ###################################################
 from Plugins.Extensions.IPTVPlayer.components.ihost import IHost, CDisplayListItem, RetHost, CUrlItem
 import Plugins.Extensions.IPTVPlayer.libs.pCommon as pCommon
-from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSelOneLink
+from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSearchHistoryHelper, CSelOneLink
 #import Plugins.Extensions.IPTVPlayer.libs.urlparser as urlparser
 from Plugins.Extensions.IPTVPlayer.iptvdm.iptvdh import DMHelper
 from Plugins.Extensions.IPTVPlayer.libs.urlparser import urlparser 
@@ -116,7 +116,13 @@ class IPTVHost(IHost):
             return RetHost(RetHost.NOT_IMPLEMENTED, value = [])
 
     def getSearchResults(self, pattern, searchType = None):
-        return RetHost(RetHost.NOT_IMPLEMENTED, value = [])
+        printDBG( "getSearchResults begin" )
+        printDBG( "getSearchResults pattern: " +pattern)
+        self.prevIndex.append(0)
+        self.prevList.append(self.currList)
+        self.currList = self.host.getSearchResults(pattern, searchType)
+        printDBG( "getSearchResults end" )
+        return RetHost(RetHost.OK, value = self.currList)
 
     ###################################################
     # Additional functions on class IPTVHost
@@ -127,11 +133,13 @@ class Host:
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
+    SEARCH_URL = ''
     
     def __init__(self):
         printDBG( 'Host __init__ begin' )
         self.cm = pCommon.common()
         self.up = urlparser() 
+        self.history = CSearchHistoryHelper('xxx')
         self.currList = []
         _url = 'https://gitlab.com/iptv-host-xxx/iptv-host-xxx/blob/master/IPTVPlayer/hosts/hostXXX.py'
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -169,14 +177,58 @@ class Host:
         printDBG( 'Host getListForItem end' )
         return self.currList
 
+    def getSearchResults(self, pattern, searchType = None):
+        printDBG( "Host getSearchResults begin" )
+        printDBG( "Host getSearchResults pattern: " +pattern)
+        valTab = []
+        valTab = self.listsItems(-1, pattern, 'search')
+        self.currList = valTab
+        printDBG( "Host getSearchResults end" )
+        return self.currList
+
     def listsItems(self, Index, url, name = ''):
         printDBG( 'Host listsItems begin' )
         printDBG( 'Host listsItems url: '+url )
         valTab = []
-        if name == 'main-menu':
+        # ########## #
+        if 'history' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           for histItem in self.history.getHistoryList():
+               valTab.append(CDisplayListItem(histItem['pattern'], 'Szukaj ', CDisplayListItem.TYPE_CATEGORY, [histItem['pattern'],histItem['type']], 'search', '', None))          
+           printDBG( 'Host listsItems end' )
+           return valTab           
+        # ########## #
+        if 'search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           pattern = url 
+           if Index==-1: 
+              self.history.addHistoryItem( pattern, 'video')
+           url = 'http://k.zalukaj.tv/szukaj'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': True, 'return_data': True },{'searchinput': pattern})
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="tivief4".*?src="(.*?)".*?<a href="(.*?)".*?title="(.*?)".*?div style.*?">(.*?)<.*?class="few_more">(.*?)<', data, re.S)
+           if phMovies:
+              for (phImage, phUrl, phTitle, phDescr, phMore) in phMovies:
+                  printDBG( 'Host listsItems phImage: '  +phImage )
+                  printDBG( 'Host listsItems phUrl: '    +phUrl )
+                  printDBG( 'Host listsItems phTitle: '  +phTitle )
+                  printDBG( 'Host listsItems phDescr: '  +phDescr )
+                  printDBG( 'Host listsItems phMore: '   +phMore )
+                  valTab.append(CDisplayListItem(phTitle, phMore+' | '+decodeHtml(phDescr), CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+           if name == 'main-menu':
            printDBG( 'Host listsItems begin name='+name )
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
               valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY, [''],                                     'UPDATE',  '', None)) 
+           valTab.append(CDisplayListItem('Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,   ['http://szukaj.zalukaj.tv/szukaj'],   'seriale', '', None)) 
+           valTab.append(CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, ['http://zalukaj.tv/seriale'],   'history', '', None)) 
+
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/tags'],          '4tube',   'http://ui.4tube.com/fddc287997/bundles/kodifycore/img/layout/4tube-logo.png', None)) 
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            #valTab.append(CDisplayListItem('TUBE8 mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
