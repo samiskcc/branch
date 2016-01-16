@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.16"
+    XXXversion = "19.0.0.18"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -873,7 +873,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('<a class="thumb-link" href="(.*?)" title="(.*?)".*?<i class="icon icon-video"></i>(.*?)<.*?<img data-original="(.*?)"',data,re.S) 
            if phMovies:
               for (phUrl, phTitle, phVid, phImage ) in phMovies:           
@@ -881,7 +881,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phVid: '+phVid )
-                  valTab.append(CDisplayListItem(phTitle,'[Video: '+phVid+'] '+phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl], '4tube-clips', phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,'[Video: '+phVid+'] '+phTitle,CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com'+phUrl], '4tube-clips', phImage, None)) 
            match = re.findall('<ul class="pagination">.*?</a></li><li><a href="(.*?)"', data, re.S)
            if match:
               valTab.append(CDisplayListItem('Next', match[0], CDisplayListItem.TYPE_CATEGORY, [match[0]], name, '', None))                
@@ -1329,7 +1329,7 @@ class Host:
            phVideos = re.findall('\{"title":"(.*?)","id":"(.*?)",.*?,"ps_name"', data, re.S)
            if phVideos:
               for (phTitle, phVideoId) in phVideos:
-                 phUrl = 'http://beeg.com/api/v5/video/%s' % phVideoId
+                 phUrl = 'https://api.beeg.com/api/v5/video/%s' % phVideoId
                  phImage = 'http://img.beeg.com/236x177/%s.jpg' % phVideoId
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -2365,7 +2365,7 @@ class Host:
            #printDBG( 'second beeg-clips data: '+data )
            bestUrl = re.findall('0p":"(.*?)"', data, re.S)
            if bestUrl:
-              phUrl = 'http:%s' % bestUrl[-1]
+              phUrl = 'https:%s' % bestUrl[-1]
               phUrl = phUrl.replace('{DATA_MARKERS}','data=pc.DE')
               key = re.search(r'/key=(.*?)%2Cend=', phUrl, 0) 
               key = key.group(1)
