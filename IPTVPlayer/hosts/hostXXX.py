@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.1.1"
+    XXXversion = "19.0.1.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -195,6 +195,7 @@ class Host:
            printDBG( 'Host listsItems begin name='+name )
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
               valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY,           [''], 'UPDATE',  '', None)) 
+           #self.SEARCH_proc=name
            #valTab.append(CDisplayListItem('Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,             [''], '',        '', None)) 
            #valTab.append(CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/tags'],          '4tube',   'http://ui.4tube.com/fddc287997/bundles/kodifycore/img/layout/4tube-logo.png', None)) 
@@ -251,6 +252,10 @@ class Host:
            if Index==-1: 
               self.history.addHistoryItem( pattern, 'video')
            if self.SEARCH_proc == '': return []               
+           if self.SEARCH_proc == 'main-menu':
+              valTab=[]
+              '''tu obsluga szukania w wielu hostach'''
+              return valTab
            valTab = self.listsItems(-1, url, self.SEARCH_proc)
            printDBG( 'Host listsItems end' )              
            return valTab
@@ -365,6 +370,9 @@ class Host:
            valTab.insert(0,CDisplayListItem('--- Hot ---', 'Hot',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hot/'],       'xnxx-clips', '', None)) 
            valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],      'xnxx-clips', '', None)) 
            valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/new/'],       'xnxx-clips', '', None)) 
+           self.SEARCH_proc='xnxx-search'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'xnxx-tagsalfa' == name:
@@ -384,6 +392,11 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle+': '+phCount,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'xnxx-clips', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+        if 'xnxx-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://www.xnxx.com/?k='+url, 'xnxx-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if 'xnxx-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
