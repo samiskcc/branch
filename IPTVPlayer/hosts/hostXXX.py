@@ -123,7 +123,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.16"
+    XXXversion = "19.0.0.17"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1277,7 +1277,7 @@ class Host:
            phVideos = re.findall('\{"title":"(.*?)","id":"(.*?)",.*?,"ps_name"', data, re.S)
            if phVideos:
               for (phTitle, phVideoId) in phVideos:
-                 phUrl = 'http://beeg.com/api/v5/video/%s' % phVideoId
+                 phUrl = 'https://api.beeg.com/api/v5/video/%s' % phVideoId
                  phImage = 'http://img.beeg.com/236x177/%s.jpg' % phVideoId
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -2313,7 +2313,7 @@ class Host:
            #printDBG( 'second beeg-clips data: '+data )
            bestUrl = re.findall('0p":"(.*?)"', data, re.S)
            if bestUrl:
-              phUrl = 'http:%s' % bestUrl[-1]
+              phUrl = 'https:%s' % bestUrl[-1]
               phUrl = phUrl.replace('{DATA_MARKERS}','data=pc.DE')
               key = re.search(r'/key=(.*?)%2Cend=', phUrl, 0) 
               key = key.group(1)
