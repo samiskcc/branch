@@ -129,11 +129,11 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.0.18"
+    XXXversion = "19.0.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
-    SEARCH_URL = ''
+    SEARCH_proc = ''
     
     def __init__(self):
         printDBG( 'Host __init__ begin' )
@@ -181,7 +181,7 @@ class Host:
         printDBG( "Host getSearchResults begin" )
         printDBG( "Host getSearchResults pattern: " +pattern)
         valTab = []
-        valTab = self.listsItems(-1, pattern, 'search')
+        valTab = self.listsItems(-1, pattern, 'SEARCH')
         self.currList = valTab
         printDBG( "Host getSearchResults end" )
         return self.currList
@@ -190,45 +190,13 @@ class Host:
         printDBG( 'Host listsItems begin' )
         printDBG( 'Host listsItems url: '+url )
         valTab = []
-        # ########## #
-        if 'history' == name:
-           printDBG( 'Host listsItems begin name='+name )
-           for histItem in self.history.getHistoryList():
-               valTab.append(CDisplayListItem(histItem['pattern'], 'Szukaj ', CDisplayListItem.TYPE_CATEGORY, [histItem['pattern'],histItem['type']], 'search', '', None))          
-           printDBG( 'Host listsItems end' )
-           return valTab           
-        # ########## #
-        if 'search' == name:
-           printDBG( 'Host listsItems begin name='+name )
-           pattern = url 
-           if Index==-1: 
-              self.history.addHistoryItem( pattern, 'video')
-           url = 'http://k.zalukaj.tv/szukaj'
-           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': True, 'return_data': True },{'searchinput': pattern})
-           except:
-              printDBG( 'Host listsItems query error' )
-              printDBG( 'Host listsItems query error url:'+url )
-              return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="tivief4".*?src="(.*?)".*?<a href="(.*?)".*?title="(.*?)".*?div style.*?">(.*?)<.*?class="few_more">(.*?)<', data, re.S)
-           if phMovies:
-              for (phImage, phUrl, phTitle, phDescr, phMore) in phMovies:
-                  printDBG( 'Host listsItems phImage: '  +phImage )
-                  printDBG( 'Host listsItems phUrl: '    +phUrl )
-                  printDBG( 'Host listsItems phTitle: '  +phTitle )
-                  printDBG( 'Host listsItems phDescr: '  +phDescr )
-                  printDBG( 'Host listsItems phMore: '   +phMore )
-                  valTab.append(CDisplayListItem(phTitle, phMore+' | '+decodeHtml(phDescr), CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
-           printDBG( 'Host listsItems end' )
-           return valTab
 
-           if name == 'main-menu':
+        if name == 'main-menu':
            printDBG( 'Host listsItems begin name='+name )
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
-              valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY, [''],                                     'UPDATE',  '', None)) 
-           valTab.append(CDisplayListItem('Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,   ['http://szukaj.zalukaj.tv/szukaj'],   'seriale', '', None)) 
-           valTab.append(CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, ['http://zalukaj.tv/seriale'],   'history', '', None)) 
-
+              valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY,           [''], 'UPDATE',  '', None)) 
+           #valTab.append(CDisplayListItem('Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,             [''], '',        '', None)) 
+           #valTab.append(CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
            valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/tags'],          '4tube',   'http://ui.4tube.com/fddc287997/bundles/kodifycore/img/layout/4tube-logo.png', None)) 
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            #valTab.append(CDisplayListItem('TUBE8 mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
@@ -268,6 +236,52 @@ class Host:
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+
+        # ########## #
+        if 'HISTORY' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           for histItem in self.history.getHistoryList():
+               valTab.append(CDisplayListItem(histItem['pattern'], 'Szukaj ', CDisplayListItem.TYPE_CATEGORY, [histItem['pattern'],histItem['type']], 'search', '', None))          
+           printDBG( 'Host listsItems end' )
+           return valTab           
+        # ########## #
+        if 'SEARCH' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           pattern = url 
+           if Index==-1: 
+              self.history.addHistoryItem( pattern, 'video')
+           if self.SEARCH_proc == '': return []               
+           if self.SEARCH_proc == 'fulltube8-clips':
+              url='http://www.tube8.com/searches.html?q='+pattern
+              
+           valTab = self.listsItems(-1, url, self.SEARCH_proc)
+           printDBG( 'Host listsItems end' )              
+           return valTab
+        '''   
+        if 'SEARCH' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           pattern = url 
+           if Index==-1: 
+              self.history.addHistoryItem( pattern, 'video')
+           url = 'http://k.zalukaj.tv/szukaj'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': True, 'return_data': True },{'searchinput': pattern})
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="tivief4".*?src="(.*?)".*?<a href="(.*?)".*?title="(.*?)".*?div style.*?">(.*?)<.*?class="few_more">(.*?)<', data, re.S)
+           if phMovies:
+              for (phImage, phUrl, phTitle, phDescr, phMore) in phMovies:
+                  printDBG( 'Host listsItems phImage: '  +phImage )
+                  printDBG( 'Host listsItems phUrl: '    +phUrl )
+                  printDBG( 'Host listsItems phTitle: '  +phTitle )
+                  printDBG( 'Host listsItems phDescr: '  +phDescr )
+                  printDBG( 'Host listsItems phMore: '   +phMore )
+                  valTab.append(CDisplayListItem(phTitle, phMore+' | '+decodeHtml(phDescr), CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        '''           
         if 'fulltube8' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://www.tube8.com' 
@@ -298,6 +312,9 @@ class Host:
            #valTab.insert(0,CDisplayListItem('--- Hot ---', 'Hot',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hot/'],       'xnxx-clips', '', None)) 
            #valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],      'xnxx-clips', '', None)) 
            #valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/new/'],       'xnxx-clips', '', None)) 
+           self.SEARCH_proc='fulltube8-clips'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'fulltube8-clips' == name:
