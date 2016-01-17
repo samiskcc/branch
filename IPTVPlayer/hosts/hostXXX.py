@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.0"
+    XXXversion = "19.0.2.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -262,6 +262,9 @@ class Host:
               valTab = valTab + valtemp 
               valtemp = self.listsItems(-1, url, 'xhamster-search')
               for item in valtemp: item.name='xhamster - '+item.name              
+              valTab = valTab + valtemp 
+              valtemp = self.listsItems(-1, url, 'xvideos-search')
+              for item in valtemp: item.name='xvideos - '+item.name              
               valTab = valTab + valtemp 
               return valTab
            valTab = self.listsItems(-1, url, self.SEARCH_proc)
@@ -507,9 +510,9 @@ class Host:
            #valTab.insert(0,CDisplayListItem('--- Pornstars ---',   'Pornstars',   CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/pornstars'], 'xvideos-pornstars', '', None)) 
            valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],     'xvideos-clips', '', None)) 
            valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL],              'xvideos-clips', '', None)) 
-
-           #valTab.append(CDisplayListItem('Best Videos', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/channels'],  'xvideos-clips', '', None)) 
-           #valTab.append(CDisplayListItem('Best Videos', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'], 'xvideos-clips', '', None)) 
+           self.SEARCH_proc='xvideos-search'
+           valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('---Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'xvideos-pornstars' == name:
@@ -526,7 +529,14 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '  +phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'xvideos-clips', phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl.replace('pornstars-click/3','profiles')+'#_tabVideos'],'xvideos-clips', phImage, None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'xvideos-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://www.xvideos.com/?k='+url, 'xvideos-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if 'xvideos-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
