@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.1.2"
+    XXXversion = "19.0.1.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -721,8 +721,16 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/"], 'xhamster-clips', '',None))
+           self.SEARCH_proc='xhamster-search'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+        if 'xhamster-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://www.xhamster.com/search.php?from=&new=&q=%s&qcat=video' % url, 'xhamster-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if 'xhamster-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -736,7 +744,7 @@ class Host:
            if re.search('vDate', data, re.S):
               parse = re.search('<div\sclass="vDate(.*)</html>', data, re.S)
            else:
-              parse = re.search('<html>(.*)</html>', data, re.S)
+              parse = re.search('searchRes2(.*)adBottom', data, re.S)
            if not parse: return valTab
            phMovies = re.findall('<a\shref="(.*?/movies/.*?)".*?<img\ssrc=\'(.*?)\'.*?alt="(.*?)".*?start2.*?<b>(.*?)</b>', parse.group(1), re.S)
            if phMovies:
@@ -750,7 +758,7 @@ class Host:
            if match:
               match = re.findall("href='(.*?)'", match[0], re.S)
            if match:
-                  phUrl = match[-1]
+                  phUrl = match[-1].replace('&amp;','&')
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
                   valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', None))
            printDBG( 'Host listsItems end' )
