@@ -129,7 +129,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.1"
+    XXXversion = "19.0.2.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -738,6 +738,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
+           valTab.insert(0,CDisplayListItem("--- Kamerki ---",       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/cams"], 'xhamster-cams', '',None))
            valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/"], 'xhamster-clips', '',None))
            self.SEARCH_proc='xhamster-search'
            valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
@@ -779,6 +780,28 @@ class Host:
                   phUrl = match[-1].replace('&amp;','&')
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
                   valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'xhamster-cams' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://xhamster.com/cams' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('camSearch(.*)searchMode', data, re.S)
+           if not parse: return valTab
+           phMovies = re.findall("<a\shref='(.*?)'.*?<img\ssrc='(.*?)'.*?class='bold.*?>(.*?)<", parse.group(1), re.S)
+           if phMovies:
+              for (phUrl, phImage, phTitle) in phMovies:
+                  printDBG( 'Host listsItems phUrl: '  +phUrl )
+                  printDBG( 'Host listsItems phImage: '+phImage )
+                  printDBG( 'Host listsItems phTitle: '+phTitle )
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'eporner' == name:
@@ -2359,6 +2382,7 @@ class Host:
         if self.MAIN_URL == 'http://www.xvideos.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://hentaigasm.com':         return self.MAIN_URL
         if self.MAIN_URL == 'http://xhamster.com':           return self.MAIN_URL
+        if self.MAIN_URL == 'http://xhamster.com/cams':      return self.MAIN_URL
         if self.MAIN_URL == 'http://www.eporner.com':        return self.MAIN_URL
         if url.startswith('http://www.pornhub.com/embed/'):  return 'http://www.pornhub.com/embed/'
         if url.startswith('http://www.pornhub.com'):         return 'http://www.pornhub.com'
@@ -2755,6 +2779,22 @@ class Host:
            if xhFile: return xhFile[0].replace(r"\/",r"/")
            else: return ''
         
+        if parser == 'http://xhamster.com/cams':
+           parse = re.search('userId"\]\s=\s(.*?);.*?modelId"\]\s=\s"(.*?)".*?streamUrl":"(.*?)".*?path":"(.*?)".*?geo":"(.*?)"', data, re.S)
+           if parse: 
+              b = parse.group(1)
+              d =  parse.group(2)
+              a = parse.group(3).replace(r"\/",r"/") 
+              e =  parse.group(4)
+              c = parse.group(5)
+              printDBG( 'Host gr1: '+ a)
+              printDBG( 'Host gr2: '+ b)
+              printDBG( 'Host gr3: '+ c)
+              printDBG( 'Host gr4: '+ d)
+              printDBG( 'Host gr5: '+ e)
+              videoUrl = '%s?userid=%s&pwd=&geo=%s playpath=%s swfUrl=%s pageUrl=%s' % (a, b, c, d, e, url)
+           else: return ''
+
         if parser == 'http://www.eporner.com':
            videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
            if not videoPage: return ''
