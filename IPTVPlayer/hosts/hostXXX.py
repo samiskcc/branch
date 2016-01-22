@@ -6,9 +6,9 @@
 from Plugins.Extensions.IPTVPlayer.components.ihost import IHost, CDisplayListItem, RetHost, CUrlItem
 import Plugins.Extensions.IPTVPlayer.libs.pCommon as pCommon
 from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSearchHistoryHelper, CSelOneLink
-#import Plugins.Extensions.IPTVPlayer.libs.urlparser as urlparser
 from Plugins.Extensions.IPTVPlayer.iptvdm.iptvdh import DMHelper
 from Plugins.Extensions.IPTVPlayer.libs.urlparser import urlparser 
+from Plugins.Extensions.IPTVPlayer.tools.iptvfilehost import IPTVFileHost
 ###################################################
 # FOREIGN import
 ###################################################
@@ -18,7 +18,7 @@ try:
 except:
     import json as simplejson   
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
-from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN
+from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN, ConfigDirectory
 from time import sleep
 ###################################################
 
@@ -26,9 +26,14 @@ from time import sleep
 # Config options for HOST
 ###################################################
 config.plugins.iptvplayer.xxxwymagajpin = ConfigYesNo(default = True)
+config.plugins.iptvplayer.xxxlist = ConfigDirectory(default = "/hdd/")
+config.plugins.iptvplayer.xxxsortuj = ConfigYesNo(default = True)
+
 def GetConfigList():
     optionList = []
     optionList.append( getConfigListEntry( "Wymagaj pin:", config.plugins.iptvplayer.xxxwymagajpin ) )
+    optionList.append( getConfigListEntry( "Lokalizacja pliku xxxlist.txt :", config.plugins.iptvplayer.xxxlist) )
+    optionList.append( getConfigListEntry( "Sortuj xxxlist :", config.plugins.iptvplayer.xxxsortuj) )
     return optionList
 ###################################################
 
@@ -129,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.2"
+    XXXversion = "19.0.2.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -235,6 +240,7 @@ class Host:
            valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
+           valTab.append(CDisplayListItem('+++ XXXLIST +++',     'xxxlist.txt', CDisplayListItem.TYPE_CATEGORY, [''],'XXXLIST', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -2321,12 +2327,44 @@ class Host:
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phImage: '+dummy )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
-                 videoUrls = str(self.getLinksForVideo(phUrl))
-                 printDBG( 'Host listsItems videoUrls: '+videoUrls )
-                 parse = re.search('"url": "(.*?)"', videoUrls, re.S) 
-                 if parse:
-                    phUrl = parse.group(1)
+                 videoUrls = self.getLinksForVideo(phUrl)
+                 if videoUrls:
+                    for item in videoUrls:
+                       phUrl = item['url']
+                       phTitle = item['name']
                  valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 0)], 0, '', None)) 
+           return valTab
+
+        if 'XXXLIST' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           URLLIST_FILE    = 'xxxlist.txt'
+           self.filespath = config.plugins.iptvplayer.xxxlist.value
+           self.sortList = config.plugins.iptvplayer.xxxsortuj.value
+           self.currFileHost = IPTVFileHost() 
+           self.currFileHost.addFile(self.filespath + URLLIST_FILE, encoding='utf-8')
+           tmpList = self.currFileHost.getGroups(self.sortList)
+           for item in tmpList:
+               if '' == item: title = (_("Other"))
+               else:          title = item
+               valTab.append(CDisplayListItem(title,title,CDisplayListItem.TYPE_CATEGORY, [title],'XXXLIST-clips', '', None)) 
+           return valTab
+        if 'XXXLIST-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           tmpList = self.currFileHost.getAllItems(self.sortList)
+           for item in tmpList:
+               if item['group'] == url:
+                   Title = item['title_in_group']
+                   Url = item['url']
+                   printDBG( 'Host listsItems Title:'+Title )
+                   printDBG( 'Host listsItems Url:'+Url )
+                   valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
+               elif url == (_("Other")) and item['group'] == '':
+                   Title = item['full_title']
+                   Url = item['url']
+                   printDBG( 'Host listsItems Title:'+Title )
+                   printDBG( 'Host listsItems Url:'+Url )
+                   valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
+           return valTab
 
         return valTab
 
@@ -2343,8 +2381,6 @@ class Host:
             retTab = self.up.getVideoLinkExt( uri )
             videoUrls.extend(retTab)
             printDBG("Video url[%s]" % videoUrls)
-            videoUrls = simplejson.dumps(videoUrls)
-            printDBG("Video url2[%s]" % videoUrls)
             return videoUrls
 
     def getParser(self, url):
@@ -2411,22 +2447,25 @@ class Host:
         if url.startswith('http://www.fetishshrine.com'):    return 'http://www.fetishshrine.com'
         if url.startswith('http://www.hdzog.com'):           return 'http://www.hdzog.com'
         if url.startswith('http://www.sunporno.com'):        return 'http://www.sunporno.com'
-        if url.startswith('http://www.befuck.com'):        return 'http://www.befuck.com'
-        if url.startswith('http://www.drtuber.com'):        return 'http://www.drtuber.com'
-        if url.startswith('http://www.pornoxo.com'):        return 'http://www.pornoxo.com'
-        if url.startswith('http://theclassicporn.com'):        return 'http://theclassicporn.com'
-        if url.startswith('http://www.tnaflix.com'):        return 'https://www.tnaflix.com'
-        if url.startswith('https://alpha.tnaflix.com'):        return 'https://alpha.tnaflix.com'
-        if url.startswith('http://www.faphub.xxx'):        return 'http://www.faphub.xxx'
-        if url.startswith('http://www.sleazyneasy.com'):        return 'http://www.sleazyneasy.com'
-        if url.startswith('http://www.proporn.com'):        return 'http://www.proporn.com'
+        if url.startswith('http://www.befuck.com'):          return 'http://www.befuck.com'
+        if url.startswith('http://www.drtuber.com'):         return 'http://www.drtuber.com'
+        if url.startswith('http://www.pornoxo.com'):         return 'http://www.pornoxo.com'
+        if url.startswith('http://theclassicporn.com'):      return 'http://theclassicporn.com'
+        if url.startswith('http://www.tnaflix.com'):         return 'https://www.tnaflix.com'
+        if url.startswith('https://alpha.tnaflix.com'):      return 'https://alpha.tnaflix.com'
+        if url.startswith('http://www.faphub.xxx'):          return 'http://www.faphub.xxx'
+        if url.startswith('http://www.sleazyneasy.com'):     return 'http://www.sleazyneasy.com'
+        if url.startswith('http://www.proporn.com'):         return 'http://www.proporn.com'
         if url.startswith('http://www.tryboobs.com'):        return 'http://www.tryboobs.com'
-        if url.startswith('http://www.empflix.com'):        return 'http://www.empflix.com'
-        if url.startswith('http://www.viptube.com'):        return 'http://www.nuvid.com'
-        if url.startswith('http://pervclips.com'):        return 'http://www.wankoz.com'
-        if url.startswith('http://www.jizz.us'):        return 'http://www.x3xtube.com'
+        if url.startswith('http://www.empflix.com'):         return 'http://www.empflix.com'
+        if url.startswith('http://www.viptube.com'):         return 'http://www.nuvid.com'
+        if url.startswith('http://pervclips.com'):           return 'http://www.wankoz.com'
+        if url.startswith('http://www.jizz.us'):             return 'http://www.x3xtube.com'
         if url.startswith('http://www.pornstep.com'):        return 'http://www.pornstep.com'
-        if url.startswith('http://www.azzzian.com'):        return 'http://www.katestube.com'
+        if url.startswith('http://www.azzzian.com'):         return 'http://www.katestube.com'
+        if url.startswith('https://openload.co'):            return 'xxxlist.txt'
+        if url.startswith('http://openload.co'):             return 'xxxlist.txt'
+        if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
 
         return ''
 
@@ -2436,7 +2475,7 @@ class Host:
         videoUrl = ''
         parser = self.getParser(url)
         printDBG( 'Host getResolvedURL parser: '+parser )
-        if parser == '': return ''
+        if parser == '': return url
 
         if parser == 'http://beeg.com':
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -2516,6 +2555,16 @@ class Host:
               printDBG( 'Host listsItems videoPage.group(2): '+videoPage.group(2) )
               printDBG( 'Host listsItems videoPage.group(1): '+videoPage.group(1) )
               return (videoPage.group(2)+'/'+videoPage.group(1)) 
+           return ''
+
+        if parser == 'xxxlist.txt':
+           videoUrls = self.getLinksForVideo(url)
+           if videoUrls:
+              for item in videoUrls:
+                 Url = item['url']
+                 Name = item['name']
+                 printDBG( 'Host url:  '+Url )
+                 return Url
            return ''
 
         if parser == 'http://www.tube8.com/embed/':
