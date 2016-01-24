@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.3"
+    XXXversion = "19.0.2.4"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2466,6 +2466,19 @@ class Host:
         if url.startswith('https://openload.co'):            return 'xxxlist.txt'
         if url.startswith('http://openload.co'):             return 'xxxlist.txt'
         if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
+        if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
+        if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
+        if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
+        if url.startswith('http://www.tubeon.com'):          return 'http://www.nuvid.com'
+        if url.startswith('http://www.finevids.xxx'):        return 'http://www.katestube.com'
+        if url.startswith('http://www.pornwhite.com'):       return 'http://www.pornstep.com'
+        if url.startswith('http://www.hotshame.com'):        return 'http://www.katestube.com'
+        if url.startswith('http://www.xfig.net'):            return 'http://www.xfig.net'
+        if url.startswith('http://www.pornoid.com'):         return 'http://www.katestube.com'
+        if url.startswith('http://www.thenewporn.com'):      return 'http://www.katestube.com'
+        if url.startswith('http://tubeq.xxx'):               return 'http://www.faphub.xxx'
+        if url.startswith('http://www.wetplace.com'):        return 'http://www.katestube.com'
+        if url.startswith('http://www.pinkrod.com'):         return 'http://www.katestube.com'
 
         return ''
 
@@ -2975,6 +2988,23 @@ class Host:
               url = videoPage[-1] 
               url = url.replace('\/','/') 
               return url
+           return ''
+
+        if parser == 'http://pornicom.com':
+           videoPage = re.search('download-link.*?href="(.*?)"', data, re.S) 
+           if videoPage:
+              return videoPage.group(1)
+           return ''
+
+        if parser == 'http://www.xfig.net':
+           videoPage = re.search('var videoFile="(.*?)".*?videoFileHLS = "(.*?)";', data, re.S) 
+           if videoPage:
+              videoFile=videoPage.group(1)[63:]
+              prefix = '/contents/videos'
+              videoUrl=videoPage.group(2).replace('" + prefix + videoId + "/',prefix+videoFile)
+              printDBG( 'Host gr1 '+videoPage.group(1) )
+              printDBG( 'Host gr2 '+videoPage.group(2) )
+              return videoUrl
            return ''
 
         printDBG( 'Host getResolvedURL end' )
