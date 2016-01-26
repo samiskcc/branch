@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.4"
+    XXXversion = "19.0.2.5"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -790,7 +790,6 @@ class Host:
            return valTab
         if 'xhamster-cams' == name:
            printDBG( 'Host listsItems begin name='+name )
-           self.MAIN_URL = 'http://xhamster.com/cams' 
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               data = self.cm.getURLRequestData(query_data)
@@ -2417,8 +2416,8 @@ class Host:
         if self.MAIN_URL == 'http://www.xnxx.com':           return self.MAIN_URL
         if self.MAIN_URL == 'http://www.xvideos.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://hentaigasm.com':         return self.MAIN_URL
+        if url.startswith('http://xhamster.com/cams'):       return 'http://xhamster.com/cams'
         if self.MAIN_URL == 'http://xhamster.com':           return self.MAIN_URL
-        if self.MAIN_URL == 'http://xhamster.com/cams':      return self.MAIN_URL
         if self.MAIN_URL == 'http://www.eporner.com':        return self.MAIN_URL
         if url.startswith('http://www.pornhub.com/embed/'):  return 'http://www.pornhub.com/embed/'
         if url.startswith('http://www.pornhub.com'):         return 'http://www.pornhub.com'
@@ -2999,11 +2998,18 @@ class Host:
         if parser == 'http://www.xfig.net':
            videoPage = re.search('var videoFile="(.*?)".*?videoFileHLS = "(.*?)";', data, re.S) 
            if videoPage:
-              videoFile=videoPage.group(1)[63:]
-              prefix = '/contents/videos'
-              videoUrl=videoPage.group(2).replace('" + prefix + videoId + "/',prefix+videoFile)
+              videoFile=videoPage.group(1) #[63:]
+              prefixy = re.search('/get_file/', videoFile)
+              if prefixy:
+                 prefix = '/contents/videos'
+              else:
+                 prefix = '/mp4'
+              #var videoId = videoFile.match(/(\/flv\/\d+\.mp4)|(\/mp4\/\d+\/\d+\/\d+\.mp4)|(\/\d+\/\d+\/\d+\.mp4)/)[0]; 
+              videoId = re.search('(/\d+/\d+/\d+\.mp4)', videoFile)
+              videoUrl=videoPage.group(2).replace('" + prefix + videoId + "',prefix+str(videoId.group(1)))
               printDBG( 'Host gr1 '+videoPage.group(1) )
               printDBG( 'Host gr2 '+videoPage.group(2) )
+              printDBG( 'Host videoId '+str(videoId.group(1)) )
               return videoUrl
            return ''
 
