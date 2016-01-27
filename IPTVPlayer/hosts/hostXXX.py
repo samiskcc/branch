@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.6"
+    XXXversion = "19.0.2.7"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1790,17 +1790,25 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           #valTab.append(CDisplayListItem('REFRESH ', 'REFRESH ', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL], name, 'http://www.clker.com/cliparts/3/e/7/7/11954451921942476621jean_victor_balin_refresh.svg.hi.png', self.MAIN_URL))                
-           Movies = re.findall('name":"(.*?)".*?"age":(.*?),.*?streamUrl":"(.*?)".*?av_640":"(.*?)".*?"ile":(.*?),', data, re.S)
-           if Movies:
-              for (Title, Age, Url, Image, Views) in Movies:
-                  Url = Url.replace('\/','/') 
-                  Image = Image.replace('\/','/') 
-                  printDBG( 'Host listsItems page Title: '+Title )
+           parse = re.search('"rooms":(.*?),"status":"OK"', data, re.S)
+           result = simplejson.loads(parse.group(1))
+           if result:
+              for item in result:
+                  Name = item["name"]
+                  Age = str(item["age"])
+                  Url = item["streamUrl"].replace('\/','/') 
+                  dateStart = item["dateStart"].replace('T',' ')[:19]   
+                  Image = item["av_126"].replace('\/','/') 
+                  Title = item["title"]
+                  Viewers = str(item["viewers"])
+                  printDBG( 'Host listsItems page Name: '+Name )
                   printDBG( 'Host listsItems page Age: '+Age )
                   printDBG( 'Host listsItems page Url: '+Url )
+                  printDBG( 'Host listsItems page dateStart: '+dateStart )
                   printDBG( 'Host listsItems page Image: '+Image )
-                  valTab.append(CDisplayListItem(Title,'[Age : '+Age+']'+'         Views:  '+Views, CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
+                  printDBG( 'Host listsItems page Title: '+Title )
+                  printDBG( 'Host listsItems page viewers: '+Viewers )
+                  valTab.append(CDisplayListItem(Name,'[Age : '+Age+']'+'   [Views:  '+Viewers+']   [Date Start: '+dateStart+']', CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
 
