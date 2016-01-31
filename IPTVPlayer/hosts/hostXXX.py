@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.7"
+    XXXversion = "19.0.2.9"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1791,24 +1791,29 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('"rooms":(.*?),"status":"OK"', data, re.S)
+           if not parse: return valTab
+           #printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
            result = simplejson.loads(parse.group(1))
            if result:
               for item in result:
-                  Name = item["name"]
-                  Age = str(item["age"])
-                  Url = item["streamUrl"].replace('\/','/') 
-                  dateStart = item["dateStart"].replace('T',' ')[:19]   
-                  Image = item["av_126"].replace('\/','/') 
-                  Title = item["title"]
-                  Viewers = str(item["viewers"])
-                  printDBG( 'Host listsItems page Name: '+Name )
-                  printDBG( 'Host listsItems page Age: '+Age )
-                  printDBG( 'Host listsItems page Url: '+Url )
-                  printDBG( 'Host listsItems page dateStart: '+dateStart )
-                  printDBG( 'Host listsItems page Image: '+Image )
-                  printDBG( 'Host listsItems page Title: '+Title )
-                  printDBG( 'Host listsItems page viewers: '+Viewers )
-                  valTab.append(CDisplayListItem(Name,'[Age : '+Age+']'+'   [Views:  '+Viewers+']   [Date Start: '+dateStart+']', CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
+                 try:
+                    Name = item["name"]
+                    Age = str(item["age"])
+                    Playpath = item["liveCastId"]
+                    Url = item["streamUrl"].replace('\/','/') 
+                    dateStart = item["dateStart"].replace('T',' ')[:19]   
+                    Image = item["av_126"].replace('\/','/') 
+                    Title = str(item["title"])
+                    Viewers = str(item["viewers"])
+                    printDBG( 'Host listsItems page Name: '+Name )
+                    printDBG( 'Host listsItems page Age: '+Age )
+                    printDBG( 'Host listsItems page Url: '+Url )
+                    printDBG( 'Host listsItems page dateStart: '+dateStart )
+                    printDBG( 'Host listsItems page Image: '+Image )
+                    printDBG( 'Host listsItems page Title: '+Title )
+                    printDBG( 'Host listsItems page viewers: '+Viewers )
+                    valTab.append(CDisplayListItem(Name,'[Age : '+Age+']'+'   [Views:  '+Viewers+']      ('+Title+')', CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
+                 except: pass
            printDBG( 'Host listsItems end' )
            return valTab
 
