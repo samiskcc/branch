@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.2.9"
+    XXXversion = "19.0.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -238,6 +238,7 @@ class Host:
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
            valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
+           valTab.append(CDisplayListItem('RAMPANT',     'https://www.rampant.tv/channel/', CDisplayListItem.TYPE_CATEGORY, ['https://www.rampant.tv/channel/'],'RAMPANT', 'https://www.rampant.tv/new-images/rampant_logo.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            valTab.append(CDisplayListItem('+++ XXXLIST +++',     'xxxlist.txt', CDisplayListItem.TYPE_CATEGORY, [''],'XXXLIST', '', None)) 
@@ -2380,6 +2381,43 @@ class Host:
                    printDBG( 'Host listsItems Url:'+Url )
                    valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
            return valTab
+
+        if 'RAMPANT' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'rampant.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': 'https://www.rampant.tv', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           try: data = self.cm.getURLRequestData({ 'url': 'https://www.rampant.tv/channels', 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return ''
+           printDBG( 'Host getResolvedURL data: '+data )
+           phCats = re.findall('channel title="(.*?)".*?servers="(.*?)".*?application="(.*?)".*?streamName="(.*?)".*?logo="(.*?)"', data, re.S) 
+           if phCats:
+              for (phTitle, phUrl, appli, Stremname, phImage) in phCats: 
+                  #Url= re.search("(.*?)', '(.*?)', '(.*?)', '(.*?)'", phUrl) 
+                  Url = phUrl
+                  serwery = re.search("(.*?),", phUrl, re.S) 
+                  if serwery:
+                     Url = serwery.group(1)
+                  phImage = phImage.replace('{SIZE}', '80x65')
+                  printDBG( ' ' )
+                  printDBG( 'Host listsItems phTitle: '  +phTitle )
+                  printDBG( 'Host listsItems phUrl: ' +phUrl )
+                  printDBG( 'Host listsItems Url: ' +Url )
+                  printDBG( 'Host listsItems appli: ' +appli )
+                  printDBG( 'Host listsItems Stremname: '  +Stremname )
+                  printDBG( 'Host listsItems phImage: '  +phImage )
+                  if appli <> 'leah' and  appli <> 'null':
+                     Url = 'rtmp://%s/%s/ playpath=%s swfUrl=https://static.rampant.tv/swf/player.swf pageUrl=https://www.rampant.tv/channels' % (Url, appli, Stremname)
+                     valTab.append(CDisplayListItem(phTitle,Stremname+'   '+appli+'   '+phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, phImage, None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab 
 
         return valTab
 
