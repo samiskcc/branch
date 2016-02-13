@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.1"
+    XXXversion = "19.0.3.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1419,7 +1419,7 @@ class Host:
            phVideos = re.findall('\{"title":"(.*?)","id":"(.*?)",.*?,"ps_name"', data, re.S)
            if phVideos:
               for (phTitle, phVideoId) in phVideos:
-                 phUrl = 'https://api.beeg.com/api/v5/video/%s' % phVideoId
+                 phUrl = 'http://api.beeg.com/api/v5/video/%s' % phVideoId
                  phImage = 'http://img.beeg.com/236x177/%s.jpg' % phVideoId
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -2544,7 +2544,9 @@ class Host:
         if parser == '': return url
 
         if parser == 'http://beeg.com':
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           host = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
+           header = {'User-Agent': host, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'} 
+           query_data = { 'url': url, 'header': header, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               data = self.cm.getURLRequestData(query_data)
            except:
@@ -2552,7 +2554,7 @@ class Host:
            #printDBG( 'second beeg-clips data: '+data )
            bestUrl = re.findall('0p":"(.*?)"', data, re.S)
            if bestUrl:
-              phUrl = 'https:%s' % bestUrl[-1]
+              phUrl = 'http:%s' % bestUrl[-1]
               phUrl = phUrl.replace('{DATA_MARKERS}','data=pc.DE')
               key = re.search(r'/key=(.*?)%2Cend=', phUrl, 0) 
               key = key.group(1)
