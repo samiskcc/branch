@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.2"
+    XXXversion = "19.0.3.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2647,7 +2647,7 @@ class Host:
         query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
         try:
            data = self.cm.getURLRequestData(query_data)
-           printDBG( 'Host getResolvedURL data: '+data )
+           #printDBG( 'Host getResolvedURL data: '+data )
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
@@ -2982,13 +2982,15 @@ class Host:
            return match[0]
 
         if parser == 'http://www.cam4.pl':
-           Movies = re.findall('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
+           Movies = re.search('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
            if Movies:
-              for (swfUrl, chatUrl, videoAppUrl, videoPlayUrl) in Movies:
-                  videoAppUrl = videoAppUrl+'live'
-                  Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
-                  printDBG( 'Host listsItems Url: '  +Url )
-                  return Url
+              swfUrl = Movies.group(1)
+              videoAppUrl = Movies.group(3)
+              videoPlayUrl = Movies.group(4)
+              videoAppUrl = videoAppUrl+'live'
+              Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
+              printDBG( 'Host listsItems Url: '  +Url )
+              return Url
            else: return ''
 
         if parser == 'http://www.youjizz.com':
