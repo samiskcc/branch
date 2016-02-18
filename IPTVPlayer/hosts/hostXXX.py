@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.3"
+    XXXversion = "19.0.3.4"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1821,19 +1821,40 @@ class Host:
         if 'CAM4-KAMERKI' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://www.cam4.pl' 
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-           try:
-              data = self.cm.getURLRequestData(query_data)
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'cam4.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': 'http://www.cam4.pl', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('UNLIMITED_SAVED_SEARCHES(.*?)directoryPager"', data,re.S)
+           parse = re.search('headerMenuMainUL(.*?)cam4bucksMenuLink"', data,re.S)
            if parse:
-              phCats = re.findall('profileDataBox"> <a href="(.*?)".*?src="(.*?)".*?class="flag flag-(.*?)".*?Broadcast Time"/>(.*?)<.*?viewers">(.*?)<', parse.group(1), re.S) 
+              phCats = re.findall('<a href="(.*?)".*?"nopop">(.*?)<', parse.group(1), re.S) 
               if phCats:
-                 for (phUrl, phImage, phCountry, phTime, phViews) in phCats: 
+                 for (phUrl, phTitle) in phCats:
+                     printDBG( 'Host listsItems phUrl: '  +self.MAIN_URL+phUrl )
+                     printDBG( 'Host listsItems phTitle: '  +phTitle )
+                     #if phTitle != 'Mobile Shows' and phTitle != 'Recent' and phTitle != 'Trans' and phTitle != 'poland cams':
+                     valTab.append(CDisplayListItem(phTitle,  self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+phUrl], 'CAM4-KAMERKI-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab 
+
+        if 'CAM4-KAMERKI-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'cam4.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return ''
+           #printDBG( 'Host getResolvedURL data: '+data )
+           parse = re.search('UNLIMITED_SAVED_SEARCHES(.*?)directoryPager"', data,re.S)
+           #printDBG( 'Host getResolvedURL data: '+parse.group(1) )
+           if parse:
+              phCats = re.findall('profileDataBox"> <a href="(.*?)".*?src="(.*?)".*?class="flag flag-(.*?)"', parse.group(1), re.S) 
+              if phCats:
+                 for (phUrl, phImage, phCountry) in phCats: 
                      phTitle = phUrl.strip('/')
                      try:
                          parse = re.search('input type="checkbox" name="country" value="%s".*?<label>(.*?)</label>' % phCountry, data, re.S)
@@ -1843,9 +1864,7 @@ class Host:
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phImage: '  +phImage )
                      printDBG( 'Host listsItems phCountry: '  +phCountry )
-                     printDBG( 'Host listsItems phTime: '  +phTime )
-                     printDBG( 'Host listsItems phViews: '+phViews )
-                     valTab.append(CDisplayListItem(phTitle,phTitle+'   [Views:'+phViews+']   [Country: '+phCountry+']   [Time: '+phTime+']',CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                     valTab.append(CDisplayListItem(phTitle,phTitle+'   [Country: '+phCountry+']   ',CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('directoryPager.*?> Next <', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
@@ -2625,6 +2644,26 @@ class Host:
               return (videoPage.group(2)+'/'+videoPage.group(1)) 
            return ''
 
+        if parser == 'http://www.cam4.pl':
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'cam4.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return ''
+           #printDBG( 'Host getResolvedURL data: '+data )
+           Movies = re.search('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
+           if Movies:
+              swfUrl = Movies.group(1)
+              videoAppUrl = Movies.group(3)
+              videoPlayUrl = Movies.group(4)
+              videoAppUrl = videoAppUrl+'live'
+              #Url = '%s playpath=%s swfUrl=%s conn=S:OK live=1 pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
+              Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
+              printDBG( 'Host listsItems Url: '  +Url )
+              return Url
+           else: return ''
+
         if parser == 'xxxlist.txt':
            videoUrls = self.getLinksForVideo(url)
            if videoUrls:
@@ -2980,18 +3019,6 @@ class Host:
         if parser == 'http://m.pornhub.com':
            match = re.compile('<div class="play_video.+?<a href="(.+?)"', re.DOTALL).findall(data)
            return match[0]
-
-        if parser == 'http://www.cam4.pl':
-           Movies = re.search('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
-           if Movies:
-              swfUrl = Movies.group(1)
-              videoAppUrl = Movies.group(3)
-              videoPlayUrl = Movies.group(4)
-              videoAppUrl = videoAppUrl+'live'
-              Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
-              printDBG( 'Host listsItems Url: '  +Url )
-              return Url
-           else: return ''
 
         if parser == 'http://www.youjizz.com':
            videoPage = re.findall('Add To Favorites.*?href="(.*?)"', data, re.S)   
