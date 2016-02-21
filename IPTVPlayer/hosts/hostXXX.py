@@ -9,6 +9,7 @@ from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSearchHisto
 from Plugins.Extensions.IPTVPlayer.iptvdm.iptvdh import DMHelper
 from Plugins.Extensions.IPTVPlayer.libs.urlparser import urlparser 
 from Plugins.Extensions.IPTVPlayer.tools.iptvfilehost import IPTVFileHost
+from Plugins.Extensions.IPTVPlayer.libs.looknijtv import LooknijTvApi 
 ###################################################
 # FOREIGN import
 ###################################################
@@ -134,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.4"
+    XXXversion = "19.0.3.5"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -200,7 +201,7 @@ class Host:
            printDBG( 'Host listsItems begin name='+name )
            if self.XXXversion <> self.XXXremote and self.XXXremote <> "0.0.0.0":
               valTab.append(CDisplayListItem('---UPDATE---','UPDATE MENU',        CDisplayListItem.TYPE_CATEGORY,           [''], 'UPDATE',  '', None)) 
-           valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/tags'],          '4tube',   'http://ui.4tube.com/fddc287997/bundles/kodifycore/img/layout/4tube-logo.png', None)) 
+           valTab.append(CDisplayListItem('4TUBE',          'www.4tube.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.4tube.com/tags'],          '4tube',   'http://cdn1.ht.ui.4tube.com/assets/img/layout/4tube-logo-1f503fd81c.png', None)) 
            valTab.append(CDisplayListItem('EPORNER',        'www.eporner.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.eporner.com/categories/'],   'eporner', 'http://static.eporner.com/new/logo.png', None)) 
            #valTab.append(CDisplayListItem('TUBE8 mobile',   'm.tube8.com',        CDisplayListItem.TYPE_CATEGORY, ['http://m.tube8.com'],                   'tube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
            valTab.append(CDisplayListItem('TUBE8',          'www.tube8.com',      CDisplayListItem.TYPE_CATEGORY, ['http://www.tube8.com/categories.html'], 'fulltube8',   'http://cdn1.static.tube8.phncdn.com/images/t8logo.png', None)) 
@@ -2372,6 +2373,7 @@ class Host:
 
         if 'XXXLIST' == name:
            printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'xxxlist.txt' 
            URLLIST_FILE    = 'xxxlist.txt'
            self.filespath = config.plugins.iptvplayer.xxxlist.value
            self.sortList = config.plugins.iptvplayer.xxxsortuj.value
@@ -2538,6 +2540,7 @@ class Host:
         if url.startswith('https://openload.co'):            return 'xxxlist.txt'
         if url.startswith('http://openload.co'):             return 'xxxlist.txt'
         if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
+        if url.startswith('http://looknij.tv'):              return 'xxxlist.txt'
         if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
         if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
         if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
@@ -2672,6 +2675,9 @@ class Host:
                  Name = item['name']
                  printDBG( 'Host url:  '+Url )
                  return Url
+           if url.startswith('http://looknij.tv'): 
+              self.looknijTvApi = LooknijTvApi() 
+              return self.looknijTvApi.getVideoLink(url)
            return ''
 
         if parser == 'http://www.tube8.com/embed/':
