@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.5"
+    XXXversion = "19.0.3.6"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1349,7 +1349,7 @@ class Host:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://www.pornway.com' 
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'pornusy.cookie'
-           try: data = self.cm.getURLRequestData({ 'url': 'http://showup.tv/site/accept_rules/yes?ref=http://showup.tv/', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           try: data = self.cm.getURLRequestData({ 'url': 'http://www.pornway.com', 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host listsItems query error cookie' )
               return valTab
@@ -1764,6 +1764,7 @@ class Host:
            Movies = re.findall('\'bla\', \'(.*?)\'.*?u=(.*?)".*?\stitle="(.*?)".*?src="(.*?)"', data, re.S) 
            if Movies:
               for (serwer, Url, Title, Image) in Movies:
+                  Url = decodeUrl(Url)
                   printDBG( 'Host listsItems Url: '  +Url )
                   printDBG( 'Host listsItems Title: '  +Title )
                   printDBG( 'Host listsItems Image: '  +Image )
@@ -2554,6 +2555,12 @@ class Host:
         if url.startswith('http://tubeq.xxx'):               return 'http://www.faphub.xxx'
         if url.startswith('http://www.wetplace.com'):        return 'http://www.katestube.com'
         if url.startswith('http://www.pinkrod.com'):         return 'http://www.katestube.com'
+        if url.startswith('http://sexylies.com'):            return 'http://sexylies.com'
+        if url.startswith('http://www.eskimotube.com'):      return 'http://www.eskimotube.com'
+        if url.startswith('http://www.pornalized.com'):      return 'http://www.katestube.com'
+        if url.startswith('http://www.porn5.com'):           return 'http://www.porn5.com'
+        if url.startswith('http://www.pornyeah.com'):        return 'http://www.pornyeah.com'
+        if url.startswith('http://www.porn.com'):            return 'http://www.porn5.com'
 
         return ''
 
@@ -2594,8 +2601,8 @@ class Host:
               printDBG( 'Host getResolvedURL query error' )
               printDBG( 'Host getResolvedURL query error url: '+url )
               return ''
-           #printDBG( 'Host getResolvedURL data: '+data )
-           parse = re.search('<iframe src="(.*?)"', data, re.S)
+           printDBG( 'Host getResolvedURL data: '+data )
+           parse = re.search('<iframe.*?src="(.*?)"', data, re.S)
            if parse:
               if parse.group(1).startswith('http://www.pornway.com'):
                  printDBG( 'Host getResolvedURL pornway.com: zapetlony parser: '+parse.group(1) )
@@ -2692,7 +2699,7 @@ class Host:
         query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
         try:
            data = self.cm.getURLRequestData(query_data)
-           #printDBG( 'Host getResolvedURL data: '+data )
+           printDBG( 'Host getResolvedURL data: '+data )
         except:
            printDBG( 'Host getResolvedURL query error' )
            return videoUrl
@@ -2922,9 +2929,9 @@ class Host:
            return ''
 
         if parser == 'http://embed.redtube.com':
-           videoPage = re.findall("<source src='(.*?)'", data, re.S)
+           videoPage = re.findall('sources:.*?":"(.*?)"', data, re.S)
            if videoPage:
-              return videoPage[0]
+              return videoPage[-1].replace(r"\/",r"/")
            return ''
 
         if parser == 'http://www.redtube.com':
@@ -2939,7 +2946,10 @@ class Host:
         if parser == 'http://xhamster.com':
            xhFile = re.findall('"file":"(.*?)"', data)
            if xhFile: return xhFile[0].replace(r"\/",r"/")
-           else: return ''
+           else: 
+              xhFile = re.findall("file: '(.*?)'", data)
+              if xhFile: return xhFile[0].replace(r"\/",r"/")
+           return ''
         
         if parser == 'http://xhamster.com/cams':
            parse = re.search('userId"\]\s=\s(.*?);.*?modelId"\]\s=\s"(.*?)".*?streamUrl":"(.*?)".*?path":"(.*?)".*?geo":"(.*?)"', data, re.S)
@@ -3102,6 +3112,37 @@ class Host:
               printDBG( 'Host gr2 '+videoPage.group(2) )
               printDBG( 'Host videoId '+str(videoId.group(1)) )
               return videoUrl
+           return ''
+
+        if parser == 'http://sexylies.com':
+           videoPage = re.search('source\stype="video/mp4"\ssrc="(.*?)"', data, re.S) 
+           if videoPage:
+              return videoPage.group(1)
+           return ''
+
+        if parser == 'http://www.eskimotube.com':
+           videoPage = re.search('color=black.*?href=(.*?)>', data, re.S) 
+           if videoPage:
+              return videoPage.group(1)
+           return ''
+
+        if parser == 'http://www.porn5.com':
+           videoPage = re.findall('p",url:"(.*?)"', data, re.S) 
+           if videoPage:
+              return videoPage[-1]
+           return ''
+
+        if parser == 'http://www.pornyeah.com':
+           videoPage = re.findall('settings=(.*?)"', data, re.S)
+           if not videoPage: return ''
+           xml = videoPage[0]
+           printDBG( 'Host getResolvedURL xml: '+xml )
+           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+           except: 
+                   printDBG( 'Host getResolvedURL query error xml' )
+                   return videoUrl
+           videoPage = re.findall('defaultVideo:(.*?);', data, re.S)
+           if videoPage: return videoPage[0]
            return ''
 
         printDBG( 'Host getResolvedURL end' )
