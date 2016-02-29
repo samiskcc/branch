@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.3.6"
+    XXXversion = "19.0.4.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -239,6 +239,7 @@ class Host:
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
            valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
+           valTab.append(CDisplayListItem('BONGACAMS',     'https://pl.bongacams.com/', CDisplayListItem.TYPE_CATEGORY, ['https://pl.bongacams.com/'],'BONGACAMS', 'http:////i.bongacams.com/images/bongacams_logo3_header.png', None)) 
            #valTab.append(CDisplayListItem('RAMPANT',     'https://www.rampant.tv/channel/', CDisplayListItem.TYPE_CATEGORY, ['https://www.rampant.tv/channel/'],'RAMPANT', 'https://www.rampant.tv/new-images/rampant_logo.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
            #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
@@ -2441,6 +2442,56 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab 
 
+        if 'BONGACAMS' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'https://pl.bongacams.com' 
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'bongacams.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('model_categories_panel(.*?)topmodel_panel', data,re.S)
+           if parse:
+              phCats = re.findall('href="(.*?)">(.*?)<.*?model_category.*?>(.*?)<', parse.group(1), re.S) 
+              if phCats:
+                 for (phUrl, phTitle, Count) in phCats:
+                     printDBG( 'Host listsItems phUrl: '  +self.MAIN_URL+phUrl )
+                     printDBG( 'Host listsItems phTitle: '  +phTitle )
+                     valTab.append(CDisplayListItem(phTitle+' - '+Count+' na zywo',  self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+phUrl], 'BONGACAMS-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab 
+
+        if 'BONGACAMS-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'bongacams.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+              printDBG( 'Host getResolvedURL query error url: '+url )
+              return ''
+           #printDBG( 'Host getResolvedURL data: '+data )
+           parse = re.search('mls_first_load(.*?)mls_pager"', data,re.S)
+           #printDBG( 'Host getResolvedURL data: '+parse.group(1) )
+           if parse:
+              phCats = re.findall('mls_item_online.*?data-chathost="(.*?)".*?data-name="(.*?)".*?data-src_small="(.*?)"', parse.group(1), re.S) 
+              if phCats:
+                 for (phUrl, phTitle, phImage) in phCats: 
+                     #phTitle = phUrl
+                     phImage = 'http:'+phImage
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phImage: '  +phImage )
+                     valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('mls_pager_next_pages.*?href="(.*?)".*?title="(.*?)"', data, re.S)
+           if match:
+              for (phUrl, phTitle) in match:
+                  printDBG( 'Host listsItems page phUrl: '+phUrl )
+                  printDBG( 'Host listsItems page phTitle: '+phTitle )
+              valTab.append(CDisplayListItem('Next '+phTitle, self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab 
+
         return valTab
 
 
@@ -2465,6 +2516,7 @@ class Host:
         if self.MAIN_URL == 'http://www.extremetube.com':    return self.MAIN_URL
         if self.MAIN_URL == 'http://search.el-ladies.com':   return self.MAIN_URL
         if self.MAIN_URL == 'http://new.livejasmin.com':     return self.MAIN_URL
+        if self.MAIN_URL == 'https://pl.bongacams.com':      return self.MAIN_URL
         if self.MAIN_URL == 'https://www.tnaflix.com':       return self.MAIN_URL
         if self.MAIN_URL == 'http://www.myfreecams.com':     return self.MAIN_URL
         if self.MAIN_URL == 'http://www.drtuber.com':        return self.MAIN_URL
@@ -2637,6 +2689,39 @@ class Host:
               except:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
+           return ''
+
+        if parser == 'https://pl.bongacams.com':
+           for serwer in range(9, 0, -1):
+              if serwer == 7: serwer = serwer-1
+              if serwer == 3: serwer = serwer-1
+              data =''
+              newurl = 'http://mobile%s.bongacams.com/hls/stream_%s.m3u8' % (serwer, url)
+              try: 
+                 data = self.cm.getURLRequestData({ 'url': newurl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+                 #printDBG( 'Host newurl data:  '+data )
+                 m3u8 = re.search('EXTM3U', data, re.S)
+                 if m3u8: return newurl
+              except:
+                 printDBG( 'Host error newurl:  '+newurl )
+ 
+           newurl = 'http://mobile%s.bongacams.com/hls/stream_%s.m3u8' % ('7', url)
+           try: 
+              data = self.cm.getURLRequestData({ 'url': newurl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+              #printDBG( 'Host newurl data:  '+data )
+              m3u8 = re.search('EXTM3U', data, re.S)
+              if m3u8: return newurl
+           except:
+              printDBG( 'Host error newurl:  '+newurl )
+ 
+           newurl = 'http://mobile%s.bongacams.com/hls/stream_%s.m3u8' % ('3', url)
+           try: 
+              data = self.cm.getURLRequestData({ 'url': newurl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+              #printDBG( 'Host newurl data:  '+data )
+              m3u8 = re.search('EXTM3U', data, re.S)
+              if m3u8: return newurl
+           except:
+              printDBG( 'Host error newurl:  '+newurl )
            return ''
 
         if parser == 'http://new.livejasmin.com':
