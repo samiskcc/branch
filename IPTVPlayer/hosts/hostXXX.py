@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.4.0"
+    XXXversion = "19.0.4.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2451,7 +2451,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            parse = re.search('model_categories_panel(.*?)topmodel_panel', data,re.S)
            if parse:
               phCats = re.findall('href="(.*?)">(.*?)<.*?model_category.*?>(.*?)<', parse.group(1), re.S) 
@@ -2460,6 +2460,12 @@ class Host:
                      printDBG( 'Host listsItems phUrl: '  +self.MAIN_URL+phUrl )
                      printDBG( 'Host listsItems phTitle: '  +phTitle )
                      valTab.append(CDisplayListItem(phTitle+' - '+Count+' na zywo',  self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+phUrl], 'BONGACAMS-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Female ---",       "Kobiety",       CDisplayListItem.TYPE_CATEGORY,["https://pl.bongacams.com"], 'BONGACAMS-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Couples ---",       "Pary",       CDisplayListItem.TYPE_CATEGORY,["https://pl.bongacams.com/couples"], 'BONGACAMS-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Male ---",       "Mężczyźni",       CDisplayListItem.TYPE_CATEGORY,["https://pl.bongacams.com/male"], 'BONGACAMS-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Transsexual ---",       "Transseksualiści",       CDisplayListItem.TYPE_CATEGORY,["https://pl.bongacams.com/transsexual"], 'BONGACAMS-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- New ---",       "Nowe",       CDisplayListItem.TYPE_CATEGORY,["https://pl.bongacams.com/new-models"], 'BONGACAMS-clips', '',None))
+
            printDBG( 'Host listsItems end' )
            return valTab 
 
@@ -2471,11 +2477,11 @@ class Host:
               printDBG( 'Host getResolvedURL query error' )
               printDBG( 'Host getResolvedURL query error url: '+url )
               return ''
-           #printDBG( 'Host getResolvedURL data: '+data )
-           parse = re.search('mls_first_load(.*?)mls_pager"', data,re.S)
-           #printDBG( 'Host getResolvedURL data: '+parse.group(1) )
+           printDBG( 'Host getResolvedURL data: '+data )
+           parse = re.search('mls_first_load(.*?)footer_seo"', data,re.S)
+           printDBG( 'Host getResolvedURL data2: '+parse.group(1) )
            if parse:
-              phCats = re.findall('mls_item_online.*?data-chathost="(.*?)".*?data-name="(.*?)".*?data-src_small="(.*?)"', parse.group(1), re.S) 
+              phCats = re.findall('data-chathost="(.*?)".*?data-name="(.*?)".*?data-src_small="(.*?)"', parse.group(1), re.S) 
               if phCats:
                  for (phUrl, phTitle, phImage) in phCats: 
                      #phTitle = phUrl
