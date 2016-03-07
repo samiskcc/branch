@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.7.0"
+    XXXversion = "19.0.7.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2575,10 +2575,10 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('main class="content"(.*?)div class=\'wp-pagenavi', data, re.S)
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('main class="content"(.*?)footer', data, re.S)
            if parse:
-              Movies = re.findall('href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?fa-clock-o"></i>(.*?)</div>', parse.group(1), re.S) 
+              Movies = re.findall('href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?fa-clock-o"></i>(.*?)</div>.*?href=', parse.group(1), re.S) 
               if Movies:
                  for (phUrl, phTitle, phImage, Time) in Movies:
                      Time = Time.strip()
