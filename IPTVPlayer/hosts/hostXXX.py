@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.7.1"
+    XXXversion = "19.0.7.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -996,6 +996,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phVid: '+phVid )
                   valTab.append(CDisplayListItem(phTitle,'[Video: '+phVid+'] '+phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl], '4tube-clips', phImage, None)) 
+           valTab.sort(key=lambda poz: poz.name)
            match = re.findall('<ul class="pagination">.*?</a></li><li><a href="(.*?)"', data, re.S)
            if match:
               valTab.append(CDisplayListItem('Next', match[0], CDisplayListItem.TYPE_CATEGORY, [match[0]], name, '', None))                
@@ -1248,6 +1249,7 @@ class Host:
               for (phTitle, phUpdated, phName ) in phCats:
                   phUpdated = phUpdated.replace('T', '   ')
                   phUpdated = phUpdated.replace('Z', '   ')
+                  phUpdated = phUpdated.replace('+01:00', '   ')
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phUpdated: '+phUpdated )
                   printDBG( 'Host listsItems phName: '+phName )
