@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.7.2"
+    XXXversion = "19.0.8.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -234,6 +234,7 @@ class Host:
            valTab.append(CDisplayListItem('PORNKINO',     'http://pornkino.to', CDisplayListItem.TYPE_CATEGORY, ['http://pornkino.to/'],'PORNKINO', 'http://pornkino.to/images/logo.png', None)) 
            valTab.append(CDisplayListItem('RUSPORN',     'http://rusporn.tv/', CDisplayListItem.TYPE_CATEGORY, ['http://rusporn.tv/categories.html'],'RUSPORN', 'http://rusporn.tv/App_Themes/ruporn/img/logo.png?12013', None)) 
            valTab.append(CDisplayListItem('PORN720',     'http://porn720.net/', CDisplayListItem.TYPE_CATEGORY, ['http://porn720.net/'],'PORN720', 'http://porn720.net/wp-content/themes/porn720/img/logo.png', None)) 
+           valTab.append(CDisplayListItem('PORNTREX',     'http://www.porntrex.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porntrex.com/categories'],'PORNTREX', 'http://www.porntrex.com/templates/frontend/porntrex/img/logo.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            self.SEARCH_proc=name
            valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
@@ -2595,6 +2596,56 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
 
+        if 'PORNTREX' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.porntrex.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('categories\?s=a(.*?)footer-container"', data, re.S)
+           if parse:
+              phCats = re.findall('a href="(.*?)".*?data-original="(.*?)".*?title="(.*?)"', parse.group(1), re.S)
+              if phCats:
+                 for (phUrl, phImage, phTitle) in phCats:
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     printDBG( 'Host listsItems phImage: '+phImage )
+                     valTab.append(CDisplayListItem(phTitle,self.MAIN_URL+phUrl,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'PORNTREX-clips', self.MAIN_URL+phImage, phUrl)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'PORNTREX-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('class="col-sm-12"(.*?)footer-container"', data, re.S)
+           if parse:
+              Movies = re.findall('href="(.*?)".*?data-original="(.*?)".*?title="(.*?)".*?fa fa-clock-o"></i>(.*?)</div>', parse.group(1), re.S) 
+              if Movies:
+                 for (phUrl, phImage, phTitle, Time) in Movies:
+                     Time = Time.strip()
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     printDBG( 'Host listsItems Time: '+Time ) 
+                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phUrl),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                 match = re.search('</a></li><li><a href="(.*?)".*?Next page', data, re.S)
+                 if match:
+                    phUrl = match.group(1)
+                    valTab.append(CDisplayListItem('Next ', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', catUrl))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         return valTab
 
 
@@ -2616,6 +2667,7 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://www.porntrex.com':       return self.MAIN_URL
         if self.MAIN_URL == 'http://porn720.net':            return self.MAIN_URL
         if self.MAIN_URL == 'http://rusporn.tv':             return self.MAIN_URL
         if self.MAIN_URL == 'http://www.extremetube.com':    return self.MAIN_URL
@@ -2728,6 +2780,21 @@ class Host:
         parser = self.getParser(url)
         printDBG( 'Host getResolvedURL parser: '+parser )
         if parser == '': return url
+
+        if parser == 'http://www.porntrex.com':
+           host = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
+           header = {'User-Agent': host, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'} 
+           query_data = { 'url': url, 'header': header, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              return ''
+           printDBG( 'Host getResolvedURL data: '+data )
+           videoPage = re.findall('id=mp4video" src="(.*?)"', data, re.S)   
+           if videoPage:
+              printDBG( 'Host videoPage:'+videoPage[0])
+              return videoPage[0]
+           return ''
 
         if parser == 'http://beeg.com':
            host = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
