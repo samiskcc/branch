@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.8.0"
+    XXXversion = "19.0.8.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2790,10 +2790,14 @@ class Host:
            except:
               return ''
            printDBG( 'Host getResolvedURL data: '+data )
-           videoPage = re.findall('id=mp4video" src="(.*?)"', data, re.S)   
+           videoPage = re.findall("video_hd='(.*?)'", data, re.S)   
            if videoPage:
               printDBG( 'Host videoPage:'+videoPage[0])
               return videoPage[0]
+           else:
+              videoPage = re.findall('id=mp4video" src="(.*?)"', data, re.S)
+              if videoPage:
+                 return videoPage[0]
            return ''
 
         if parser == 'http://beeg.com':
