@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.8.1"
+    XXXversion = "19.0.9.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2401,13 +2401,19 @@ class Host:
                    Url = item['url']
                    printDBG( 'Host listsItems Title:'+Title )
                    printDBG( 'Host listsItems Url:'+Url )
-                   valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
+                   if Url.endswith('.mjpg') or Url.endswith('.cgi'):
+                      valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_PICTURE, [CUrlItem('', Url, 1)], 0, '', None)) 
+                   else:
+                      valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
                elif url == (_("Other")) and item['group'] == '':
                    Title = item['full_title']
                    Url = item['url']
                    printDBG( 'Host listsItems Title:'+Title )
                    printDBG( 'Host listsItems Url:'+Url )
-                   valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
+                   if Url.endswith('.mjpg') or Url.endswith('.cgi'):
+                      valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_PICTURE, [CUrlItem('', Url, 1)], 0, '', None)) 
+                   else:
+                      valTab.append(CDisplayListItem(Title, Url,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 1)], 0, '', None)) 
            return valTab
 
         if 'RAMPANT' == name:
@@ -2770,6 +2776,8 @@ class Host:
         if url.startswith('http://www.porn5.com'):           return 'http://www.porn5.com'
         if url.startswith('http://www.pornyeah.com'):        return 'http://www.pornyeah.com'
         if url.startswith('http://www.porn.com'):            return 'http://www.porn5.com'
+        if url.endswith('.mjpg'):                            return 'mjpg_stream'
+        if url.endswith('.cgi'):                             return 'mjpg_stream'
 
         return ''
 
@@ -2780,6 +2788,21 @@ class Host:
         parser = self.getParser(url)
         printDBG( 'Host getResolvedURL parser: '+parser )
         if parser == '': return url
+
+        if parser == 'mjpg_stream':
+           stream=urllib.urlopen(url)
+           bytes=''
+           while True:
+              bytes+=stream.read(1024)
+              a = bytes.find('\xff\xd8')
+              b = bytes.find('\xff\xd9')
+              if a!=-1 and b!=-1:
+                 jpg = bytes[a:b+2]
+                 bytes= bytes[b+2:]
+                 with open('/tmp/obraz.jpg', 'w') as titleFile:  
+                    titleFile.write(jpg) 
+                    return 'file:///tmp/obraz.jpg'
+           return ''
 
         if parser == 'http://www.porntrex.com':
            host = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
