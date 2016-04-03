@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.0.9.0"
+    XXXversion = "19.2.9.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -216,7 +216,7 @@ class Host:
            valTab.append(CDisplayListItem('XVIDEOS',        'www.xvideos.com',    CDisplayListItem.TYPE_CATEGORY, ['http://www.xvideos.com'],               'xvideos', 'http://www.adultvideotheme.com/images/xvideos-logo.png', None)) 
            valTab.append(CDisplayListItem('XNXX',           'www.xnxx.com',       CDisplayListItem.TYPE_CATEGORY, ['http://www.xnxx.com'],                  'xnxx',    'http://www.naughtyalysha.com/tgp/xnxx/xnxx-porn-recip.jpg', None)) 
            valTab.append(CDisplayListItem('PORNWAY',     'www.pornway.com',     CDisplayListItem.TYPE_CATEGORY, ['http://www.pornway.com'],  'pornusy', 'http://www.pornway.com/porno.png', None)) 
-           valTab.append(CDisplayListItem('BEEG',           'beeg.com',           CDisplayListItem.TYPE_CATEGORY, ['http://beeg.com/api/v5/index/main/0/mobile'],                      'beeg',    'http://staticloads.com/img/logo/logo.png', None)) 
+           valTab.append(CDisplayListItem('BEEG',           'beeg.com',           CDisplayListItem.TYPE_CATEGORY, ['http://api2.beeg.com/api/v6/1738/index/main/0/mobile'],                      'beeg',    'http://staticloads.com/img/logo/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNRABBIT',     'www.pornrabbit.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.pornrabbit.com/page/categories/'],'pornrabbit','http://cdn1.static.pornrabbit.com/pornrabbit/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNHD',     'www.pornhd.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.pornhd.com/category'],'pornhd','http://f90f5c1c633346624330effd22345bfc.lswcdn.net/image/logo.png', None)) 
            valTab.append(CDisplayListItem('AH-ME',     'www.ah-me.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.ah-me.com/channels.php'],'AH-ME','http://ahmestatic.fuckandcdn.com/ah-me/ahmestatic/v20/common/ah-me/img/logo.jpg', None)) 
@@ -1400,7 +1400,7 @@ class Host:
               phCats = re.findall('"(.*?)"', parse.group(1), re.S)
               if phCats:
                  for Title in phCats:
-                     phUrl = 'http://beeg.com/api/v5/index/tag/$PAGE$/mobile?tag=%s' % Title
+                     phUrl = 'http://api2.beeg.com/api/v6/1738/index/tag/$PAGE$/mobile?tag=%s' % Title
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phTitle: '+Title )
                      valTab.append(CDisplayListItem(Title,phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'beeg-clips', '', None)) 
@@ -1426,7 +1426,7 @@ class Host:
            phVideos = re.findall('\{"title":"(.*?)","id":"(.*?)",.*?,"ps_name"', data, re.S)
            if phVideos:
               for (phTitle, phVideoId) in phVideos:
-                 phUrl = 'http://api.beeg.com/api/v5/video/%s' % phVideoId
+                 phUrl = 'http://api2.beeg.com/api/v6/1738/video/%s' % phVideoId
                  phImage = 'http://img.beeg.com/236x177/%s.jpg' % phVideoId
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -3765,8 +3765,7 @@ def urs(a, b):
 # functions for beeg.com
 ############################################
 def decrypt_key(key):
-    # Reverse engineered from http://static.beeg.com/cpl/1067.js
-    a = '5ShMcIQlssOd7zChAIOlmeTZDaUxULbJRnywYaiB'
+    a = 'GUuyodcfS8FW8gQp4OKLMsZBcX0T7B'
     e = urllib.unquote_plus(key).decode("utf-8")
     o = ''.join([
         chr(ord(e[n]) - ord(a[n % len(a)]) % 21)
