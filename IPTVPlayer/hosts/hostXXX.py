@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.2.9.0"
+    XXXversion = "19.3.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1251,6 +1251,7 @@ class Host:
                   phUpdated = phUpdated.replace('T', '   ')
                   phUpdated = phUpdated.replace('Z', '   ')
                   phUpdated = phUpdated.replace('+01:00', '   ')
+                  phUpdated = phUpdated.replace('+02:00', '   ')
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phUpdated: '+phUpdated )
                   printDBG( 'Host listsItems phName: '+phName )
@@ -1395,12 +1396,15 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            self.tags = 'popular'
            self.page = -1
+           version = re.search('bundle_version":(.*?)\}' , data, re.S)
+           if version:
+              self.beeg_version = str(version.group(1))
            parse = re.search('"%s":\[(.*?)\]' % self.tags, data, re.S)
            if parse:
               phCats = re.findall('"(.*?)"', parse.group(1), re.S)
               if phCats:
                  for Title in phCats:
-                     phUrl = 'http://api2.beeg.com/api/v6/1738/index/tag/$PAGE$/mobile?tag=%s' % Title
+                     phUrl = 'http://api2.beeg.com/api/v6/%s/index/tag/$PAGE$/mobile?tag=%s' % (self.beeg_version, Title)
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phTitle: '+Title )
                      valTab.append(CDisplayListItem(Title,phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'beeg-clips', '', None)) 
@@ -1426,7 +1430,7 @@ class Host:
            phVideos = re.findall('\{"title":"(.*?)","id":"(.*?)",.*?,"ps_name"', data, re.S)
            if phVideos:
               for (phTitle, phVideoId) in phVideos:
-                 phUrl = 'http://api2.beeg.com/api/v6/1738/video/%s' % phVideoId
+                 phUrl = 'http://api2.beeg.com/api/v6/%s/video/%s' % (self.beeg_version, phVideoId)
                  phImage = 'http://img.beeg.com/236x177/%s.jpg' % phVideoId
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
                  printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -2824,6 +2828,17 @@ class Host:
            return ''
 
         if parser == 'http://beeg.com':
+           printDBG( 'self.beeg_version: '+self.beeg_version)
+           urljs = 'http://static.beeg.com/cpl/%s.js' % self.beeg_version
+           query_data = {'url': urljs, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
+           try:
+              data = self.cm.getURLRequestData(query_data)
+              #printDBG( 'Host getResolvedURL data: '+data )
+           except:
+              printDBG( 'Host getResolvedURL query error' )
+           parse = re.search('beeg_salt="(.*?)"', data, re.S)
+           if parse: a = parse.group(1)
+
            host = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
            header = {'User-Agent': host, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'} 
            query_data = { 'url': url, 'header': header, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -2839,7 +2854,7 @@ class Host:
               key = re.search(r'/key=(.*?)%2Cend=', phUrl, 0) 
               key = key.group(1)
               printDBG( 'key encrypt : '+key )
-              key = decrypt_key(key)	
+              key = decrypt_key(key, a)	
               printDBG( 'key decrypt: '+key )
               videoUrl = re.sub(r'/key=(.*?)%2Cend=', '/key='+key+',end=', phUrl)
               return videoUrl
@@ -3764,8 +3779,8 @@ def urs(a, b):
 ############################################
 # functions for beeg.com
 ############################################
-def decrypt_key(key):
-    a = 'GUuyodcfS8FW8gQp4OKLMsZBcX0T7B'
+def decrypt_key(key, a):
+    printDBG( 'beeg_salt= '+a)
     e = urllib.unquote_plus(key).decode("utf-8")
     o = ''.join([
         chr(ord(e[n]) - ord(a[n % len(a)]) % 21)
