@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.0.0"
+    XXXversion = "19.3.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1386,6 +1386,18 @@ class Host:
         if 'beeg' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://beeg.com' 
+           query_data = { 'url': self.MAIN_URL, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           version = re.search('src="//static\.beeg\.com/cpl/(.*?)\.js' , data, re.S)
+           if version:
+              self.beeg_version = str(version.group(1))
+           url = 'http://api2.beeg.com/api/v6/%s/index/main/0/mobile' % self.beeg_version
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
               data = self.cm.getURLRequestData(query_data)
@@ -1396,9 +1408,6 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            self.tags = 'popular'
            self.page = -1
-           version = re.search('bundle_version":(.*?)\}' , data, re.S)
-           if version:
-              self.beeg_version = str(version.group(1))
            parse = re.search('"%s":\[(.*?)\]' % self.tags, data, re.S)
            if parse:
               phCats = re.findall('"(.*?)"', parse.group(1), re.S)
