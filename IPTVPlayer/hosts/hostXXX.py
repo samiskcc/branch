@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.1.0"
+    XXXversion = "19.3.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -228,7 +228,7 @@ class Host:
            valTab.append(CDisplayListItem('YOUJIZZ',     'http://www.youjizz.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.youjizz.com/categories'],'YOUJIZZ', 'http://www.sample-made.com/cms/content/uploads/2015/05/youjizz_logo-450x400.jpg', None)) 
            valTab.append(CDisplayListItem('DACHIX',     'http://www.dachix.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.dachix.com/categories'],'DACHIX', 'http://thumbs.dachix.com/images/dachixcom_logo_noir.png', None)) 
            valTab.append(CDisplayListItem('DRTUBER',     'http://www.drtuber.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.drtuber.com/categories'],'DRTUBER', 'http://static.drtuber.com/templates/frontend/mobile/images/logo.png', None)) 
-           valTab.append(CDisplayListItem('TNAFLIX',     'https://www.tnaflix.com', CDisplayListItem.TYPE_CATEGORY, ['https://www.tnaflix.com/channels.php'],'TNAFLIX', 'https://pbs.twimg.com/profile_images/1109542593/logo_400x400.png', None)) 
+           valTab.append(CDisplayListItem('TNAFLIX',     'https://www.tnaflix.com', CDisplayListItem.TYPE_CATEGORY, ['https://www.tnaflix.com/categories'],'TNAFLIX', 'https://pbs.twimg.com/profile_images/1109542593/logo_400x400.png', None)) 
            valTab.append(CDisplayListItem('EL-LADIES - JUST-EROPROFILE',     'http://search.el-ladies.com', CDisplayListItem.TYPE_CATEGORY, ['http://search.el-ladies.com'],'EL-LADIES', 'http://amateurblogs.eroprofile.com/img/ep_new_gallery_header.png', None)) 
            valTab.append(CDisplayListItem('EXTREMETUBE',     'http://www.extremetube.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.extremetube.com/video-categories'],'EXTREMETUBE', 'http://www.wp-tube-plugin.com/feed-images/extremetube.png', None)) 
            valTab.append(CDisplayListItem('PORNKINO',     'http://pornkino.to', CDisplayListItem.TYPE_CATEGORY, ['http://pornkino.to/'],'PORNKINO', 'http://pornkino.to/images/logo.png', None)) 
@@ -2104,9 +2104,9 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('title="List of tags".*?="/video.php(.*?)>Channels</strong>', data, re.S) 
+           parse = re.search('ajax_sidebar(.*?)ajax_content main', data, re.S) 
            if parse:
-              genre = re.findall('<a href="(.*?)">(.*?)</a>', parse.group(1), re.S)
+              genre = re.findall('<a href="(.*?)".*?>(.*?)<', parse.group(1), re.S)
               if genre:
                  for phUrl, phTitle in genre:
                     phTitle = decodeHtml(phTitle)
@@ -2114,7 +2114,6 @@ class Host:
                     printDBG( 'Host listsItems phTitle: '+phTitle )
                     valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'TNAFLIX-clips', '', None)) 
                     valTab.sort(key=lambda poz: poz.name)
-           #valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["https://www.tnaflix.com/new/1/"], 'TNAFLIX-clips', '',None))
            printDBG( 'Host listsItems end' )
            return valTab
         if 'TNAFLIX-clips' == name:
@@ -2127,20 +2126,19 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('<a  href="(.*?)".*?class="nHover"><h2>(.*?)</h2>.*?class="duringTime">(.*?)</span>.*?<img src="(.*?)"', data, re.S)  
+           phMovies = re.findall("data-vid=.*?data-name='(.*?)'.*?data-original='(.*?)'.*?videoDuration'>(.*?)<.*?href='(.*?)'", data, re.S)  
            if phMovies:
-              for (phUrl, phTitle, phRuntime, phImage ) in phMovies:
-                  phImage = 'http:'+phImage
+              for ( phTitle, phImage, phRuntime, phUrl ) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('class="navLink".*?ref="(.*?)"', data, re.S)
+           match = re.findall('class="llNav.*?href="(.*?)"', data, re.S)
            if match:
               phUrl = match[0]
               printDBG( 'Host listsItems page phUrl: '+phUrl )
-              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', None))
+              valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -3379,9 +3377,9 @@ class Host:
            return ''
 
         if parser == 'https://www.tnaflix.com':
-           videoPage = re.search('downloadTabBlock.*?href="(.*?)"', data, re.S) 
+           videoPage = re.search('contentUrl.*?content="(.*?)"', data, re.S) 
            if videoPage:
-              return urllib2.unquote('http:'+videoPage.group(1)) 
+              return videoPage.group(1)
            return ''
 
         if parser == 'http://search.el-ladies.com':
