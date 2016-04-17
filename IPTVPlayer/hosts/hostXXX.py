@@ -135,7 +135,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.2.0"
+    XXXversion = "19.3.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1873,7 +1873,7 @@ class Host:
            parse = re.search('UNLIMITED_SAVED_SEARCHES(.*?)directoryPager"', data,re.S)
            #printDBG( 'Host getResolvedURL data: '+parse.group(1) )
            if parse:
-              phCats = re.findall('profileDataBox"> <a href="(.*?)".*?src="(.*?)".*?class="flag flag-(.*?)"', parse.group(1), re.S) 
+              phCats = re.findall('profileDataBox"> <a href="(.*?)".*?data-src="(.*?)".*?class="flag flag-(.*?)"', parse.group(1), re.S) 
               if phCats:
                  for (phUrl, phImage, phCountry) in phCats: 
                      phTitle = phUrl.strip('/')
