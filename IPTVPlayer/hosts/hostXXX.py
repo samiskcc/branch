@@ -9,7 +9,6 @@ from Plugins.Extensions.IPTVPlayer.tools.iptvtools import printDBG, CSearchHisto
 from Plugins.Extensions.IPTVPlayer.iptvdm.iptvdh import DMHelper
 from Plugins.Extensions.IPTVPlayer.libs.urlparser import urlparser 
 from Plugins.Extensions.IPTVPlayer.tools.iptvfilehost import IPTVFileHost
-from Plugins.Extensions.IPTVPlayer.libs.looknijtv import LooknijTvApi 
 ###################################################
 # FOREIGN import
 ###################################################
@@ -135,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.3.0"
+    XXXversion = "19.3.6.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -750,7 +749,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
-           valTab.insert(0,CDisplayListItem("--- Kamerki ---",       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/cams"], 'xhamster-cams', '',None))
+           valTab.insert(0,CDisplayListItem("--- Kamerki ---",       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/cams"], 'xhamster-cams', 'https://cdn.stripchat.com/assets/common/images/favicon_xh.png',None))
            valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/"], 'xhamster-clips', '',None))
            self.SEARCH_proc='xhamster-search'
            valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
@@ -796,23 +795,36 @@ class Host:
            return valTab
         if 'xhamster-cams' == name:
            printDBG( 'Host listsItems begin name='+name )
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-           try:
-              data = self.cm.getURLRequestData(query_data)
+           self.MAIN_URL = 'http://xhamsterlive.com' 
+           url='http://xhamsterlive.com/api/front/models'
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'xhamstercams.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': True, 'load_cookie': False, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
            except:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('camSearch(.*)searchMode', data, re.S)
+           parse = re.search('"models":(.*?),"ttl":', data, re.S) 
            if not parse: return valTab
-           phMovies = re.findall("<a\shref='(.*?)'.*?<img\ssrc='(.*?)'.*?class='bold.*?>(.*?)<", parse.group(1), re.S)
-           if phMovies:
-              for (phUrl, phImage, phTitle) in phMovies:
-                  printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phImage: '+phImage )
-                  printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           result = simplejson.loads(parse.group(1))
+           if result:
+              for item in result:
+                 ID = str(item["id"]) 
+                 Name = item["username"]
+                 BroadcastServer = item["broadcastServer"]
+                 Image = item["avatarUrl"].replace('\/','/')  
+                 #Image = item["previewUrl"].replace('\/','/') 
+                 status = item["status"]
+                 sessionHash = 'session-value'
+                 Url = 'rtmp://%s:1936/live?sessionHash=%s playpath=%s swfUrl=http://xhamsterlive.com/assets/cams/components/ui/Player/player.swf?isModel=false&bgColor=2829099&bufferTime=1&camFPS=25&camKeyframe=25&camQuality=85&camWidth=640&camHeight=480 pageUrl=http://xhamsterlive.com/cams/%s live=1 ' % (BroadcastServer, sessionHash, ID, Name)
+                 printDBG( 'Host listsItems Name: '+Name )
+                 printDBG( 'Host listsItems ID: '+ID )
+                 printDBG( 'Host listsItems BroadcastServer: '+BroadcastServer )
+                 printDBG( 'Host listsItems Url: '  +Url )
+                 printDBG( 'Host listsItems Image: '+Image )
+                 printDBG( 'Host listsItems sessionHash: '+sessionHash )
+                 if status == "public":
+                    valTab.append(CDisplayListItem(Name,Name,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', ID, 1)], 0, Image, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'eporner' == name:
@@ -1834,7 +1846,7 @@ class Host:
                     printDBG( 'Host listsItems page Image: '+Image )
                     printDBG( 'Host listsItems page Title: '+Title )
                     printDBG( 'Host listsItems page viewers: '+Viewers )
-                    valTab.append(CDisplayListItem(Name,'[Age : '+Age+']'+'   [Views:  '+Viewers+']      ('+Title+')', CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
+                    valTab.append(CDisplayListItem(Name,'[Age : '+Age+']'+'   [Views:  '+Viewers+']      '+Title, CDisplayListItem.TYPE_VIDEO, [CUrlItem('', Url, 0)], 0, Image, None)) 
                  except: pass
            printDBG( 'Host listsItems end' )
            return valTab
@@ -1914,6 +1926,7 @@ class Host:
            if phCats:
               for (phUrl, phTitle) in phCats:
                   phTitle = phTitle.strip(' ')
+                  phTitle = decodeHtml(phTitle)
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'YOUJIZZ-clips', '', None)) 
@@ -1926,6 +1939,7 @@ class Host:
            return valTab
         if 'YOUJIZZ-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
            url = url.replace(' ','%20')
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
            try:
@@ -1950,6 +1964,7 @@ class Host:
               match = re.findall("href='(.*?)'", match[0], re.S)
            if match:
                   phUrl = match[-1]
+                  phUrl = '/categories/'+phUrl
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
                   valTab.append(CDisplayListItem('Next', 'Page: '+self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))
            printDBG( 'Host listsItems end' )
@@ -2718,7 +2733,7 @@ class Host:
         if self.MAIN_URL == 'http://www.xnxx.com':           return self.MAIN_URL
         if self.MAIN_URL == 'http://www.xvideos.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://hentaigasm.com':         return self.MAIN_URL
-        if url.startswith('http://xhamster.com/cams'):       return 'http://xhamster.com/cams'
+        if self.MAIN_URL =='http://xhamsterlive.com':        return 'http://xhamster.com/cams'
         if self.MAIN_URL == 'http://xhamster.com':           return self.MAIN_URL
         if self.MAIN_URL == 'http://www.eporner.com':        return self.MAIN_URL
         if url.startswith('http://www.pornhub.com/embed/'):  return 'http://www.pornhub.com/embed/'
@@ -2767,7 +2782,6 @@ class Host:
         if url.startswith('https://openload.co'):            return 'xxxlist.txt'
         if url.startswith('http://openload.co'):             return 'xxxlist.txt'
         if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
-        if url.startswith('http://looknij.tv'):              return 'xxxlist.txt'
         if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
         if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
         if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
@@ -2988,9 +3002,40 @@ class Host:
                  Name = item['name']
                  printDBG( 'Host url:  '+Url )
                  return Url
-           if url.startswith('http://looknij.tv'): 
-              self.looknijTvApi = LooknijTvApi() 
-              return self.looknijTvApi.getVideoLink(url)
+           return ''
+
+        if parser == 'http://xhamster.com/cams':
+           config='http://xhamsterlive.com/api/front/config'
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'xhamstercams.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': config, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return ''
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('"sessionHash":"(.*?)"', data, re.S) 
+           if not parse: return ''
+           sessionHash = parse.group(1) 
+
+           models='http://xhamsterlive.com/api/front/models'
+           COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'xhamstercams.cookie'
+           try: data = self.cm.getURLRequestData({ 'url': models, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('"models":(.*?),"ttl":', data, re.S) 
+           if not parse: return ''
+           result = simplejson.loads(parse.group(1))
+           if result:
+              for item in result:
+                 ID = str(item["id"]) 
+                 Name = item["username"]
+                 BroadcastServer = item["broadcastServer"]
+                 Url = 'rtmp://%s:1936/live?sessionHash=%s playpath=%s swfUrl=http://xhamsterlive.com/assets/cams/components/ui/Player/player.swf?isModel=false&bgColor=2829099&bufferTime=1&camFPS=25&camKeyframe=25&camQuality=85&camWidth=640&camHeight=480 pageUrl=http://xhamsterlive.com/cams/%s live=1 ' % (BroadcastServer, sessionHash, ID, Name) 
+                 if ID == url: 
+                    return Url
            return ''
 
         if parser == 'http://www.tube8.com/embed/':
@@ -3257,22 +3302,6 @@ class Host:
               if xhFile: return xhFile[0].replace(r"\/",r"/")
            return ''
         
-        if parser == 'http://xhamster.com/cams':
-           parse = re.search('userId"\]\s=\s(.*?);.*?modelId"\]\s=\s"(.*?)".*?streamUrl":"(.*?)".*?path":"(.*?)".*?geo":"(.*?)"', data, re.S)
-           if parse: 
-              b = parse.group(1)
-              d =  parse.group(2)
-              a = parse.group(3).replace(r"\/",r"/") 
-              e =  parse.group(4)
-              c = parse.group(5)
-              printDBG( 'Host gr1: '+ a)
-              printDBG( 'Host gr2: '+ b)
-              printDBG( 'Host gr3: '+ c)
-              printDBG( 'Host gr4: '+ d)
-              printDBG( 'Host gr5: '+ e)
-              videoUrl = '%s?userid=%s&pwd=&geo=%s playpath=%s swfUrl=%s pageUrl=%s' % (a, b, c, d, e, url)
-           else: return ''
-
         if parser == 'http://www.eporner.com':
            videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
            if not videoPage: return ''
