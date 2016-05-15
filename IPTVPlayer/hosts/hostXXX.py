@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.6.0"
+    XXXversion = "19.3.7.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -810,19 +810,14 @@ class Host:
            if result:
               for item in result:
                  ID = str(item["id"]) 
-                 Name = item["username"]
-                 BroadcastServer = item["broadcastServer"]
-                 Image = item["avatarUrl"].replace('\/','/')  
-                 #Image = item["previewUrl"].replace('\/','/') 
-                 status = item["status"]
-                 sessionHash = 'session-value'
-                 Url = 'rtmp://%s:1936/live?sessionHash=%s playpath=%s swfUrl=http://xhamsterlive.com/assets/cams/components/ui/Player/player.swf?isModel=false&bgColor=2829099&bufferTime=1&camFPS=25&camKeyframe=25&camQuality=85&camWidth=640&camHeight=480 pageUrl=http://xhamsterlive.com/cams/%s live=1 ' % (BroadcastServer, sessionHash, ID, Name)
-                 printDBG( 'Host listsItems Name: '+Name )
+                 Name = str(item["username"])
+                 BroadcastServer = str(item["broadcastServer"])
+                 Image = str(item["avatarUrl"].replace('\/','/'))  
+                 status = str(item["status"])
                  printDBG( 'Host listsItems ID: '+ID )
+                 printDBG( 'Host listsItems Name: '+Name )
                  printDBG( 'Host listsItems BroadcastServer: '+BroadcastServer )
-                 printDBG( 'Host listsItems Url: '  +Url )
                  printDBG( 'Host listsItems Image: '+Image )
-                 printDBG( 'Host listsItems sessionHash: '+sessionHash )
                  if status == "public":
                     valTab.append(CDisplayListItem(Name,Name,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', ID, 1)], 0, Image, None)) 
            printDBG( 'Host listsItems end' )
@@ -1516,8 +1511,9 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('categories-all(.*?)class="popup popupOverlay login-popup"', data, re.S)
-           phCats = re.findall('<a class="thumb" href="(.*?)">.*?alt="(.*?)".*?data-original="(.*?)"', parse.group(1), re.S)
+           parse = re.search('class="tag-150-list">(.*?)class="footer-zone">', data, re.S)
+           if not parse: return valTab
+           phCats = re.findall('href="(.*?)".*?alt="(.*?)".*?data-original="(.*?)"', parse.group(1), re.S)
            if phCats:
               for (phUrl, phTitle, phImage) in phCats:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -1831,18 +1827,16 @@ class Host:
            if result:
               for item in result:
                  try:
-                    Name = item["name"]
+                    Name = str(item["name"])
                     Age = str(item["age"])
-                    Playpath = item["liveCastId"]
-                    Url = item["streamUrl"].replace('\/','/') 
-                    dateStart = item["dateStart"].replace('T',' ')[:19]   
-                    Image = item["av_126"].replace('\/','/') 
+                    Playpath = str(item["liveCastId"])
+                    Url = str(item["streamUrl"].replace('\/','/')) 
+                    Image = str(item["av_126"].replace('\/','/')) 
                     Title = str(item["title"])
                     Viewers = str(item["viewers"])
                     printDBG( 'Host listsItems page Name: '+Name )
                     printDBG( 'Host listsItems page Age: '+Age )
                     printDBG( 'Host listsItems page Url: '+Url )
-                    printDBG( 'Host listsItems page dateStart: '+dateStart )
                     printDBG( 'Host listsItems page Image: '+Image )
                     printDBG( 'Host listsItems page Title: '+Title )
                     printDBG( 'Host listsItems page viewers: '+Viewers )
@@ -1949,11 +1943,13 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('<div id="main">(.*?)<!-- main end-->', data, re.S)
+           parse = re.search('style=\'padding-left:0px(.*?)<!-- main end-->', data, re.S)
            phMovies = re.findall('href=\'(.*?)\'.*?data-original="(.*?)".*?title1">(.*?)<.*?thumbtime\'>.*?>(.*?)</span>', parse.group(1), re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phRuntime) in phMovies:
                   phTitle = phTitle.strip()
+                  phTitle = decodeHtml(phTitle)
+                  phUrl = decodeHtml(phUrl)
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
