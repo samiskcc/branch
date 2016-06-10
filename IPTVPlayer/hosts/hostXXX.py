@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.4.1.0"
+    XXXversion = "19.4.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -378,16 +378,19 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('ALL SEX VIDEOS:(.*?)<a href="http://www.xnxx.com/tags/">More', data, re.S)
+           parse = re.search('cats.write\((.*?), false', data, re.S)
            if not parse: return valTab
-           phCats = re.findall('<a href="(.*?)">(.*?)<', parse.group(1), re.S)
-           if phCats:
-              for (phUrl, phTitle) in phCats:
-                  printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xnxx-clips', '', None)) 
+           #printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
+           result = simplejson.loads(parse.group(1))
+           if result:
+              for item in result:
+                 phUrl = str(item["url"].replace('\/','/'))  
+                 phTitle = str(item["label"]) 
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'xnxx-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
-           valTab.insert(0,CDisplayListItem('--- Tags alfabetical ---',  'Tags',         CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/tags/'],      'xnxx-tagsalfa', '', None)) 
+           #valTab.insert(0,CDisplayListItem('--- Tags alfabetical ---',  'Tags',         CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/tags/'],      'xnxx-tagsalfa', '', None)) 
            valTab.insert(0,CDisplayListItem('--- Hits ---', 'Hits',               CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hits/'],      'xnxx-clips', '', None)) 
            valTab.insert(0,CDisplayListItem('--- Hot ---', 'Hot',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hot/'],       'xnxx-clips', '', None)) 
            valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],      'xnxx-clips', '', None)) 
@@ -404,7 +407,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            phCats = re.findall('<td align=left nowrap><a href="(.*?)">(.*?)</a>(.*?)<', data, re.S)
            if phCats:
               for (phUrl, phTitle, phCount) in phCats:
@@ -428,11 +431,10 @@ class Host:
               return valTab
            if not data: return valTab
            #printDBG( 'Host listsItems data: '+data )
-           try: phMovies = re.findall('<li><div align="center">.*?href="(.*?)".*?src="(.*?)".*?title="(.*?)".*?#5C99FE">(.*?)<', data, re.S)
-           except:
-              printDBG( 'Host listsItems phmovies error' )
-              return valTab           
-           #printDBG( 'Host listsItems phmovies ' )
+           parse = re.search('mozaique(.*?)pagination', data, re.S)
+           if not parse: return valTab
+           #printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
+           phMovies = re.findall('<div id=".*?href="(.*?)".*?src="(.*?)".*?title="(.*?)".*?duration">(.*?)<', parse.group(1), re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phTime ) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -440,12 +442,12 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phTime: ' +phTime )                  
                   phTitle = decodeHtml(phTitle)
-                  valTab.append(CDisplayListItem(phTitle,phTime+'\n'+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<a class="nP" href="(.*?)">Next<', data, re.S)
+                  valTab.append(CDisplayListItem(phTitle,phTime+'\n'+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.search("pagination(.*?)Next", data, re.S)
+           if match: match = re.findall('href="(.*?)"', match.group(1), re.S)
            if match:
               phUrl = match[-1]
-              if phUrl[0] <> '/'[0]:
-                 phUrl = '/'+phUrl
+              #printDBG( 'Host listsItems page phUrl: '+phUrl )
               valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab
@@ -1822,7 +1824,7 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('"rooms":(.*?),"status":"OK"', data, re.S)
            if not parse: return valTab
-           #printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
+           printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
            result = simplejson.loads(parse.group(1))
            if result:
               for item in result:
