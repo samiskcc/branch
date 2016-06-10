@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.3.9.0"
+    XXXversion = "19.4.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -812,7 +812,7 @@ class Host:
                  ID = str(item["id"]) 
                  Name = str(item["username"])
                  BroadcastServer = str(item["broadcastServer"])
-                 Image = str(item["avatarUrl"].replace('\/','/'))  
+                 Image = str(item["previewUrl"].replace('\/','/'))  
                  status = str(item["status"])
                  printDBG( 'Host listsItems ID: '+ID )
                  printDBG( 'Host listsItems Name: '+Name )
@@ -2358,7 +2358,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('<article\sid="post.*?<!--\s<a\shref=".*?href="(.*?)"\stitle="(.*?)"><img\sclass="cover"\ssrc="(.*?)"\swidth=', data, re.S)
            if phMovies:
               for ( phUrl, phTitle, phImage) in phMovies:
@@ -2366,7 +2366,8 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', phImage, None)) 
+                  #valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
            if match:
               next = decodeHtml(match[0])
@@ -2384,9 +2385,10 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            parse = re.search('post-header">(.*?)</article>', data, re.S) 
-           streams = re.findall('(http[s]?://(?!(pornkino.to|picload.org))(.*?)\/.*?)[\'|"|\&|<]', parse.group(1), re.S|re.I)
+           #streams = re.findall('(http[s]?://(?!(pornkino.to|picload.org))(.*?)\/.*?)[\'|"|\&|<]', parse.group(1), re.S|re.I)
+           streams = re.findall('(http[s]?://(?!(pornkino.to|picload.org|fileload.io|www.fastimg.org))(.*?)\/.*?)[\'|"|\&|<]', parse.group(1), re.S|re.I)
            if streams:
               for (phUrl, dummy, phTitle) in streams:
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -2397,7 +2399,8 @@ class Host:
                     for item in videoUrls:
                        phUrl = item['url']
                        phTitle = item['name']
-                 valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 0)], 0, '', None)) 
+                 if phUrl <> 'https://openload.co/favicon.ico':
+                    valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 0)], 0, '', None)) 
            return valTab
 
         if 'XXXLIST' == name:
@@ -2700,6 +2703,7 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://pornkino.to':            return self.MAIN_URL
         if self.MAIN_URL == 'http://www.porntrex.com':       return self.MAIN_URL
         if self.MAIN_URL == 'http://porn720.net':            return self.MAIN_URL
         if self.MAIN_URL == 'http://rusporn.tv':             return self.MAIN_URL
@@ -2783,6 +2787,7 @@ class Host:
         if url.startswith('https://openload.co'):            return 'xxxlist.txt'
         if url.startswith('http://openload.co'):             return 'xxxlist.txt'
         if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
+        if url.startswith('http://tvtoya.pl'):               return 'xxxlist.txt'
         if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
         if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
         if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
@@ -3019,6 +3024,16 @@ class Host:
                  Name = item['name']
                  printDBG( 'Host url:  '+Url )
                  return Url
+           if url.startswith('http://tvtoya.pl'):
+              query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
+              try:
+                 data = self.cm.getURLRequestData(query_data)
+                 #printDBG( 'Host getResolvedURL data: '+data )
+              except:
+                 printDBG( 'Host getResolvedURL query error' )
+              videoUrl = re.search('data-stream="(.*?)"', data, re.S)
+              return videoUrl.group(1).replace("index","03")
+              #return self.getResolvedURL(videoUrl.group(1))
            return ''
 
         if parser == 'http://xhamster.com/cams':
@@ -3507,6 +3522,18 @@ class Host:
            videoPage = re.search('0p":"(.*?)"', data, re.S) 
            if videoPage:
               return videoPage.group(1)
+           return ''
+
+        if parser == 'http://pornkino.to':
+           videoPage = re.search('<a href="https://openload.co(.*?)"', data, re.S) 
+           if videoPage:
+              url = 'https://openload.co'+videoPage.group(1)
+              videoUrls = self.getLinksForVideo(url)
+              if videoUrls:
+                 for item in videoUrls:
+                    phUrl = item['url']
+                    phTitle = item['name']
+              return phUrl
            return ''
 
         printDBG( 'Host getResolvedURL end' )
