@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.4.2.0"
+    XXXversion = "19.4.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2811,6 +2811,10 @@ class Host:
         if url.startswith('http://www.porn.com'):            return 'http://www.porn5.com'
         if url.endswith('.mjpg'):                            return 'mjpg_stream'
         if url.endswith('.cgi'):                             return 'mjpg_stream'
+        if url.startswith('http://porndoe.com'):             return 'http://porndoe.com'
+        if url.startswith('http://www.yeptube.com'):         return 'http://www.nuvid.com'
+        if url.startswith('http://www.upornia.com'):         return 'http://www.katestube.com'
+        if url.startswith('http://www.pornpillow.com'):      return 'http://www.pornpillow.com'
 
         return ''
 
@@ -3535,7 +3539,19 @@ class Host:
                  for item in videoUrls:
                     phUrl = item['url']
                     phTitle = item['name']
-              return phUrl
+                    return phUrl
+           return ''
+
+        if parser == 'http://porndoe.com':
+           videoPage = re.findall('file: "(.*?)"', data, re.S)   
+           if videoPage:
+              return videoPage[1]
+           return ''
+
+        if parser == 'http://www.pornpillow.com':
+           videoPage = re.findall("'file': '(.*?)'", data, re.S)   
+           if videoPage:
+              return videoPage[0]
            return ''
 
         printDBG( 'Host getResolvedURL end' )
