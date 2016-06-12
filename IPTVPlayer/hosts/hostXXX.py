@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.4.3.0"
+    XXXversion = "19.5.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -234,6 +234,7 @@ class Host:
            valTab.append(CDisplayListItem('RUSPORN',     'http://rusporn.tv/', CDisplayListItem.TYPE_CATEGORY, ['http://rusporn.tv/categories.html'],'RUSPORN', 'http://rusporn.tv/App_Themes/ruporn/img/logo.png?12013', None)) 
            valTab.append(CDisplayListItem('PORN720',     'http://porn720.net/', CDisplayListItem.TYPE_CATEGORY, ['http://porn720.net/'],'PORN720', 'http://porn720.net/wp-content/themes/porn720/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNTREX',     'http://www.porntrex.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porntrex.com/categories'],'PORNTREX', 'http://www.porntrex.com/templates/frontend/porntrex/img/logo.png', None)) 
+           valTab.append(CDisplayListItem('PORNDOE',     'http://www.porndoe.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porndoe.com/categories'],'PORNDOE', 'http://porndoe.com/themes/frontend/white/assets/images/logo_fb.jpg', None)) 
            valTab.sort(key=lambda poz: poz.name)
            self.SEARCH_proc=name
            valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
@@ -2345,6 +2346,7 @@ class Host:
                  for (phUrl, phTitle) in phCats: 
                     if phTitle != "High Definition Videos":
                        search = "http://pornkino.to/page/%s/?s=%s" % (str(self.page), phTitle)
+                       phTitle = decodeHtml(phTitle)
                        printDBG( 'Host listsItems phTitle: '+phTitle )
                        printDBG( 'Host listsItems phUrl: '  +phUrl )
                        valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [search],'PORNKINO-clips', '', None)) 
@@ -2360,7 +2362,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('<article\sid="post.*?<!--\s<a\shref=".*?href="(.*?)"\stitle="(.*?)"><img\sclass="cover"\ssrc="(.*?)"\swidth=', data, re.S)
            if phMovies:
               for ( phUrl, phTitle, phImage) in phMovies:
@@ -2368,7 +2370,6 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  #valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', phImage, None)) 
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
            if match:
@@ -2376,33 +2377,6 @@ class Host:
               printDBG( 'Host listsItems page next: '+next )
               valTab.append(CDisplayListItem('Next', 'Page: '+next, CDisplayListItem.TYPE_CATEGORY, [next], name, '', None))
            printDBG( 'Host listsItems end' )
-           return valTab
-
-        if 'PORNKINO-serwer' == name:
-           printDBG( 'Host listsItems begin name='+name )
-           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-           try:
-              data = self.cm.getURLRequestData(query_data)
-           except:
-              printDBG( 'Host listsItems query error' )
-              printDBG( 'Host listsItems query error url: '+url )
-              return valTab
-           printDBG( 'Host listsItems data: '+data )
-           parse = re.search('post-header">(.*?)</article>', data, re.S) 
-           #streams = re.findall('(http[s]?://(?!(pornkino.to|picload.org))(.*?)\/.*?)[\'|"|\&|<]', parse.group(1), re.S|re.I)
-           streams = re.findall('(http[s]?://(?!(pornkino.to|picload.org|fileload.io|www.fastimg.org))(.*?)\/.*?)[\'|"|\&|<]', parse.group(1), re.S|re.I)
-           if streams:
-              for (phUrl, dummy, phTitle) in streams:
-                 printDBG( 'Host listsItems phUrl: '  +phUrl )
-                 printDBG( 'Host listsItems phImage: '+dummy )
-                 printDBG( 'Host listsItems phTitle: '+phTitle )
-                 videoUrls = self.getLinksForVideo(phUrl)
-                 if videoUrls:
-                    for item in videoUrls:
-                       phUrl = item['url']
-                       phTitle = item['name']
-                 if phUrl <> 'https://openload.co/favicon.ico':
-                    valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 0)], 0, '', None)) 
            return valTab
 
         if 'XXXLIST' == name:
@@ -2644,7 +2618,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('categories\?s=a(.*?)footer-container"', data, re.S)
            if parse:
               phCats = re.findall('a href="(.*?)".*?data-original="(.*?)".*?title="(.*?)"', parse.group(1), re.S)
@@ -2666,7 +2640,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('class="col-sm-12"(.*?)footer-container"', data, re.S)
            if parse:
               Movies = re.findall('href="(.*?)".*?data-original="(.*?)".*?title="(.*?)".*?fa fa-clock-o"></i>(.*?)</div>', parse.group(1), re.S) 
@@ -2681,6 +2655,55 @@ class Host:
                  if match:
                     phUrl = match.group(1)
                     valTab.append(CDisplayListItem('Next ', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [phUrl], name, '', catUrl))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
+        if 'PORNDOE' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://porndoe.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('id="dropdown-categories(.*?)CATEGORIES DROPDOWN', data, re.S)
+           if parse:
+              phCats = re.findall('data-url="(.*?)".*?"category ">(.*?)<', parse.group(1), re.S)
+              if phCats:
+                 for (phUrl, phTitle) in phCats:
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     valTab.append(CDisplayListItem(decodeHtml(phTitle),self.MAIN_URL+phUrl,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'PORNDOE-clips', '', phUrl)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'PORNDOE-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           printDBG( 'Host listsItems data: '+data )
+           parse = re.search('class="videos-listing premium-logos "(.*?)paginator', data, re.S)
+           if parse:
+              Movies = re.findall('href="(.*?)".*?title="(.*?)".*?data-video-image="(.*?)".*?duration">(.*?)<', parse.group(1), re.S) 
+              if Movies:
+                 for (phUrl, phTitle, phImage, Time) in Movies:
+                     Time = Time.strip()
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     printDBG( 'Host listsItems Time: '+Time ) 
+                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.search('page next"><a href="(.*?)"', data, re.S)
+           if match:
+              phUrl = match.group(1)
+              valTab.append(CDisplayListItem('Next ', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -2705,6 +2728,7 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://porndoe.com':            return self.MAIN_URL
         if self.MAIN_URL == 'http://pornkino.to':            return self.MAIN_URL
         if self.MAIN_URL == 'http://www.porntrex.com':       return self.MAIN_URL
         if self.MAIN_URL == 'http://porn720.net':            return self.MAIN_URL
@@ -3543,9 +3567,12 @@ class Host:
            return ''
 
         if parser == 'http://porndoe.com':
-           videoPage = re.findall('file: "(.*?)"', data, re.S)   
+           videoPage = re.findall('file:\s"(.*?)".*?"(.*?)"', data, re.S)  
            if videoPage:
-              return videoPage[1]
+              for (link, default) in videoPage:
+                 printDBG( 'Host listsItems link: '  +link )
+                 printDBG( 'Host listsItems default: '+default )
+                 if default == 'default': return link
            return ''
 
         if parser == 'http://www.pornpillow.com':
