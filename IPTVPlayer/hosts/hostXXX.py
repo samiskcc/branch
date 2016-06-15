@@ -239,6 +239,7 @@ class Host:
            self.SEARCH_proc=name
            valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
            valTab.insert(0,CDisplayListItem('---Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,             [''], '',        '', None)) 
+           valTab.append(CDisplayListItem('XHAMSTERLIVE',       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,['http://xhamsterlive.com'], 'xhamster-cams', 'https://cdn.stripchat.com/assets/common/images/favicon_xh.png',None))
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
            valTab.append(CDisplayListItem('LIVEJASMIN',     'http://new.livejasmin.com', CDisplayListItem.TYPE_CATEGORY, ['http://new.livejasmin.com/en/girl/free+chat?selectedFilters=12'],'LIVEJASMIN', 'http://livejasmins.fr/livejasmin-france.png', None)) 
@@ -1880,7 +1881,7 @@ class Host:
               return ''
            #printDBG( 'Host getResolvedURL data: '+data )
            parse = re.search('UNLIMITED_SAVED_SEARCHES(.*?)directoryPager"', data,re.S)
-           #printDBG( 'Host getResolvedURL data: '+parse.group(1) )
+           #printDBG( 'Host getResolvedURL data2: '+parse.group(1) )
            if parse:
               phCats = re.findall('profileDataBox"> <a href="(.*?)".*?data-src="(.*?)".*?class="flag flag-(.*?)"', parse.group(1), re.S) 
               if phCats:
@@ -3034,14 +3035,16 @@ class Host:
               printDBG( 'Host getResolvedURL query error url: '+url )
               return ''
            #printDBG( 'Host getResolvedURL data: '+data )
-           Movies = re.search('data="(.*?)".*?chatUrl=(.*?)&.*?videoAppUrl=(.*?)live.*?videoPlayUrl=(.*?)&', data, re.S) 
+           Movies = re.search('data="(.*?)".*?videoPlayUrl=(.*?)&.*?videoAppUrl=(.*?)&', data, re.S) 
            if Movies:
               swfUrl = Movies.group(1)
+              videoPlayUrl = Movies.group(2)
               videoAppUrl = Movies.group(3)
-              videoPlayUrl = Movies.group(4)
-              videoAppUrl = videoAppUrl+'live'
-              #Url = '%s playpath=%s swfUrl=%s conn=S:OK live=1 pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
-              Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
+              printDBG( 'Host swfUrl: '  +swfUrl )
+              printDBG( 'Host videoPlayUrl: '  +videoPlayUrl )
+              printDBG( 'videoPlayUrl: '  +videoPlayUrl )
+              Url = '%s playpath=%s swfUrl=%s conn=S:OK live=1 pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
+              #Url = '%s playpath=%s swfUrl=%s pageUrl=%s' % (videoAppUrl, videoPlayUrl, swfUrl, url)
               printDBG( 'Host listsItems Url: '  +Url )
               return Url
            else: return ''
