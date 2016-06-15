@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.5.0.0"
+    XXXversion = "19.5.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -976,7 +976,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('<a class="thumb-link" href="(.*?)" title="(.*?)".*?<i class="icon icon-video"></i>(.*?)<.*?<img data-original="(.*?)"',data,re.S) 
            if phMovies:
               for (phUrl, phTitle, phVid, phImage ) in phMovies:           
@@ -1791,7 +1791,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            Movies = re.findall('\'bla\', \'(.*?)\'.*?u=(.*?)".*?\stitle="(.*?)".*?src="(.*?)"', data, re.S) 
            if Movies:
               for (serwer, Url, Title, Image) in Movies:
@@ -2180,7 +2180,7 @@ class Host:
            except:
               printDBG( 'Host listsItems query error cookie' )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phCats = re.findall('class="perf_container ".*?img src="(.*?)".*?alt="(.*?)"', data, re.S) 
            if phCats:
               for (phImage, phTitle) in phCats: 
@@ -2591,7 +2591,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('main class="content"(.*?)footer', data, re.S)
            if parse:
               Movies = re.findall('href="(.*?)".*?title="(.*?)".*?src="(.*?)".*?fa-clock-o"></i>(.*?)</div>.*?href=', parse.group(1), re.S) 
@@ -2669,7 +2669,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('id="dropdown-categories(.*?)CATEGORIES DROPDOWN', data, re.S)
            if parse:
               phCats = re.findall('data-url="(.*?)".*?"category ">(.*?)<', parse.group(1), re.S)
@@ -2690,7 +2690,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('class="videos-listing premium-logos "(.*?)paginator', data, re.S)
            if parse:
               Movies = re.findall('href="(.*?)".*?title="(.*?)".*?data-video-image="(.*?)".*?duration">(.*?)<', parse.group(1), re.S) 
