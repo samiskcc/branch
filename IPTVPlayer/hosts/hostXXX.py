@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.5.2.0"
+    XXXversion = "19.5.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2815,6 +2815,7 @@ class Host:
         if url.startswith('http://openload.co'):             return 'xxxlist.txt'
         if url.startswith('http://www.cda.pl'):              return 'xxxlist.txt'
         if url.startswith('http://tvtoya.pl'):               return 'xxxlist.txt'
+        if url.startswith('http://polskikarting.pl'):        return 'xxxlist.txt'
         if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
         if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
         if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
@@ -3066,7 +3067,15 @@ class Host:
                  printDBG( 'Host getResolvedURL query error' )
               videoUrl = re.search('data-stream="(.*?)"', data, re.S)
               return videoUrl.group(1).replace("index","03")
-              #return self.getResolvedURL(videoUrl.group(1))
+           if url.startswith('http://polskikarting.pl'):
+              query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
+              try:
+                 data = self.cm.getURLRequestData(query_data)
+                 printDBG( 'Host getResolvedURL data: '+data )
+              except:
+                 printDBG( 'Host getResolvedURL query error' )
+              videoUrl = re.findall("file: '(.*?)'", data, re.S)
+              return videoUrl[0] # or videoUrl[1]
            return ''
 
         if parser == 'http://xhamster.com/cams':
