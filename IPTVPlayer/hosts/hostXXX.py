@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.5.3.0"
+    XXXversion = "19.5.3.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3579,12 +3579,12 @@ class Host:
            return ''
 
         if parser == 'http://porndoe.com':
-           videoPage = re.findall('file:\s"(.*?)".*?"(.*?)"', data, re.S)  
+           videoPage = re.findall('file:\s"(.*?)".*?label:"(.*?)"', data, re.S)  
            if videoPage:
               for (link, default) in videoPage:
                  printDBG( 'Host listsItems link: '  +link )
                  printDBG( 'Host listsItems default: '+default )
-                 if default == 'default': return link
+              return link
            return ''
 
         if parser == 'http://www.pornpillow.com':
