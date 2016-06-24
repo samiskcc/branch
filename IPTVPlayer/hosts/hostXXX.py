@@ -134,7 +134,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.5.3.1"
+    XXXversion = "19.5.3.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1522,7 +1522,7 @@ class Host:
               for (phUrl, phTitle, phImage) in phCats:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'pornhd-clips', phImage, phUrl)) 
+                  valTab.append(CDisplayListItem(decodeHtml(phTitle),decodeHtml(phTitle),CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'pornhd-clips', phImage, phUrl)) 
            valTab.sort(key=lambda poz: poz.name)
            printDBG( 'Host listsItems end' )
            return valTab
@@ -1537,25 +1537,13 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           x = 0
            Movies = re.findall('<a class="thumb" href="(.*?)".*?alt="(.*?)".*?data-original="(.*?)".*?<time>(.*?)</time>.*?', data, re.S)
            if Movies:
               for (Url, Title, Image, Runtime) in Movies:
                   valTab.append(CDisplayListItem(decodeHtml(Title),'['+Runtime+'] '+decodeHtml(Title),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+Url, 1)], 0, Image, None)) 
-                  x = x + 1
-           match = re.findall('li class="next ".*?nav-bar section-title', data, re.S)
+           match = re.search('rel="next" href="(.*?)"', data, re.S)
            if match:
-              printDBG( 'Host listsItems page match: '+match[0] )
-              match = re.findall('href="(.*?)\?(.*?)=(.*?)"', match[0], re.S)
-           if match:
-              for ( phUrl, phTitle, phNumber) in match:
-                  #phTitle = phUrl.strip('/category')
-                  phUrl = phUrl+'?'+phTitle+'='+phNumber
-                  printDBG( 'Host listsItems page phTitle: '+phTitle )
-                  printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  printDBG( 'Host listsItems page phNumber: '+phNumber )
-                  if phTitle == 'page':
-                     valTab.append(CDisplayListItem('Next '+phTitle+phNumber, 'Page: '+phNumber, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+              valTab.append(CDisplayListItem('Next', 'Page : '+match.group(1), CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+match.group(1)], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
 
@@ -3136,6 +3124,14 @@ class Host:
            return ''
 
         if parser == 'http://www.pornhd.com':
+           videoPage = re.findall("'1080p'  : '(.*?)'", data, re.S)
+           if videoPage:
+              printDBG( 'Host pornhd videoPage:'+videoPage[0])
+              return videoPage[0]
+           videoPage = re.findall("'720p'  : '(.*?)'", data, re.S)
+           if videoPage:
+              printDBG( 'Host pornhd videoPage:'+videoPage[0])
+              return videoPage[0]
            videoPage = re.findall("'480p'  : '(.*?)'", data, re.S)
            if videoPage:
               printDBG( 'Host pornhd videoPage:'+videoPage[0])
@@ -3579,12 +3575,14 @@ class Host:
            return ''
 
         if parser == 'http://porndoe.com':
-           videoPage = re.findall('file:\s"(.*?)".*?label:"(.*?)"', data, re.S)  
-           if videoPage:
-              for (link, default) in videoPage:
-                 printDBG( 'Host listsItems link: '  +link )
-                 printDBG( 'Host listsItems default: '+default )
-              return link
+           parse = re.search('sources:(.*?)width', data, re.S) 
+           if parse:
+              videoPage = re.findall('file:\s"(.*?)".*?label:"(.*?)"', parse.group(1), re.S)  
+              if videoPage:
+                 for (link, default) in videoPage:
+                    printDBG( 'Host listsItems link: '  +link )
+                    printDBG( 'Host listsItems default: '+default )
+                 return link
            return ''
 
         if parser == 'http://www.pornpillow.com':
