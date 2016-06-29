@@ -21,7 +21,10 @@ from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Components.config import config, ConfigSelection, ConfigYesNo, ConfigText, getConfigListEntry, ConfigPIN, ConfigDirectory
 from time import sleep
 ###################################################
-
+# E2 GUI COMMPONENTS 
+###################################################
+from Plugins.Extensions.IPTVPlayer.components.asynccall import MainSessionWrapper
+from Screens.MessageBox import MessageBox 
 ###################################################
 # Config options for HOST
 ###################################################
@@ -134,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.5.3.2"
+    XXXversion = "19.6.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -145,6 +148,7 @@ class Host:
         self.cm = pCommon.common()
         self.up = urlparser() 
         self.history = CSearchHistoryHelper('xxx')
+        self.sessionEx = MainSessionWrapper() 
         self.currList = []
         _url = 'https://gitlab.com/iptv-host-xxx/iptv-host-xxx/blob/master/IPTVPlayer/hosts/hostXXX.py'
         query_data = { 'url': _url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -787,7 +791,7 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                  valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+phRuntime+'] '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall("<div class='pager'>.*?>Next<", data, re.S)
            if match:
               match = re.findall("href='(.*?)'", match[0], re.S)
@@ -1082,7 +1086,7 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="content.*?<a href="(.*?)" title="(.*?)".*?src="(.*?)".*?TIME:  (.*?)</div>', data, re.S)
+           phMovies = re.findall('class="content.*?href="(.*?)".*?itle="(.*?)".*?src="(.*?)".*?TIME:  (.*?)</div>', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -1345,7 +1349,8 @@ class Host:
                  data = f.read()
                  f.close() 
                  wersja = re.search('XXXversion = "(.*?)"', data, re.S)
-                 printDBG( 'HostXXX aktualna wersja wtyczki '+wersja.group(1) )
+                 aktualna = wersja.group(1)
+                 printDBG( 'HostXXX aktualna wersja wtyczki '+aktualna )
            except:
               printDBG( 'HostXXX error openfile ' )
 
@@ -1356,6 +1361,8 @@ class Host:
 
            if url:
               try:
+                 info = 'Zaraz nastąpi Restart GUI .\n \n Wersja hostXXX w tunerze %s' % aktualna
+                 self.sessionEx.open(MessageBox, info, type = MessageBox.TYPE_INFO, timeout = 3 )
                  from enigma import quitMainloop
                  quitMainloop(3)
               except: pass
@@ -1758,7 +1765,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            parse = re.search('class="categoryList"><h2>Darmowe(.*?)class="adSpace"', data,re.S)
            if parse:
               phCats = re.findall('href="(.*?)".*?"_self">(.*?)<', parse.group(1), re.S) 
@@ -2021,23 +2028,15 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           self.scope = 0 
-           self.scopeText = ['Straight','Gays', 'Transsexual'] 
-           parse = re.search('<span>Categories<(.*?)a href="/albums"', data, re.S) 
+           parse = re.search('contain_cols(.*?)<div class="drop_inner">', data, re.S) 
            if parse:
-              genre = re.findall('<a href="(.*?)">(.*?)</a>', parse.group(1), re.S)
-              if genre:
-                 for genrepart, phTitle in genre:
-                    genretype = re.search('<span>(.*?)</span>', phTitle)
-                    if genretype:
-                       genretopic = genretype.group(1)
-                    else:
-                       if genretopic == self.scopeText[self.scope]:
-                          phUrl = "%s%s" % (self.MAIN_URL,genrepart) 
-                          printDBG( 'Host listsItems phUrl: '  +phUrl )
-                          printDBG( 'Host listsItems phTitle: '+phTitle )
-                          valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'DRTUBER-clips', '', None)) 
-              valTab.sort(key=lambda poz: poz.name)
+              Cats = re.findall('<a href="(.*?)">(.*?)</a>', parse.group(1), re.S)
+              if Cats:
+                 for (phUrl, phTitle) in Cats:
+                    printDBG( 'Host listsItems phUrl: '  +self.MAIN_URL+phUrl )
+                    printDBG( 'Host listsItems phTitle: '+phTitle )
+                    valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'DRTUBER-clips', '', None)) 
+                 valTab.sort(key=lambda poz: poz.name)
            printDBG( 'Host listsItems end' )
            return valTab
         if 'DRTUBER-clips' == name:
@@ -2050,7 +2049,9 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('><a\shref="(/video.*?)"\sclass="th\sch-video.*?src="(.*?)"\salt="(.*?)".*?time_th"></i><em>(.*?)<', data, re.S)  
+           parse = re.search('heading bg_round(.*?)pagination', data, re.S) 
+           if not parse: return valTab
+           phMovies = re.findall('><a\shref="(.*?)".*?src="(.*?)"\salt="(.*?)".*?time.*?<em>(.*?)<', parse.group(1), re.S)  
            if phMovies:
               for (phUrl, phImage, phTitle, phRuntime) in phMovies:
                   phTitle = decodeHtml(phTitle)
@@ -3669,10 +3670,11 @@ def decodeHtml(text):
 	text = text.replace('\u2013',"-")
 	text = text.replace('&#8216;',"'")
 	text = text.replace('&#8217;',"'")
+	text = text.replace('#8217;',"'")
 	text = text.replace('&#8220;',"'")
 	text = text.replace('&#8221;','"')
 	text = text.replace('&#8222;',',')
-	
+	text = text.replace('&#x27;',"'")
 	text = text.replace('&#8230;','...')
 	text = text.replace('\u2026','...')
 	return text	
