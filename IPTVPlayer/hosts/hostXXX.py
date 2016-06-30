@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.6.0.0"
+    XXXversion = "19.7.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -517,7 +517,7 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('class="main-categories"(.*?)</div>', data, re.S)
+           parse = re.search('class="main-categories".*?href="(.*?)</div>', data, re.S)
            if parse:
               phCats = re.findall('<a href="(.*?)".*?>(.*?)<', parse.group(1), re.S)
               if phCats:
@@ -563,15 +563,16 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)" title="(.*?)"', data, re.S)
+           printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)" title="(.*?)".*?"duration">(.*?)<', data, re.S)
            if phMovies:
-              for (phImage, phUrl, phTitle ) in phMovies:
+              for (phImage, phUrl, phTitle, Runtime ) in phMovies:
+                  phTitle = decodeHtml(phTitle)
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
-                  phTitle = decodeHtml(phTitle)
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                  printDBG( 'Host listsItems Runtime: '+Runtime )
+                  valTab.append(CDisplayListItem(phTitle,Runtime.strip()+'  '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            next = re.search('pagination(.*?)>Next<', data, re.S)
            if next:
               match = re.findall('a href="(.*?)"', next.group(1), re.S)
@@ -924,10 +925,10 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('<div\sclass="wrap">.*?<a\shref="(.*?)".*?\stitle="(.*?)".*?data-mediumthumb="(.*?)".*?<var\sclass="duration">(.*?)</var>.*?<span\sclass="views"><var>(.*?)<.*?<var\sclass="added">(.*?)<', data, re.S)
+           printDBG( 'Host listsItems data: '+data )
+           phMovies = re.findall('<div\sclass="wrap">.*?<a\shref="(.*?)".*?itle="(.*?)".*?class="duration">(.*?)</var>.*?data-mediumthumb="(.*?)".*?class="views"><var>(.*?)<.*?class="added">(.*?)<', data, re.S)
            if phMovies:
-              for (phUrl, phTitle, phImage, phRuntime, phViews, phAdded) in phMovies:
+              for (phUrl, phTitle, phRuntime, phImage, phViews, phAdded) in phMovies:
                   phUrl = self.MAIN_URL+phUrl
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
@@ -1765,7 +1766,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('class="categoryList"><h2>Darmowe(.*?)class="adSpace"', data,re.S)
            if parse:
               phCats = re.findall('href="(.*?)".*?"_self">(.*?)<', parse.group(1), re.S) 
@@ -2640,7 +2641,7 @@ class Host:
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phTitle: '+phTitle )
                      printDBG( 'Host listsItems Time: '+Time ) 
-                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phUrl),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
                  match = re.search('</a></li><li><a href="(.*?)".*?Next page', data, re.S)
                  if match:
                     phUrl = match.group(1)
@@ -2960,6 +2961,14 @@ class Host:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
            for serwer in range(419, 400, -1): #419, 400
+              data =''
+              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
+              try:
+                 data = urllib2.urlopen(newurl)
+              except:
+                 printDBG( 'Host error newurl:  '+newurl )
+              if data: return newurl
+           for serwer in range(371, 340, -1): #419, 400
               data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
               try:
@@ -3317,6 +3326,8 @@ class Host:
            return ''
 
         if parser == 'http://www.xvideos.com':
+           videoUrl = re.search("setVideoUrlHigh\('(.*?)'", data, re.S)
+           if videoUrl: return decodeUrl(videoUrl.group(1))
            videoUrl = re.search('flv_url=(.*?)&', data, re.S)
            if videoUrl: return decodeUrl(videoUrl.group(1))
            return ''
@@ -3392,17 +3403,13 @@ class Host:
            return ''
         
         if parser == 'http://www.pornhub.com':
-           match = re.compile('"video_url":"([^"]+)"').findall(data)
-           if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
-           if not match: match = re.compile('"quality_480p":"([^"]+)"').findall(data)
-           if not match: match = re.compile('"quality_240p":"([^"]+)"').findall(data)
-           if not match: match = re.compile("quality_720p = '(.*?)'").findall(data)
-           if not match: match = re.compile("quality_480p = '(.*?)'").findall(data)
-           if not match: match = re.compile("quality_240p = '(.*?)'").findall(data)
-           if not match: 
-                         printDBG( 'Host getResolvedURL not match' )  
-                         return ''
-           return match[0]   
+           match = re.findall("player_quality_720p = '(.*?)'", data, re.S)
+           if match: return match[0]
+           match = re.findall("player_quality_480p = '(.*?)'", data, re.S)
+           if match: return match[0]
+           match = re.findall("player_quality_240p = '(.*?)'", data, re.S)
+           if match: return match[0]
+           return ''
 
         if parser == 'http://www.4tube.com':
            #printDBG( 'Host getResolvedURL data: '+data )
