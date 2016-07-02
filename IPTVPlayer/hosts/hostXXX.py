@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.7.0.0"
+    XXXversion = "19.7.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1363,7 +1363,7 @@ class Host:
            if url:
               try:
                  info = 'Zaraz nastąpi Restart GUI .\n \n Wersja hostXXX w tunerze %s' % aktualna
-                 self.sessionEx.open(MessageBox, info, type = MessageBox.TYPE_INFO, timeout = 3 )
+                 self.sessionEx.open(MessageBox, info, type = MessageBox.TYPE_INFO, timeout = 2 )
                  from enigma import quitMainloop
                  quitMainloop(3)
               except: pass
@@ -2361,7 +2361,15 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                  query_data = { 'url': phUrl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+                  try:
+                     data2 = self.cm.getURLRequestData(query_data)
+                  except:
+                     printDBG( 'Host listsItems query error url: '+url )
+                     return valTab
+                  #printDBG( 'Host internal: '+data2 )
+                  if re.search('href="http[s]?://openload.co/', data2, re.S):
+                     valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNKINO-serwer', phImage, None))
            match = re.findall('<link rel="next" href="(.*?)"', data, re.S)
            if match:
               next = decodeHtml(match[0])
@@ -2369,6 +2377,31 @@ class Host:
               valTab.append(CDisplayListItem('Next', 'Page: '+next, CDisplayListItem.TYPE_CATEGORY, [next], name, '', None))
            printDBG( 'Host listsItems end' )
            return valTab
+        if 'PORNKINO-serwer' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('class="entry_table">(.*?)class="entry_right">', data, re.S)
+           if not parse: return valTab
+           streams = re.findall('<a href="(.*?)".*?<span>(.*?)</span>', parse.group(1), re.S|re.I)
+           if streams:
+              for (phUrl, phTitle) in streams:
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 serwery = re.search("http[s]?://(.*?)/", phUrl, re.S) 
+                 if serwery: 
+                    Url = serwery.group(1)
+                    printDBG( 'Host listsItems Url: '  +Url )
+                    #if Url <> 'filecrypt.cc' and Url <> 'www.bitporno.sx' and Url <> 'www.keeplinks.eu' and Url <> 'relink.to' and Url <> 'hdstream.to' and Url <> 'sh.st':
+                    if Url == 'openload.co' or Url == 'streamcloud.eu' or Url == 'www.flashx.tv' or Url == 'www.nowvideo.sx':
+                       valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, '', None)) 
+           return valTab 
 
         if 'XXXLIST' == name:
            printDBG( 'Host listsItems begin name='+name )
@@ -2842,6 +2875,16 @@ class Host:
         printDBG( 'Host getResolvedURL parser: '+parser )
         if parser == '': return url
 
+        if parser == 'http://pornkino.to':
+           #url = decodeUrl(url)
+           videoUrls = self.getLinksForVideo(url)
+           if videoUrls:
+              for item in videoUrls:
+                 phUrl = item['url']
+                 phTitle = item['name']
+                 return phUrl
+           return ''
+
         if parser == 'mjpg_stream':
            stream=urllib.urlopen(url)
            bytes=''
@@ -2944,7 +2987,7 @@ class Host:
            return ''
         
         if parser == 'http://www.myfreecams.com':
-           for serwer in range(491, 438, -1):  #491, 438
+           for serwer in range(491, 464, -1):  #491, 465
               data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
               try:
@@ -2952,7 +2995,7 @@ class Host:
               except:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
-           for serwer in range(627, 600, -1):  #627, 600
+           for serwer in range(463, 438, -1):  #463, 439
               data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
               try:
@@ -2960,7 +3003,7 @@ class Host:
               except:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
-           for serwer in range(419, 400, -1): #419, 400
+           for serwer in range(627, 600, -1):  #627, 601
               data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
               try:
@@ -2968,7 +3011,15 @@ class Host:
               except:
                  printDBG( 'Host error newurl:  '+newurl )
               if data: return newurl
-           for serwer in range(371, 340, -1): #419, 400
+           for serwer in range(419, 400, -1): #419, 401
+              data =''
+              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
+              try:
+                 data = urllib2.urlopen(newurl)
+              except:
+                 printDBG( 'Host error newurl:  '+newurl )
+              if data: return newurl
+           for serwer in range(371, 340, -1): #371, 341
               data =''
               newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
               try:
@@ -3568,18 +3619,6 @@ class Host:
            videoPage = re.search('0p":"(.*?)"', data, re.S) 
            if videoPage:
               return videoPage.group(1)
-           return ''
-
-        if parser == 'http://pornkino.to':
-           videoPage = re.search('<a href="https://openload.co(.*?)"', data, re.S) 
-           if videoPage:
-              url = 'https://openload.co'+videoPage.group(1)
-              videoUrls = self.getLinksForVideo(url)
-              if videoUrls:
-                 for item in videoUrls:
-                    phUrl = item['url']
-                    phTitle = item['name']
-                    return phUrl
            return ''
 
         if parser == 'http://porndoe.com':
