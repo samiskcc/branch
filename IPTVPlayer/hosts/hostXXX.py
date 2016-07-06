@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.7.1.0"
+    XXXversion = "19.7.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3135,7 +3135,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return ''
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            parse = re.search('"sessionHash":"(.*?)"', data, re.S) 
            if not parse: return ''
            sessionHash = parse.group(1) 
@@ -3147,7 +3147,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            parse = re.search('"models":(.*?),"ttl":', data, re.S) 
            if not parse: return ''
            result = simplejson.loads(parse.group(1))
@@ -3156,7 +3156,8 @@ class Host:
                  ID = str(item["id"]) 
                  Name = item["username"]
                  BroadcastServer = item["broadcastServer"]
-                 Url = 'rtmp://%s:1936/live?sessionHash=%s playpath=%s swfUrl=http://xhamsterlive.com/assets/cams/components/ui/Player/player.swf?isModel=false&bgColor=2829099&bufferTime=1&camFPS=25&camKeyframe=25&camQuality=85&camWidth=640&camHeight=480 pageUrl=http://xhamsterlive.com/cams/%s live=1 ' % (BroadcastServer, sessionHash, ID, Name) 
+                 swf_url = 'http://xhamsterlive.com/assets/cams/components/ui/Player/player.swf?bgColor=2829099&isModel=false&version=1.5.857&bufferTime=1&camFPS=30&camKeyframe=15&camQuality=85&camWidth=640&camHeight=480'
+                 Url = 'rtmp://%s:1935/live?sessionHash=%s&domain=xhamsterlive.com playpath=%s swfUrl=%s pageUrl=http://xhamsterlive.com/cams/%s live=1 ' % (BroadcastServer, sessionHash, ID, swf_url, Name) 
                  if ID == url: 
                     return Url
            return ''
