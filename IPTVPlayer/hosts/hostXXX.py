@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.8.0.0"
+    XXXversion = "19.8.1.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -437,10 +437,10 @@ class Host:
               return valTab
            if not data: return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('mozaique(.*?)pagination', data, re.S)
-           if not parse: return valTab
+           #parse = re.search('mozaique(.*?)pagination', data, re.S)
+           #if not parse: return valTab
            #printDBG( 'Host listsItems parse.group(1): '+parse.group(1) )
-           phMovies = re.findall('<div id=".*?href="(.*?)".*?src="(.*?)".*?title="(.*?)".*?duration">(.*?)<', parse.group(1), re.S)
+           phMovies = re.findall('<div id="video.*?href="(.*?)".*?src="(.*?)".*?title="(.*?)".*?duration">(.*?)<', data, re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phTime ) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -750,13 +750,16 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('id="letter_A">(.*?)id="footer">', data, re.S)
+           if not parse: return valTab
            phCats = re.findall('href="(.*?)">(.*?)<.*?/a>', parse.group(1), re.S|re.I)
            if phCats:
               for (phUrl, phTitle) in phCats:
                   phTitle = phTitle.strip(' ')
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
+                  channels = re.search('.+/channels/.+', phUrl)
+                  if channels:
+                     valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'xhamster-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.insert(0,CDisplayListItem("--- Kamerki ---",       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/cams"], 'xhamster-cams', 'https://cdn.stripchat.com/assets/common/images/favicon_xh.png',None))
            valTab.insert(0,CDisplayListItem("--- New ---",       "New",       CDisplayListItem.TYPE_CATEGORY,["http://xhamster.com/"], 'xhamster-clips', '',None))
