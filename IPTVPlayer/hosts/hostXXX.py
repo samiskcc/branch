@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.7.2.0"
+    XXXversion = "19.7.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -250,7 +250,7 @@ class Host:
            valTab.append(CDisplayListItem('BONGACAMS',     'https://pl.bongacams.com/', CDisplayListItem.TYPE_CATEGORY, ['https://pl.bongacams.com/'],'BONGACAMS', 'http:////i.bongacams.com/images/bongacams_logo3_header.png', None)) 
            valTab.append(CDisplayListItem('RAMPANT',     'https://www.rampant.tv/channel/', CDisplayListItem.TYPE_CATEGORY, ['https://www.rampant.tv/channel/'],'RAMPANT', 'https://www.rampant.tv/new-images/rampant_logo.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
-           #valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
+           valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            valTab.append(CDisplayListItem('+++ XXXLIST +++',     'xxxlist.txt', CDisplayListItem.TYPE_CATEGORY, [''],'XXXLIST', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
@@ -828,7 +828,7 @@ class Host:
                  printDBG( 'Host listsItems BroadcastServer: '+BroadcastServer )
                  printDBG( 'Host listsItems Image: '+Image )
                  if status == "public":
-                    valTab.append(CDisplayListItem(Name,Name,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', ID, 1)], 0, Image, None)) 
+                    valTab.append(CDisplayListItem(Name,Name+'   [status: '+status+']',CDisplayListItem.TYPE_VIDEO, [CUrlItem('', ID, 1)], 0, Image, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'eporner' == name:
@@ -3437,16 +3437,12 @@ class Host:
            return ''
         
         if parser == 'http://www.eporner.com':
-           videoPage = re.findall("mediaspace --> <script>.*?getScript.*?'(.*?)'", data, re.S)
-           if not videoPage: return ''
-           xml = parser+videoPage[0]
-           printDBG( 'Host getResolvedURL xml: '+xml )
-           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-           except: 
-                   printDBG( 'Host getResolvedURL query error xml' )
-                   return videoUrl
-           videoPage = re.findall('file: ?"(.*?)"', data, re.S)
-           if videoPage: return videoPage[0]
+           videoPage = re.findall('1080p HD:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
+           videoPage = re.findall('720.*?HD:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
+           videoPage = re.findall('360p:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
            return ''
 
         if parser == 'http://www.pornhub.com/embed/':
