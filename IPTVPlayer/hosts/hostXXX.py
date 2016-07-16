@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.8.1.0"
+    XXXversion = "19.8.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3388,8 +3388,8 @@ class Host:
            return ''
 
         if parser == 'http://hentaigasm.com':
-           videoUrl = re.search('<div id="player_1111"></div>.*?file: "(.*?)"', data, re.S)
-           if videoUrl: return videoUrl.group(1)
+           videoUrl = re.findall('file: "(.*?)"', data, re.S)
+           if videoUrl: return videoUrl[0]
            return ''
 
         if parser == 'http://www.youporn.com':
