@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.8.2.0"
+    XXXversion = "19.8.4.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -155,7 +155,7 @@ class Host:
         try:
            data = self.cm.getURLRequestData(query_data)
            #printDBG( 'Host init data: '+data )
-           r=re.search( r'XXXversion.*?&quot;(.*?)&quot;',data)
+           r=re.search( r'XXXversion.*?class="s">"(.*?)"',data)
            if r:
               printDBG( 'r' )
               self.XXXremote=r.group(1)
@@ -3440,18 +3440,25 @@ class Host:
            return ''
         
         if parser == 'http://www.eporner.com':
-           videoID = re.search("http://www.eporner.com/hd-porn/(.*?)/.+", url)
-           if not videoID: return ''
-           xml = 'http://www.eporner.com/config5/'+videoID.group(1)
-           printDBG( 'Host getResolvedURL xml: '+xml )
-           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-           except: 
-                   printDBG( 'Host getResolvedURL query error xml' )
-                   return videoUrl
-           videoPage = re.findall('file: ?"(.*?)"', data, re.S)
-           if videoPage: return videoPage[0]
-           return ''
- 
+#           videoID = re.search("http://www.eporner.com/hd-porn/(.*?)/.+", url)
+#           if not videoID: return ''
+#           xml = 'http://www.eporner.com/config5/'+videoID.group(1)
+#           printDBG( 'Host getResolvedURL xml: '+xml )
+#           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+#           except: 
+#                   printDBG( 'Host getResolvedURL query error xml' )
+#                   return videoUrl
+#           videoPage = re.findall('file: ?"(.*?)"', data, re.S)
+#           if videoPage: return videoPage[0]
+#           return ''
+           videoPage = re.findall('1080.*?HD:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
+           videoPage = re.findall('720.*?HD:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
+           videoPage = re.findall('360p:.*?href="(.*?)"', data, re.S)
+           if videoPage: return parser+videoPage[0]
+
+
         if parser == 'http://www.pornhub.com/embed/':
            match = re.findall("container.*?src.*?'(.*?)'", data, re.S)
            if match: return match[0]
