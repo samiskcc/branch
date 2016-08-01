@@ -31,12 +31,15 @@ from Screens.MessageBox import MessageBox
 config.plugins.iptvplayer.xxxwymagajpin = ConfigYesNo(default = True)
 config.plugins.iptvplayer.xxxlist = ConfigDirectory(default = "/hdd/")
 config.plugins.iptvplayer.xxxsortuj = ConfigYesNo(default = True)
+config.plugins.iptvplayer.xxxsearch = ConfigYesNo(default = False)
 
 def GetConfigList():
     optionList = []
     optionList.append( getConfigListEntry( "Wymagaj pin:", config.plugins.iptvplayer.xxxwymagajpin ) )
     optionList.append( getConfigListEntry( "Lokalizacja pliku xxxlist.txt :", config.plugins.iptvplayer.xxxlist) )
     optionList.append( getConfigListEntry( "Sortuj xxxlist :", config.plugins.iptvplayer.xxxsortuj) )
+    optionList.append( getConfigListEntry( "Globalne wyszukiwanie :", config.plugins.iptvplayer.xxxsearch) )
+
     return optionList
 ###################################################
 
@@ -137,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.8.6.0"
+    XXXversion = "19.8.8.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -241,8 +244,9 @@ class Host:
            valTab.append(CDisplayListItem('PORNDOE',     'http://www.porndoe.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porndoe.com/categories'],'PORNDOE', 'http://porndoe.com/themes/frontend/white/assets/images/logo_fb.jpg', None)) 
            valTab.sort(key=lambda poz: poz.name)
            self.SEARCH_proc=name
-           valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
-           valTab.insert(0,CDisplayListItem('---Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,             [''], '',        '', None)) 
+           if config.plugins.iptvplayer.xxxsearch.value:
+               valTab.insert(0,CDisplayListItem('---Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+               valTab.insert(0,CDisplayListItem('---Szukaj',  'Szukaj filmów',             CDisplayListItem.TYPE_SEARCH,             [''], '',        '', None)) 
            valTab.append(CDisplayListItem('XHAMSTERLIVE',       "Kamerki",       CDisplayListItem.TYPE_CATEGORY,['http://xhamsterlive.com'], 'xhamster-cams', 'https://cdn.stripchat.com/assets/common/images/favicon_xh.png',None))
            valTab.append(CDisplayListItem('CAM4 - KAMERKI',     'http://www.cam4.pl', CDisplayListItem.TYPE_CATEGORY, ['http://www.cam4.pl/female'],'CAM4-KAMERKI', 'http://edgecast.cam4s.com/web/images/cam4-wh.png', None)) 
            valTab.append(CDisplayListItem('MY_FREECAMS',     'http://www.myfreecams.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.myfreecams.com/#Homepage'],'MYFREECAMS', 'http://goatcheesedick.com/wp-content/uploads/2015/08/myfreecams-logo1.png', None)) 
@@ -282,6 +286,10 @@ class Host:
               valTab = valTab + valtemp 
               valtemp = self.listsItems(-1, url, 'xvideos-search')
               for item in valtemp: item.name='xvideos - '+item.name              
+              valTab = valTab + valtemp
+
+              valtemp = self.listsItems(-1, url, '4tube-search')
+              for item in valtemp: item.name='4tube - '+item.name              
               valTab = valTab + valtemp 
               return valTab
            valTab = self.listsItems(-1, url, self.SEARCH_proc)
@@ -338,10 +346,10 @@ class Host:
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fulltube8-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.insert(0,CDisplayListItem('--- Featured videos ---', 'Featured videos', CDisplayListItem.TYPE_CATEGORY, ['http://www.tube8.com'], 'fulltube8-clips', '', None)) 
-           #valTab.insert(0,CDisplayListItem('--- Hits ---', 'Hits',               CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hits/'],      'xnxx-clips', '', None)) 
-           #valTab.insert(0,CDisplayListItem('--- Hot ---', 'Hot',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/hot/'],       'xnxx-clips', '', None)) 
-           #valTab.insert(0,CDisplayListItem('--- Best Videos ---', 'Best Videos', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/best/'],      'xnxx-clips', '', None)) 
-           #valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/new/'],       'xnxx-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- Most Viewed ---', 'Most Viewed',               CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/most-viewed/page/1/'],      'fulltube8-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- Top Rated ---', 'Top Rated',                 CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/top/page/1/'],       'fulltube8-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- Longest ---', 'Longest', CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/longest/page/1/'],      'fulltube8-clips', '', None)) 
+           valTab.insert(0,CDisplayListItem('--- New Videos ---',  'New Videos',  CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+'/newest/page/1/'],       'fulltube8-clips', '', None)) 
            self.SEARCH_proc='fulltube8-search'
            valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
            valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
@@ -359,7 +367,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
+           printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('data-video_url="(.*?)".*?src="(.*?)".*?title="(.*?)".*?"video_duration">(.*?)<', data, re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phTime ) in phMovies:
@@ -367,7 +375,7 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phTime: ' +phTime )                  
-                  valTab.append(CDisplayListItem(phTitle,'['+phTime+']'+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,'['+phTime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
            match = re.findall('00</a></span></b>.*?href="(.*?)".id="pagination_next">Next', data, re.S)
            if match:
               printDBG( 'Host match: '+match[0] )
@@ -770,7 +778,7 @@ class Host:
            return valTab
         if 'xhamster-search' == name:
            printDBG( 'Host listsItems begin name='+name )
-           valTab = self.listsItems(-1, 'http://www.xhamster.com/search.php?from=&new=&q=%s&qcat=video' % url, 'xhamster-clips')
+           valTab = self.listsItems(-1, 'http://www.xhamster.com/search.php?from=suggestion&q=%s&qcat=video' % url, 'xhamster-clips')
            printDBG( 'Host listsItems end' )
            return valTab              
         if 'xhamster-clips' == name:
@@ -786,7 +794,7 @@ class Host:
            if re.search('vDate', data, re.S):
               parse = re.search('<div\sclass="vDate(.*)</html>', data, re.S)
            else:
-              parse = re.search('searchRes2(.*)adBottom', data, re.S)
+              parse = re.search('searchRes2(.*)</tr></table>', data, re.S)
            if not parse: return valTab
            phMovies = re.findall('<a\shref="(.*?/movies/.*?)".*?<img\ssrc=\'(.*?)\'.*?alt="(.*?)".*?start2.*?<b>(.*?)</b>', parse.group(1), re.S)
            if phMovies:
@@ -973,8 +981,16 @@ class Host:
            valTab.insert(0,CDisplayListItem("--- Most viewed ---","Most viewed",     CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos?sort=views&time=month"],             '4tube-clips',    '',None))
            valTab.insert(0,CDisplayListItem("--- Highest Rated ---","Highest Rated", CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos?sort=rating&time=month"],             '4tube-clips',    '',None))
            valTab.insert(0,CDisplayListItem("--- Lastest ---","Lastest",     CDisplayListItem.TYPE_CATEGORY,["http://www.4tube.com/videos"],             '4tube-clips',    '',None))
+           self.SEARCH_proc='4tube-search'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+        if '4tube-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://www.4tube.com/search?q=%s' % url, '4tube-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if '4tube-channels' == name:
            printDBG( 'Host listsItems begin name='+name )
            query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
@@ -1039,7 +1055,8 @@ class Host:
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
-                  valTab.append(CDisplayListItem(phTitle,phRuntime+' '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                  if phUrl.startswith('/videos/'):
+                      valTab.append(CDisplayListItem(phTitle,phRuntime+' '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.findall('<a class="page " href="(.*?)"', data, re.S)
            if match:
               for (phPageUrl) in match: 
@@ -2867,6 +2884,7 @@ class Host:
         if url.startswith('http://www.yeptube.com'):         return 'http://www.nuvid.com'
         if url.startswith('http://www.upornia.com'):         return 'http://www.katestube.com'
         if url.startswith('http://www.pornpillow.com'):      return 'http://www.pornpillow.com'
+        if url.startswith('http://porneo.com'):              return 'http://www.nuvid.com'
 
         return ''
 
@@ -3341,17 +3359,14 @@ class Host:
               return videoPage[0]
            return ''
 
-
         if parser == 'http://www.tube8.com':
            match = re.findall('"quality_\d+p":"(http.*?)"', data)
-           if not match: match = re.compile('"quality_720p":"([^"]+)"').findall(data)
-           if not match: match = re.compile('"quality_480p":"([^"]+)"').findall(data)
-           if not match: match = re.compile('"quality_240p":"([^"]+)"').findall(data)
-           if not match: return ''
-           fetchurl = urllib2.unquote(match[0])
-           fetchurl = fetchurl.replace(r"\/",r"/")
-           printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
-           return fetchurl 
+           if match:
+              fetchurl = urllib2.unquote(match[-1])
+              fetchurl = fetchurl.replace(r"\/",r"/")
+              printDBG( 'Host getResolvedURL fetchurl: '+fetchurl )
+              return fetchurl 
+           return ''
 
         if parser == 'http://www.xnxx.com':
            videoUrl = re.search('flv_url=(.*?)&', data, re.S)
