@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.8.8.0"
+    XXXversion = "19.9.0.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3433,24 +3433,21 @@ class Host:
            return ''
         
         if parser == 'http://www.eporner.com':
-#           videoID = re.search("http://www.eporner.com/hd-porn/(.*?)/.+", url)
-#           if not videoID: return ''
-#           xml = 'http://www.eporner.com/config5/'+videoID.group(1)
-#           printDBG( 'Host getResolvedURL xml: '+xml )
-#           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-#           except: 
-#                   printDBG( 'Host getResolvedURL query error xml' )
-#                   return videoUrl
-#           videoPage = re.findall('file: ?"(.*?)"', data, re.S)
-#           if videoPage: return videoPage[0]
-#           return ''
-           videoPage = re.findall('1080.*?HD:.*?href="(.*?)"', data, re.S)
-           if videoPage: return parser+videoPage[0]
-           videoPage = re.findall('720.*?HD:.*?href="(.*?)"', data, re.S)
-           if videoPage: return parser+videoPage[0]
-           videoPage = re.findall('360p:.*?href="(.*?)"', data, re.S)
-           if videoPage: return parser+videoPage[0]
-
+           videoID = re.search("http://www.eporner.com/hd-porn/(.*?)/.+", url)
+           if not videoID: return ''
+           parse = re.findall("hash: '(.*?)'", data, re.S)
+           hash =  urllib.unquote_plus(parse[0]).decode("utf-8")
+           x = calc_hash(hash)
+           printDBG( 'Host getResolvedURL hash: '+parse[0]+' calc_hash:'+x)
+           xml = 'http://www.eporner.com/xhr/video/%s?device=generic&domain=www.eporner.com&hash=%s&fallback=false' % (videoID.group(1), x)
+           try:    data = self.cm.getURLRequestData({'url': xml, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+           except: 
+                   printDBG( 'Host getResolvedURL query error xml' )
+                   return ''
+           printDBG( 'Host data json: '+data )
+           videoPage = re.findall('src": "(.*?)"', data, re.S)
+           if videoPage: return videoPage[0]
+           return ''
 
         if parser == 'http://www.pornhub.com/embed/':
            match = re.findall("container.*?src.*?'(.*?)'", data, re.S)
@@ -3986,4 +3983,26 @@ def split(o, e):
         o = cut(o, e)
     n.append(o)
     return n
+############################################
+# functions for eporner
+############################################
+def calc_hash(s):
+    return ''.join((encode_base_n(int(s[lb:lb + 8], 16), 36) for lb in range(0, 32, 8)))
+
+def encode_base_n(num, n, table=None):
+    FULL_TABLE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    if not table:
+        table = FULL_TABLE[:n]
+
+    if n > len(table):
+        raise ValueError('base %d exceeds table length %d' % (n, len(table)))
+
+    if num == 0:
+        return table[0]
+
+    ret = ''
+    while num:
+        ret = table[num % n] + ret
+        num = num // n
+    return ret
 
