@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.9.0.0"
+    XXXversion = "19.9.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2534,7 +2534,7 @@ class Host:
            parse = re.search('mls_first_load(.*?)footer_seo"', data,re.S)
            #printDBG( 'Host getResolvedURL data2: '+parse.group(1) )
            if parse:
-              phCats = re.findall('data-chathost="(.*?)".*?data-name="(.*?)".*?data-src_small="(.*?)"', parse.group(1), re.S) 
+              phCats = re.findall('data-chathost="(.*?)".*?data-name="(.*?)".*?src="(.*?)"', parse.group(1), re.S) 
               if phCats:
                  for (phUrl, phTitle, phImage) in phCats: 
                      phImage = 'http:'+phImage
@@ -2546,7 +2546,7 @@ class Host:
               for (phUrl, phTitle) in match:
                   printDBG( 'Host listsItems page phUrl: '+phUrl )
                   printDBG( 'Host listsItems page phTitle: '+phTitle )
-              valTab.append(CDisplayListItem('Next '+phTitle, self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+              valTab.append(CDisplayListItem('Next ', self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
            printDBG( 'Host listsItems end' )
            return valTab 
 
