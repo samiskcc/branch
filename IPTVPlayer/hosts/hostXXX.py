@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.9.2.0"
+    XXXversion = "19.9.6.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3003,47 +3003,42 @@ class Host:
               return videoUrl
            return ''
         
+        def base_myfreecam(serwer, url):
+           data =''
+           newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
+           try:
+              data = urllib2.urlopen(newurl, timeout=1)
+           except:
+              printDBG( 'Host error newurl:  '+newurl )
+           if data: 
+              newurl = newurl.replace("mfc","ngrp:mfc").replace("aac","mobile")
+              try: data = self.cm.getURLRequestData({ 'url': newurl, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+              except:
+                 printDBG( 'Host error newurl:  '+newurl )
+              if data:
+                 printDBG( 'Host data:  '+data )
+                 parse = re.search("chunklist(.*?)m3u8", data, re.S)
+                 if parse:
+                    best = parse.group(0)
+                    videoUrl = newurl.replace("playlist.m3u8", best)
+                    return videoUrl
+
         if parser == 'http://www.myfreecams.com':
-           for serwer in range(492, 464, -1):  #492, 465
-              data =''
-              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              try:
-                 data = urllib2.urlopen(newurl, timeout=2)
-              except:
-                 printDBG( 'Host error newurl:  '+newurl )
-              if data: return newurl
-           for serwer in range(464, 437, -1):  #464, 438
-              data =''
-              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              try:
-                 data = urllib2.urlopen(newurl, timeout=2)
-              except:
-                 printDBG( 'Host error newurl:  '+newurl )
-              if data: return newurl
            for serwer in range(627, 599, -1):  #627, 600
-              data =''
-              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              try:
-                 data = urllib2.urlopen(newurl, timeout=2)
-              except:
-                 printDBG( 'Host error newurl:  '+newurl )
-              if data: return newurl
+              videoUrl = base_myfreecam(serwer, url)
+              if videoUrl: return videoUrl
+           for serwer in range(492, 464, -1):  #492, 465
+              videoUrl = base_myfreecam(serwer, url)
+              if videoUrl: return videoUrl
+           for serwer in range(464, 437, -1):  #464, 438
+              videoUrl = base_myfreecam(serwer, url)
+              if videoUrl: return videoUrl
            for serwer in range(419, 403, -1): #419, 404
-              data =''
-              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              try:
-                 data = urllib2.urlopen(newurl, timeout=2)
-              except:
-                 printDBG( 'Host error newurl:  '+newurl )
-              if data: return newurl
+              videoUrl = base_myfreecam(serwer, url)
+              if videoUrl: return videoUrl
            for serwer in range(371, 339, -1): #371, 340
-              data =''
-              newurl = 'http://video%s.myfreecams.com:1935/NxServer/mfc_%s.f4v_aac/playlist.m3u8' % (serwer, url)
-              try:
-                 data = urllib2.urlopen(newurl, timeout=2)
-              except:
-                 printDBG( 'Host error newurl:  '+newurl )
-              if data: return newurl
+              videoUrl = base_myfreecam(serwer, url)
+              if videoUrl: return videoUrl
            return ''
 
         if parser == 'https://pl.bongacams.com':
