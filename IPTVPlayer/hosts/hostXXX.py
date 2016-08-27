@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "19.9.6.0"
+    XXXversion = "19.9.6.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2534,10 +2534,10 @@ class Host:
            parse = re.search('mls_first_load(.*?)footer_seo"', data,re.S)
            #printDBG( 'Host getResolvedURL data2: '+parse.group(1) )
            if parse:
-              phCats = re.findall('data-chathost="(.*?)".*?data-name="(.*?)".*?src="(.*?)"', parse.group(1), re.S) 
+              phCats = re.findall('data-chathost="(.*?)".*?data-name="(.*?)".*?src="//(.*?)"', parse.group(1), re.S) 
               if phCats:
                  for (phUrl, phTitle, phImage) in phCats: 
-                     phImage = 'http:'+phImage
+                     phImage = 'http://'+phImage
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phImage: '  +phImage )
                      valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
