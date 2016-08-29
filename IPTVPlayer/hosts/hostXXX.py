@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.0.0"
+    XXXversion = "20.0.0.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -881,24 +881,22 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="mbimg".*?src="(.*?)".*?<a href="(.*?)" title="(.*?)".*?"mbtim">(.*?)</div>', data, re.S)
+           phMovies = re.findall('class="mb".*?>\s*<a\shref="(.*?)"\stitle="(.*?)".*?src="(.*?)".*?"mbtim">(.*?)</div>', data, re.S)
            if phMovies:
-                 for (phImage, phUrl, phTitle, phRuntime) in phMovies:
-                  printDBG( 'Host listsItems phUrl: '  +phUrl )
-                  printDBG( 'Host listsItems phTitle: '+phTitle )
-                  printDBG( 'Host listsItems phImage: '+phImage )
-                  printDBG( 'Host listsItems phRuntime: '+phRuntime )
-                  valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('<div class="numlist2">.*?PRODUCTION', data, re.S)
+              for (phUrl, phTitle, phImage, phRuntime) in phMovies:
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 printDBG( 'Host listsItems phImage: '+phImage )
+                 printDBG( 'Host listsItems phRuntime: '+phRuntime )
+                 valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.findall('<div class="numlist2">.*?>NEXT', data, re.S)
            if match:
               printDBG( 'Host listsItems page match: '+match[0] )
-              match = re.findall('<a href="(.*?)" title="(.*?)"', match[0], re.S)
-           if match:
-              for (phUrl, phTitle) in match:
-                  printDBG( 'Host listsItems page phUrl: '+phUrl )
-                  printDBG( 'Host listsItems page phTitle: '+phTitle )
-                  if phTitle == 'Next page':
-                     valTab.append(CDisplayListItem(phTitle, 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
+              match = re.findall("<a href=(.*?)title", match[0], re.S)
+              if match:
+                 printDBG( 'Host listsItems page phUrl: '+match[-1] )
+                 phUrl = match[-1].replace("'","").replace('"','')
+                 valTab.append(CDisplayListItem('Next', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
         if 'fullpornhub' == name:
