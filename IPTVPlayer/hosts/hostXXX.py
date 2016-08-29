@@ -140,7 +140,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.0.1"
+    XXXversion = "20.0.0.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -882,6 +882,8 @@ class Host:
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="mb".*?>\s*<a\shref="(.*?)"\stitle="(.*?)".*?src="(.*?)".*?"mbtim">(.*?)</div>', data, re.S)
+           if not phMovies:
+              phMovies = re.findall('class="mb hdy".*?>\s*<a\shref="(.*?)"\stitle="(.*?)".*?src="(.*?)".*?"mbtim">(.*?)</div>', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phImage, phRuntime) in phMovies:
                  printDBG( 'Host listsItems phUrl: '  +phUrl )
