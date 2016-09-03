@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.0"
+    XXXversion = "20.0.2.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -432,11 +432,15 @@ class Host:
               printDBG( 'Host getResolvedURL query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
+           sex = ''
            ph1 = re.search('var streams=(.*?)}];', data, re.S)
            if ph1: ph1 = ph1.group(1)+'}]'
            result = simplejson.loads(ph1)
            if result:
               for item in result:
+                  if str(item["acctype"])=='1': sex = 'male'
+                  if str(item["acctype"])=='2': sex = 'female'
+                  if str(item["acctype"])=='3': sex = 'couple'
                   printDBG( 'Host listsItems nick: '+item["nick"] )
                   printDBG( 'Host listsItems broadcasturl: '+item["broadcasturl"] )
                   printDBG( 'Host listsItems topic: '+item["topic"] )
@@ -446,7 +450,7 @@ class Host:
                   #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'
                   streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/'+str(item["broadcasturl"])+' live=1'
                   printDBG( 'Host listsItems streamUrl: '+streamUrl )
-                  valTab.append(CDisplayListItem(str(item["nick"]),str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
+                  valTab.append(CDisplayListItem(str(item["nick"])+'    {'+sex+'}',str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'showup' == name:
@@ -2688,6 +2692,8 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if url.startswith('http://www.slutsxmovies.com/embed/'):   return 'http://www.nuvid.com'
+        if url.startswith('http://www.cumyvideos.com/embed/'):   return 'http://www.nuvid.com'
         if self.MAIN_URL == 'http://www.filmyporno.tv':      return self.MAIN_URL
         if self.MAIN_URL == 'http://www.pornfromczech.com':  return self.MAIN_URL
         if self.MAIN_URL == 'http://porndoe.com':            return self.MAIN_URL
@@ -3568,6 +3574,9 @@ class Host:
                     phUrl = item['url']
                     phTitle = item['name']
                     return phUrl
+           videoPage = re.findall('iframe src="(.*?)"', data, re.S)
+           if videoPage:
+              return self.getResolvedURL(videoPage[0])
            return ''
 
         if parser == 'http://www.filmyporno.tv':
