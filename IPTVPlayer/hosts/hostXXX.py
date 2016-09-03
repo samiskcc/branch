@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.1.0"
+    XXXversion = "20.0.2.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -221,7 +221,7 @@ class Host:
            valTab.append(CDisplayListItem('AH-ME',     'www.ah-me.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.ah-me.com/channels.php'],'AH-ME','http://ahmestatic.fuckandcdn.com/ah-me/ahmestatic/v20/common/ah-me/img/logo.jpg', None)) 
            valTab.append(CDisplayListItem('CHATURBATE',     'chaturbate.com', CDisplayListItem.TYPE_CATEGORY, ['https://chaturbate.com'],'CHATURBATE','http://webcamstartup.com/wp-content/uploads/2014/12/chaturbate.jpg', None)) 
            valTab.append(CDisplayListItem('AMATEURPORN',     'www.amateurporn.net', CDisplayListItem.TYPE_CATEGORY, ['http://www.amateurporn.net/channels/'],'AMATEURPORN', 'http://www.amateurporn.net/images/amateur-porn.png', None)) 
-           valTab.append(CDisplayListItem('BIGXVIDEOS',     'www.bigxvideos.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.bigxvideos.com/categories.html'],'BIGXVIDEOS', 'http://partners.bigxvideos.com/img/logo.png', None)) 
+           #valTab.append(CDisplayListItem('BIGXVIDEOS',     'www.bigxvideos.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.bigxvideos.com/categories.html'],'BIGXVIDEOS', 'http://partners.bigxvideos.com/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNOORZEL',     'http://www.pornoorzel.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.pornoorzel.com/search/'],'PORNOORZEL', 'http://assetfiles.com/pornoorzel.com/images/logo-mobile.png', None)) 
            valTab.append(CDisplayListItem('FOTKA-PL-KAMERKI',     'http://www.fotka.pl/kamerki', CDisplayListItem.TYPE_CATEGORY, ['http://api.fotka.pl/v2/cams/get?page=1&limit=100&gender=f'],'FOTKA-PL-KAMERKI', 'https://pbs.twimg.com/profile_images/3086758992/6fb5cc2ee2735c334d0363bcb01a52ca_400x400.png', None)) 
            valTab.append(CDisplayListItem('YOUJIZZ',     'http://www.youjizz.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.youjizz.com/categories'],'YOUJIZZ', 'http://www.sample-made.com/cms/content/uploads/2015/05/youjizz_logo-450x400.jpg', None)) 
@@ -236,6 +236,7 @@ class Host:
            valTab.append(CDisplayListItem('PORNTREX',     'http://www.porntrex.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porntrex.com/categories'],'PORNTREX', 'http://www.porntrex.com/templates/frontend/porntrex/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNDOE',     'http://www.porndoe.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porndoe.com/categories'],'PORNDOE', 'http://porndoe.com/themes/frontend/white/assets/images/logo_fb.jpg', None)) 
            valTab.append(CDisplayListItem('PORNfromCZECH',     'http://www.pornfromczech.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.pornfromczech.com/'],'PORNFROMCZECH', 'http://pornfromczech.com/wp-content/uploads/2013/03/PfC_logo.png', None)) 
+           valTab.append(CDisplayListItem('FILMYPORNO',     'http://www.filmyporno.tv', CDisplayListItem.TYPE_CATEGORY, ['http://www.filmyporno.tv/channels/'],'FILMYPORNO', 'http://www.filmyporno.tv/templates/default_tube2016/images/logo.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            self.SEARCH_proc=name
            if config.plugins.iptvplayer.xxxsearch.value:
@@ -2609,6 +2610,63 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
 
+        if 'FILMYPORNO' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.filmyporno.tv' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('HEADER UP END(.*?)FOOTER DOWN END', data, re.S)
+           if parse:
+              phCats = re.findall('<a href="(.*?)".*?src="(.*?)".*?"title">(.*?)<', parse.group(1), re.S)
+              if phCats:
+                 for (phUrl, phImage, phTitle) in phCats:
+                     #phUrl = phUrl + 'page/'
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phImage: '  +phImage )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     valTab.append(CDisplayListItem(decodeHtml(phTitle),phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'FILMYPORNO-clips', phImage, phUrl)) 
+           valTab.insert(0,CDisplayListItem("--- NAJDŁUŻSZE ---",       "NAJDŁUŻSZE",                    CDisplayListItem.TYPE_CATEGORY,["http://www.filmyporno.tv/longest/"], 'FILMYPORNO-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- NAJCZĘŚCIEJ DYSKUTOWANE ---","NAJCZĘŚCIEJ DYSKUTOWANE", CDisplayListItem.TYPE_CATEGORY,["http://www.filmyporno.tv/most-discussed/"], 'FILMYPORNO-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- NAJLEPIEJ OCENIONE ---",     "NAJLEPIEJ OCENIONE",      CDisplayListItem.TYPE_CATEGORY,["http://www.filmyporno.tv/top-rated/"], 'FILMYPORNO-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- NAJPOPULARNIEJSZE ---",      "NAJPOPULARNIEJSZE",       CDisplayListItem.TYPE_CATEGORY,["http://www.filmyporno.tv/most-viewed/"], 'FILMYPORNO-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- NOWE FILMY ---",             "NOWE FILMY",              CDisplayListItem.TYPE_CATEGORY,["http://www.filmyporno.tv/videos/"], 'FILMYPORNO-clips', '',None))
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'FILMYPORNO-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('HEADER UP END(.*?)FOOTER DOWN END', data, re.S)
+           if parse:
+              Movies = re.findall('<a\shref="(.*?)".*?src="(.*?)".*?lt="(.*?)".*?"time">(.*?)<.*?item\sEND', parse.group(1), re.S) 
+              if Movies:
+                 for (phUrl, phImage, phTitle, Time) in Movies:
+                    Time = Time.strip()
+                    printDBG( 'Host listsItems phUrl: '  +phUrl )
+                    printDBG( 'Host listsItems phTitle: '+phTitle )
+                    printDBG( 'Host listsItems Time: '+Time ) 
+                    valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+           match = re.search('rel="next" href="(.*?)"', data, re.S)
+           if match:
+              phUrl = match.group(1)
+              url = re.sub('page.+', '', url)
+              valTab.append(CDisplayListItem('Next ', 'Page: '+url+phUrl, CDisplayListItem.TYPE_CATEGORY, [url+phUrl], name, '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         return valTab
 
 
@@ -2630,6 +2688,7 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
+        if self.MAIN_URL == 'http://www.filmyporno.tv':      return self.MAIN_URL
         if self.MAIN_URL == 'http://www.pornfromczech.com':  return self.MAIN_URL
         if self.MAIN_URL == 'http://porndoe.com':            return self.MAIN_URL
         if self.MAIN_URL == 'http://pornkino.to':            return self.MAIN_URL
@@ -2671,6 +2730,8 @@ class Host:
         if self.MAIN_URL == 'http://xhamster.com':           return self.MAIN_URL
         if self.MAIN_URL == 'http://www.eporner.com':        return self.MAIN_URL
         if url.startswith('http://www.pornhub.com/embed/'):  return 'http://www.pornhub.com/embed/'
+        if url.startswith('http://pl.pornhub.com/embed/'):   return 'http://www.pornhub.com/embed/'
+        if url.startswith('http://pl.pornhub.com'):          return 'http://www.pornhub.com'
         if url.startswith('http://www.pornhub.com'):         return 'http://www.pornhub.com'
         if self.MAIN_URL == 'http://www.pornhub.com':        return self.MAIN_URL
         if self.MAIN_URL == 'http://www.4tube.com':          return self.MAIN_URL
@@ -2827,7 +2888,7 @@ class Host:
               videoUrl = re.sub(r'/key=(.*?)%2Cend=', '/key='+key+',end=', phUrl)
               return videoUrl
            else: return ''
-		   
+  
         if parser == 'http://www.pornway.com':
            COOKIEFILE = resolveFilename(SCOPE_PLUGINS, 'Extensions/IPTVPlayer/cache/') + 'pornusy.cookie'
            try: data = self.cm.getURLRequestData({ 'url': url, 'use_host': False, 'use_cookie': True, 'save_cookie': False, 'load_cookie': True, 'cookiefile': COOKIEFILE, 'use_post': False, 'return_data': True })
@@ -3471,7 +3532,10 @@ class Host:
            return ''
 
         if parser == 'http://porn720.net':
-           videoPage = re.search('0p":"(.*?)"', data, re.S) 
+           videoPage = re.search('720p":"(.*?)"', data, re.S) 
+           if videoPage:
+              return videoPage.group(1)
+           videoPage = re.search('480p":"(.*?)"', data, re.S) 
            if videoPage:
               return videoPage.group(1)
            return ''
@@ -3505,6 +3569,11 @@ class Host:
                     phTitle = item['name']
                     return phUrl
            return ''
+
+        if parser == 'http://www.filmyporno.tv':
+           match = re.findall('source src="(.*?)"', data, re.S)
+           if match: return match[0]
+           else: return ''
 
         printDBG( 'Host getResolvedURL end' )
         return videoUrl
