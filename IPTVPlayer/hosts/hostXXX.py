@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.1"
+    XXXversion = "20.0.2.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -450,7 +450,8 @@ class Host:
                   #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'
                   streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/'+str(item["broadcasturl"])+' live=1'
                   printDBG( 'Host listsItems streamUrl: '+streamUrl )
-                  valTab.append(CDisplayListItem(str(item["nick"])+'    {'+sex+'}',str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
+                  if str(item["acctype"])<>'1':
+                     valTab.append(CDisplayListItem(str(item["nick"])+'    {'+sex+'}',str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'showup' == name:
@@ -1689,15 +1690,13 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('headerMenuMainUL(.*?)cam4bucksMenuLink"', data,re.S)
-           if parse:
-              phCats = re.findall('<a href="(.*?)".*?"nopop">(.*?)<', parse.group(1), re.S) 
-              if phCats:
-                 for (phUrl, phTitle) in phCats:
-                     printDBG( 'Host listsItems phUrl: '  +self.MAIN_URL+phUrl )
-                     printDBG( 'Host listsItems phTitle: '  +phTitle )
-                     #if phTitle != 'Mobile Shows' and phTitle != 'Recent' and phTitle != 'Trans' and phTitle != 'poland cams':
-                     valTab.append(CDisplayListItem(phTitle,  self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY,[self.MAIN_URL+phUrl], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- HD ---",       "HD",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/cams/hd"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Poland ---",       "Polskie",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/poland-cams"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Couples ---",       "Pary",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/couple"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Male ---",       "Mężczyźni",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/male"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Transsexual ---",       "Transseksualiści",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/shemale"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- New ---",       "Nowe",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/new"], 'CAM4-KAMERKI-clips', '',None))
+           valTab.insert(0,CDisplayListItem("--- Female ---",       "Kobiety",       CDisplayListItem.TYPE_CATEGORY,["http://www.cam4.pl/female"], 'CAM4-KAMERKI-clips', '',None))
            printDBG( 'Host listsItems end' )
            return valTab 
 
@@ -2695,7 +2694,6 @@ class Host:
         if url.startswith('http://www.slutsxmovies.com/embed/'):   return 'http://www.nuvid.com'
         if url.startswith('http://www.cumyvideos.com/embed/'):   return 'http://www.nuvid.com'
         if self.MAIN_URL == 'http://www.filmyporno.tv':      return self.MAIN_URL
-        if self.MAIN_URL == 'http://www.pornfromczech.com':  return self.MAIN_URL
         if self.MAIN_URL == 'http://porndoe.com':            return self.MAIN_URL
         if self.MAIN_URL == 'http://pornkino.to':            return self.MAIN_URL
         if self.MAIN_URL == 'http://www.porntrex.com':       return self.MAIN_URL
@@ -2811,6 +2809,7 @@ class Host:
         if url.startswith('http://www.upornia.com'):         return 'http://www.katestube.com'
         if url.startswith('http://www.pornpillow.com'):      return 'http://www.pornpillow.com'
         if url.startswith('http://porneo.com'):              return 'http://www.nuvid.com'
+        if self.MAIN_URL == 'http://www.pornfromczech.com':  return self.MAIN_URL
 
         return ''
 
