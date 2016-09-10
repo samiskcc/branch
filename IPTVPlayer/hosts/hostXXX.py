@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.2"
+    XXXversion = "20.0.2.3"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2380,11 +2380,12 @@ class Host:
               phCats = re.findall('a href="(.*?)"', parse.group(1), re.S)
               if phCats:
                  for (phUrl) in phCats:
-                     phTitle = re.search('tv/(.*?)_', phUrl, re.S)
-                     phTitle = phTitle.group(1)
-                     printDBG( 'Host listsItems phUrl: '  +phUrl )
-                     printDBG( 'Host listsItems phTitle: '+phTitle )
-                     valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'RUSPORN-clips', '', phUrl)) 
+                    phTitle = re.search('tv/(.*?)_', phUrl, re.S)
+                    if phTitle: 
+                       phTitle = phTitle.group(1)
+                       printDBG( 'Host listsItems phUrl: '  +phUrl )
+                       printDBG( 'Host listsItems phTitle: '+phTitle )
+                       valTab.append(CDisplayListItem(phTitle,phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'RUSPORN-clips', '', phUrl)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'RUSPORN-clips' == name:
@@ -2403,12 +2404,14 @@ class Host:
               Movies = re.findall('a href="(.*?)".*?src="(.*?)".*?"rdur">(.*?)<', parse.group(1), re.S) 
               if Movies:
                  for (phUrl, phImage, Time) in Movies:
-                     phTitle = re.search('.*?_.*?_(.*?).html', phUrl, re.S)
-                     phTitle = phTitle.group(1)
-                     printDBG( 'Host listsItems phUrl: '  +phUrl )
-                     printDBG( 'Host listsItems phTitle: '+phTitle )
-                     printDBG( 'Host listsItems Time: '+Time ) 
-                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phUrl),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
+                    phTitle = re.search('.*?_.*?_(.*?).html', phUrl, re.S)
+                    if phTitle:
+                       phTitle = phTitle.group(1)
+                       phUrl = 'http:'+phUrl
+                       printDBG( 'Host listsItems phUrl: '  +phUrl )
+                       printDBG( 'Host listsItems phTitle: '+phTitle )
+                       printDBG( 'Host listsItems Time: '+Time ) 
+                       valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phUrl),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
                  match = re.search('RPTabPages.*?class="active".*?href="(.*?)"', data, re.S)
                  if match:
                     phUrl = match.group(1)
@@ -3531,9 +3534,12 @@ class Host:
            return ''
 
         if parser == 'http://rusporn.tv':
-           videoPage = re.findall('"file": "(.*?)"', data, re.S) 
-           if videoPage:
-              return videoPage[-1]
+           VideoID = re.search("var videoId = '(.*?)'", data, re.S)
+           if VideoID:
+              VideoID = VideoID.group(1)
+              videoPage = re.findall('"file": "(.*?)"', data, re.S) 
+              if videoPage:
+                 return videoPage[-1]+VideoID+"&hq=high&ex=mp4"
            return ''
 
         if parser == 'http://porn720.net':
