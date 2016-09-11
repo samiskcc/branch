@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.3"
+    XXXversion = "20.0.2.4"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -237,6 +237,7 @@ class Host:
            valTab.append(CDisplayListItem('PORNDOE',     'http://www.porndoe.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porndoe.com/categories'],'PORNDOE', 'http://porndoe.com/themes/frontend/white/assets/images/logo_fb.jpg', None)) 
            valTab.append(CDisplayListItem('PORNfromCZECH',     'http://www.pornfromczech.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.pornfromczech.com/'],'PORNFROMCZECH', 'http://pornfromczech.com/wp-content/uploads/2013/03/PfC_logo.png', None)) 
            valTab.append(CDisplayListItem('FILMYPORNO',     'http://www.filmyporno.tv', CDisplayListItem.TYPE_CATEGORY, ['http://www.filmyporno.tv/channels/'],'FILMYPORNO', 'http://www.filmyporno.tv/templates/default_tube2016/images/logo.png', None)) 
+           valTab.append(CDisplayListItem('CLIPHUNTER',     'http://www.cliphunter.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.cliphunter.com/categories/'],'CLIPHUNTER', 'http://www.cliphunter.com/gfx/new/logo.png', None)) 
            valTab.sort(key=lambda poz: poz.name)
            self.SEARCH_proc=name
            if config.plugins.iptvplayer.xxxsearch.value:
@@ -2673,6 +2674,56 @@ class Host:
            printDBG( 'Host listsItems end' )
            return valTab
 
+        if 'CLIPHUNTER' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           self.MAIN_URL = 'http://www.cliphunter.com' 
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url:'+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           parse = re.search('id="submenu-categories">(.*?)</div>', data, re.S)
+           if parse:
+              phCats = re.findall('href="(/categories/.*?)".*?>(.*?)<', parse.group(1), re.S)
+              if phCats:
+                 for (phUrl, phTitle) in phCats:
+                     phUrl = 'http://www.cliphunter.com%s/' % phUrl.replace(' ','%20')
+                     printDBG( 'Host listsItems phUrl: '  +phUrl )
+                     printDBG( 'Host listsItems phTitle: '+phTitle )
+                     #if not phTitle == "All" and not phTitle == "More ...  ": 
+                     if phTitle <> "More ... ": 
+                        valTab.append(CDisplayListItem(decodeHtml(phTitle),phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'CLIPHUNTER-clips', '', phUrl)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'CLIPHUNTER-clips' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           catUrl = self.currList[Index].possibleTypesOfSearch
+           query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
+           try:
+              data = self.cm.getURLRequestData(query_data)
+           except:
+              printDBG( 'Host listsItems query error' )
+              printDBG( 'Host listsItems query error url: '+url )
+              return valTab
+           #printDBG( 'Host listsItems data: '+data )
+           Movies = re.findall('class="t"\shref="(.*?)".*?class="i"\ssrc="(.*?)".*?class="tr">(.*?)</div>.*?class="vttl.*?">(.*?)</a>', data, re.S) 
+           if Movies:
+              for (phUrl, phImage, Time, phTitle) in Movies:
+                 Time = Time.strip()
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 printDBG( 'Host listsItems Time: '+Time ) 
+                 valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           match = re.search('rel="next" href="(.*?)"', data, re.S)
+           if match:
+              phUrl = match.group(1)
+              valTab.append(CDisplayListItem('Next ', 'Page: '+self.MAIN_URL+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', None))                
+           printDBG( 'Host listsItems end' )
+           return valTab
+
         return valTab
 
 
@@ -2694,7 +2745,8 @@ class Host:
         printDBG( 'Host getParser begin' )
         printDBG( 'Host getParser mainurl: '+self.MAIN_URL )
         printDBG( 'Host getParser url    : '+url )
-        if url.startswith('http://www.slutsxmovies.com/embed/'):   return 'http://www.nuvid.com'
+        if self.MAIN_URL == 'http://www.cliphunter.com':     return self.MAIN_URL
+        if url.startswith('http://www.slutsxmovies.com/embed/'): return 'http://www.nuvid.com'
         if url.startswith('http://www.cumyvideos.com/embed/'):   return 'http://www.nuvid.com'
         if self.MAIN_URL == 'http://www.filmyporno.tv':      return self.MAIN_URL
         if self.MAIN_URL == 'http://porndoe.com':            return self.MAIN_URL
@@ -3587,6 +3639,21 @@ class Host:
         if parser == 'http://www.filmyporno.tv':
            match = re.findall('source src="(.*?)"', data, re.S)
            if match: return match[0]
+           else: return ''
+
+        if parser == 'http://www.cliphunter.com':
+           url = re.findall('"url":"(.*?)"}', data, re.S)
+           if url:
+              url = url[-1]
+              url = url.replace('\u0026', '.')
+              translation_table = {
+                 'm': 'a', 'b': 'b', 'c': 'c', 'i': 'd', 'd': 'e', 'g': 'f', 'a': 'h',
+                 'z': 'i', 'y': 'l', 'n': 'm', 'l': 'n', 'f': 'o', 'v': 'p', 'x': 'r',
+                 'r': 's', 'q': 't', 'p': 'u', 'e': 'v',
+                 '$': ':', '&': '.', '(': '=', '^': '&', '=': '/',
+              }
+              url = ''.join(translation_table.get(c, c) for c in url) 
+              return url
            else: return ''
 
         printDBG( 'Host getResolvedURL end' )
