@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.4"
+    XXXversion = "20.0.2.5"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2552,16 +2552,14 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('class="videos-listing premium-logos "(.*?)paginator', data, re.S)
-           if parse:
-              Movies = re.findall('href="(.*?)".*?title="(.*?)".*?data-video-image="(.*?)".*?duration">(.*?)<', parse.group(1), re.S) 
-              if Movies:
-                 for (phUrl, phTitle, phImage, Time) in Movies:
-                     Time = Time.strip()
-                     printDBG( 'Host listsItems phUrl: '  +phUrl )
-                     printDBG( 'Host listsItems phTitle: '+phTitle )
-                     printDBG( 'Host listsItems Time: '+Time ) 
-                     valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+           Movies = re.findall('video-item-thumb.*?href="(.*?)".*?title="(.*?)".*?data-video-image="(.*?)".*?duration">(.*?)<', data, re.S) 
+           if Movies:
+              for (phUrl, phTitle, phImage, Time) in Movies:
+                 Time = Time.strip()
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 printDBG( 'Host listsItems Time: '+Time ) 
+                 valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.search('page next"><a href="(.*?)"', data, re.S)
            if match:
               phUrl = match.group(1)
