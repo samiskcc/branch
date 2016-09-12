@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.6"
+    XXXversion = "20.0.2.7"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2770,7 +2770,7 @@ class Host:
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('class="llNav.*?href="(.*?)"', data, re.S)
+           match = re.findall('</a><a class="navLink".*?href="(.*?)"', data, re.S)
            if match:
               phUrl = match[0]
               printDBG( 'Host listsItems page phUrl: '+phUrl )
