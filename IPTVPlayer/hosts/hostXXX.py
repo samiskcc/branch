@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.0"
+    XXXversion = "20.0.3.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -1939,15 +1939,16 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('ajax_sidebar(.*?)ajax_content main', data, re.S) 
+           parse = re.search('Categories</h2>(.*?)<footer class="clear', data, re.S) 
            if parse:
-              genre = re.findall('<a href="(.*?)".*?>(.*?)<', parse.group(1), re.S)
+              genre = re.findall('class="thumb"\shref="(.*?)".*?src="(.*?)".*?title="(.*?)"', parse.group(1), re.S)
               if genre:
-                 for phUrl, phTitle in genre:
+                 for phUrl, phImage, phTitle in genre:
                     phTitle = decodeHtml(phTitle)
                     printDBG( 'Host listsItems phUrl: '  +phUrl )
                     printDBG( 'Host listsItems phTitle: '+phTitle )
-                    valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'TNAFLIX-clips', '', None)) 
+                    printDBG( 'Host listsItems phImage: '+phImage )
+                    valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'TNAFLIX-clips', phImage, None)) 
                     valTab.sort(key=lambda poz: poz.name)
            printDBG( 'Host listsItems end' )
            return valTab
@@ -1961,9 +1962,9 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('data-vid=.*?data-original=\'(.*?)\'.*?videoDuration\'>(.*?)<.*?\s+href=\'(.*?)\'\s+title=\'\'>(.*?)<', data, re.S)  
+           phMovies = re.findall("data-vid=.*?data-original='(.*?)'.*?lt=\"(.*?)\".*?videoDuration'>(.*?)<.*?href='(.*?)'", data, re.S)  
            if phMovies:
-              for ( phImage, phRuntime, phUrl, phTitle ) in phMovies:
+              for ( phImage, phTitle, phRuntime, phUrl ) in phMovies:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
