@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.1"
+    XXXversion = "20.0.3.2"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2110,15 +2110,15 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('class="title-general">\s{0,1}Categories</h1>(.*?)footer', data, re.S)   
            if parse:
-              phCats = re.findall('href="(.*?)".*?img" src="(.*?)".*?alt="(.*?)"', data, re.S) 
+              phCats = re.findall('href="(.*?)".*?src="(.*?)".*?title="(.*?)"', parse.group(1), re.S) 
               if phCats:
                  for (phUrl, phImage, phTitle) in phCats: 
                     if phTitle != "High Definition Videos":
-                       phUrl = "http://www.extremetube.com" + phUrl.replace('?fromPage=categories', '') + '?page='
+                       phUrl = phUrl.replace('?fromPage=categories', '') + '?page='
                        printDBG( 'Host listsItems phImage: '  +phImage )
                        printDBG( 'Host listsItems phTitle: '+phTitle )
                        printDBG( 'Host listsItems phUrl: '  +phUrl )
-                       valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'EXTREMETUBE-clips', phImage, None)) 
+                       valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'EXTREMETUBE-clips', phImage, None)) 
                        valTab.sort(key=lambda poz: poz.name)
            printDBG( 'Host listsItems end' )
            return valTab
@@ -2132,8 +2132,6 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('absolute title-ornament(.*?)', data, re.S)   
-
            phMovies = re.findall('data-srcmedium="(.*?)".*?title="(.*?)".*?href="(.*?)".*?videoDuration"><div class="text">(.*?)<', data, re.S) 
            if phMovies:
               for ( phImage, phTitle, phUrl, Runtime) in phMovies:
@@ -3595,7 +3593,7 @@ class Host:
            return ''
 
         if parser == 'http://www.extremetube.com':
-           videoPage = re.findall('"quality_\d+p":"(.*?)","', data, re.S) 
+           videoPage = re.findall('"quality_\d+p":"(.*?)"', data, re.S) 
            if videoPage:
               url = videoPage[-1] 
               url = url.replace('\/','/') 
