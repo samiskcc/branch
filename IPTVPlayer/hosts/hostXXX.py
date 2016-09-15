@@ -137,7 +137,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.2.9"
+    XXXversion = "20.0.3.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -3579,7 +3579,11 @@ class Host:
               url = re.findall('CDATA\[(.*?)\]', data, re.S)
               if url: 
                  videoUrl = url[-1]
-                 videoUrl = videoUrl.replace('fck-c','fck-ce') 
+                 if videoUrl[:2] == "//":
+                    videoUrl = "http:" + videoUrl
+                 serwer = re.search('fck-ce', videoUrl, re.S)
+                 if not serwer:
+                    videoUrl = videoUrl.replace('fck-c','fck-ce') 
                  return videoUrl
            return ''
 
