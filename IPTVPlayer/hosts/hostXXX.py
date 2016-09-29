@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.6"
+    XXXversion = "20.0.3.7"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -233,7 +233,7 @@ class Host:
            valTab.append(CDisplayListItem('EL-LADIES - JUST-EROPROFILE',     'http://search.el-ladies.com', CDisplayListItem.TYPE_CATEGORY, ['http://search.el-ladies.com'],'EL-LADIES', 'http://amateurblogs.eroprofile.com/img/ep_new_gallery_header.png', None)) 
            valTab.append(CDisplayListItem('EXTREMETUBE',     'http://www.extremetube.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.extremetube.com/video-categories'],'EXTREMETUBE', 'http://www.wp-tube-plugin.com/feed-images/extremetube.png', None)) 
            valTab.append(CDisplayListItem('PORNKINO',     'http://pornkino.to', CDisplayListItem.TYPE_CATEGORY, ['http://pornkino.to/'],'PORNKINO', 'http://pornkino.to/images/logo.png', None)) 
-           valTab.append(CDisplayListItem('RUSPORN',     'http://rusporn.tv/', CDisplayListItem.TYPE_CATEGORY, ['http://rusporn.tv/categories.html'],'RUSPORN', 'http://rusporn.tv/App_Themes/ruporn/img/logo.png?12013', None)) 
+           valTab.append(CDisplayListItem('RUPORN',     'http://ruporn.video/', CDisplayListItem.TYPE_CATEGORY, ['http://ruporn.video/categories.html'],'RUSPORN', 'http://ruporn.video/App_Themes/ruporn/img/logo.png?12013', None)) 
            valTab.append(CDisplayListItem('PORN720',     'http://porn720.net/', CDisplayListItem.TYPE_CATEGORY, ['http://porn720.net/'],'PORN720', 'http://porn720.net/wp-content/themes/porn720/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNTREX',     'http://www.porntrex.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porntrex.com/categories'],'PORNTREX', 'http://www.porntrex.com/templates/frontend/porntrex/img/logo.png', None)) 
            valTab.append(CDisplayListItem('PORNDOE',     'http://www.porndoe.com', CDisplayListItem.TYPE_CATEGORY, ['http://www.porndoe.com/categories'],'PORNDOE', 'http://porndoe.com/themes/frontend/white/assets/images/logo_fb.jpg', None)) 
@@ -2375,10 +2375,11 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('cats(.*?)</ul>', data, re.S)
            if parse:
+              printDBG( 'Host listsItems data: '+parse.group(1) )
               phCats = re.findall('a href="(.*?)"', parse.group(1), re.S)
               if phCats:
                  for (phUrl) in phCats:
-                    phTitle = re.search('tv/(.*?)_', phUrl, re.S)
+                    phTitle = re.search('video/(.*?)_', phUrl, re.S)
                     if phTitle: 
                        phTitle = phTitle.group(1)
                        printDBG( 'Host listsItems phUrl: '  +phUrl )
