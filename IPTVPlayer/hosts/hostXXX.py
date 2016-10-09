@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.7"
+    XXXversion = "20.0.3.8"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -446,7 +446,7 @@ class Host:
                   printDBG( 'Host listsItems goalDsc: '+item["goalDsc"] )
                   phImage = 'http://ctn.zbiornik.com/cams/'+str(item["broadcasturl"])+'-224.jpg'
                   printDBG( 'Host listsItems phImage: '+phImage )
-                  #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'
+                  #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'+ ' flashVer=WIN 12,0,0,44 '
                   streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/'+str(item["broadcasturl"])+' live=1'
                   printDBG( 'Host listsItems streamUrl: '+streamUrl )
                   if str(item["acctype"])<>'1':
@@ -2529,9 +2529,10 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('id="dropdown-categories(.*?)CATEGORIES DROPDOWN', data, re.S)
+           parse = re.search('categories-list(.*?)</header>', data, re.S)
            if parse:
-              phCats = re.findall('data-url="(.*?)".*?"category ">(.*?)<', parse.group(1), re.S)
+              #printDBG( 'Host listsItems data2: '+parse.group(1) )
+              phCats = re.findall('href="(.*?)".*?"category ">(.*?)<', parse.group(1), re.S)
               if phCats:
                  for (phUrl, phTitle) in phCats:
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
@@ -3724,8 +3725,10 @@ class Host:
            try:
               link = re.search('src="(https://www.rapidvideo.com.*?)"', data, re.S) 
               if link:
-                 printDBG( 'Host listsItems test1: '  +link.group(1) )
-                 data = self.cm.getURLRequestData({'url': link.group(1), 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+                 rapid = link.group(1).replace(r'embed/',r'?v=')
+                 printDBG( 'Host listsItems test1: '  +rapid )
+                 data = self.cm.getURLRequestData({'url': rapid, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+                 printDBG( 'Host listsItems test1 data: '  +data )
                  videoPage = re.findall('"file":"(.*?)"', data, re.S)
                  if videoPage: return videoPage[-1].replace('\/','/')
            except: pass
@@ -3739,15 +3742,15 @@ class Host:
                  if videoPage: return videoPage[-1].replace('\/','/')
            except: pass
            try:
-              link = re.search('src="(https://openload.co.*?)"', data, re.S) 
-              if link:
-                 printDBG( 'Host listsItems test3: '  +link.group(1) )
-                 return self.getResolvedURL(link.group(1))
-           except: pass
-           try:
               link = re.search('src="(http://videomega.tv.*?)"', data, re.S) 
               if link:
                  printDBG( 'Host listsItems test4: '  +link.group(1) )
+                 return self.getResolvedURL(link.group(1))
+           except: pass
+           try:
+              link = re.search('src="(https://openload.co.*?)"', data, re.S) 
+              if link:
+                 printDBG( 'Host listsItems test3: '  +link.group(1) )
                  return self.getResolvedURL(link.group(1))
            except: pass
            return ''
