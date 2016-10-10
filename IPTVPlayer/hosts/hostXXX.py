@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.8"
+    XXXversion = "20.0.3.9"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -291,6 +291,11 @@ class Host:
               valtemp = self.listsItems(-1, url, '4tube-search')
               for item in valtemp: item.name='4tube - '+item.name              
               valTab = valTab + valtemp 
+
+              valtemp = self.listsItems(-1, url, 'PORNFROMCZECH-search')
+              for item in valtemp: item.name='PORNFROMCZECH - '+item.name              
+              valTab = valTab + valtemp 
+  
               return valTab
            valTab = self.listsItems(-1, url, self.SEARCH_proc)
            printDBG( 'Host listsItems end' )              
@@ -343,7 +348,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('data-video_url="(.*?)".*?src="(.*?)".*?title="(.*?)".*?"video_duration">(.*?)<', data, re.S)
            if phMovies:
               for (phUrl, phImage, phTitle, phTime ) in phMovies:
@@ -529,7 +534,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)" title="(.*?)".*?"duration">(.*?)<', data, re.S)
            if phMovies:
               for (phImage, phUrl, phTitle, Runtime ) in phMovies:
@@ -895,7 +900,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            phMovies = re.findall('<div\sclass="wrap">.*?<a\shref="(.*?)".*?itle="(.*?)".*?class="duration">(.*?)</var>.*?data-mediumthumb="(.*?)".*?class="views"><var>(.*?)<.*?class="added">(.*?)<', data, re.S)
            if phMovies:
               for (phUrl, phTitle, phRuntime, phImage, phViews, phAdded) in phMovies:
@@ -2579,15 +2584,23 @@ class Host:
            #printDBG( 'Host listsItems data: '+data )
            parse = re.search('id="categories-2"(.*?)id="text-6"', data, re.S)
            if parse:
-              phCats = re.findall('<a href="(.*?)"\s>(.*?)</a>', parse.group(1), re.S)
+              phCats = re.findall('<a href="(.*?)".*?(>.*?)</a>', parse.group(1), re.S)
               if phCats:
                  for (phUrl, phTitle) in phCats:
-                     #phUrl = phUrl + 'page/'
+                     phTitle = phTitle.replace('>','')
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phTitle: '+phTitle )
                      valTab.append(CDisplayListItem(decodeHtml(phTitle),phUrl,CDisplayListItem.TYPE_CATEGORY, [phUrl],'PORNFROMCZECH-clips', '', phUrl)) 
+           self.SEARCH_proc='PORNFROMCZECH-search'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
+        if 'PORNFROMCZECH-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://pornfromczech.com/?s=%s&x=0&y=0' % url, 'PORNFROMCZECH-clips')
+           printDBG( 'Host listsItems end' )
+           return valTab              
         if 'PORNFROMCZECH-clips' == name:
            printDBG( 'Host listsItems begin name='+name )
            catUrl = self.currList[Index].possibleTypesOfSearch
@@ -2894,6 +2907,7 @@ class Host:
         if url.startswith('http://polskikarting.pl'):        return 'xxxlist.txt'
         if url.startswith('https://www.rapidvideo.com'):     return 'xxxlist.txt'
         if url.startswith('http://videomega.tv'):            return 'xxxlist.txt'
+        if url.startswith('http://www.flashx.tv'):           return 'xxxlist.txt'
         if url.startswith('http://www.porndreamer.com'):     return 'http://www.katestube.com'
         if url.startswith('http://pornicom.com'):            return 'http://pornicom.com'
         if url.startswith('http://www.pornicom.com'):        return 'http://pornicom.com'
@@ -2965,7 +2979,7 @@ class Host:
               data = self.cm.getURLRequestData(query_data)
            except:
               return ''
-           printDBG( 'Host getResolvedURL data: '+data )
+           #printDBG( 'Host getResolvedURL data: '+data )
            videoPage = re.findall("video_hd='(.*?)'", data, re.S)   
            if videoPage:
               printDBG( 'Host videoPage:'+videoPage[0])
@@ -3012,7 +3026,7 @@ class Host:
               printDBG( 'Host getResolvedURL query error' )
               printDBG( 'Host getResolvedURL query error url: '+url )
               return ''
-           printDBG( 'Host getResolvedURL data: '+data )
+           #printDBG( 'Host getResolvedURL data: '+data )
            parse = re.search('<iframe.*?src="(.*?)"', data, re.S)
            if parse:
               if parse.group(1).startswith('http://www.pornway.com'):
@@ -3054,7 +3068,7 @@ class Host:
               except:
                  printDBG( 'Host error newurl2:  '+newurl2 )
               if data:
-                 printDBG( 'Host data:  '+data )
+                 #printDBG( 'Host data:  '+data )
                  parse = re.search("chunklist(.*?)m3u8", data, re.S)
                  if parse:
                     best = parse.group(0)
@@ -3150,7 +3164,7 @@ class Host:
               query_data = {'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True}
               try:
                  data = self.cm.getURLRequestData(query_data)
-                 printDBG( 'Host getResolvedURL data: '+data )
+                 #printDBG( 'Host getResolvedURL data: '+data )
               except:
                  printDBG( 'Host getResolvedURL query error' )
               videoUrl = re.findall("file: '(.*?)'", data, re.S)
@@ -3165,7 +3179,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return ''
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('"sessionHash":"(.*?)"', data, re.S) 
            if not parse: return ''
            sessionHash = parse.group(1) 
@@ -3177,7 +3191,7 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            parse = re.search('"models":(.*?),"ttl":', data, re.S) 
            if not parse: return ''
            result = simplejson.loads(parse.group(1))
@@ -3200,7 +3214,7 @@ class Host:
               data = self.cm.getURLRequestData(query_data)
            except:
               return valTab
-           printDBG( 'Host listsItems data: '+data )
+           #printDBG( 'Host listsItems data: '+data )
            url = re.findall('"url":"(.*?)"}', data, re.S)
            if url:
               url = url[-1]
@@ -3498,7 +3512,7 @@ class Host:
            except: 
                    printDBG( 'Host getResolvedURL query error xml' )
                    return ''
-           printDBG( 'Host data json: '+data )
+           #printDBG( 'Host data json: '+data )
            videoPage = re.findall('src": "(.*?)"', data, re.S)
            if videoPage: return videoPage[0]
            return ''
@@ -3605,7 +3619,7 @@ class Host:
               except:
                  printDBG( 'Host listsItems query error' )
                  printDBG( 'Host listsItems query error url: '+url )
-              printDBG( 'Host listsItems data: '+data )
+              #printDBG( 'Host listsItems data: '+data )
               url = re.findall('CDATA\[(.*?)\]', data, re.S)
               if url: 
                  videoUrl = url[-1]
@@ -3728,7 +3742,7 @@ class Host:
                  rapid = link.group(1).replace(r'embed/',r'?v=')
                  printDBG( 'Host listsItems test1: '  +rapid )
                  data = self.cm.getURLRequestData({'url': rapid, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-                 printDBG( 'Host listsItems test1 data: '  +data )
+                 #printDBG( 'Host listsItems test1 data: '  +data )
                  videoPage = re.findall('"file":"(.*?)"', data, re.S)
                  if videoPage: return videoPage[-1].replace('\/','/')
            except: pass
@@ -3737,21 +3751,45 @@ class Host:
               if link:
                  printDBG( 'Host listsItems test2: '  +link.group(1) )
                  data = self.cm.getURLRequestData({'url': link.group(1).replace('embed/','?v='), 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
-                 printDBG( 'Host getResolvedURL data: '+data )
+                 #printDBG( 'Host getResolvedURL data: '+data )
                  videoPage = re.findall('"file":"(.*?)"', data, re.S)
                  if videoPage: return videoPage[-1].replace('\/','/')
-           except: pass
-           try:
-              link = re.search('src="(http://videomega.tv.*?)"', data, re.S) 
-              if link:
-                 printDBG( 'Host listsItems test4: '  +link.group(1) )
-                 return self.getResolvedURL(link.group(1))
            except: pass
            try:
               link = re.search('src="(https://openload.co.*?)"', data, re.S) 
               if link:
                  printDBG( 'Host listsItems test3: '  +link.group(1) )
                  return self.getResolvedURL(link.group(1))
+           except: pass
+           try:
+              link = re.search('src="(http://www.flashx.tv.*?)"', data, re.S) 
+              if link:
+                 printDBG( 'Host listsItems test4: '  +link.group(1) )
+                 return self.getResolvedURL(link.group(1))
+           except: pass
+           try:
+              link = re.search('src="(http://videomega.tv.*?)"', data, re.S) 
+              if link:
+                 printDBG( 'Host listsItems test5: '  +link.group(1) )
+                 return self.getResolvedURL(link.group(1))
+           except: pass
+           try:
+              link = re.search('src="(https://player.tnaflix.com.*?)"', data, re.S) 
+              if link:
+                 printDBG( 'Host listsItems test6: '  +link.group(1) )
+                 data = self.cm.getURLRequestData({'url': link.group(1), 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+                 #printDBG( 'Host getResolvedURL data: '+data )
+                 videoPage = re.search('(//www.tnaflix.com.*?)"', data, re.S)
+                 if videoPage: return self.getResolvedURL('http:'+videoPage.group(1))
+           except: pass
+           try:
+              link = re.search('="(http://vidlox.tv.*?)"', data, re.S) 
+              if link:
+                 printDBG( 'Host listsItems test7: '  +link.group(1) )
+                 data = self.cm.getURLRequestData({'url': link.group(1), 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True})
+                 #printDBG( 'Host getResolvedURL data: '+data )
+                 videoPage = re.search('file:"(.*?)"', data, re.S)
+                 if videoPage: return videoPage.group(1)
            except: pass
            return ''
 
