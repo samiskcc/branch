@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.4.0"
+    XXXversion = "20.0.4.1"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -294,6 +294,10 @@ class Host:
 
               valtemp = self.listsItems(-1, url, 'PORNFROMCZECH-search')
               for item in valtemp: item.name='PORNFROMCZECH - '+item.name              
+              valTab = valTab + valtemp 
+
+              valtemp = self.listsItems(-1, url, 'porndoe-search')
+              for item in valtemp: item.name='porndoe - '+item.name              
               valTab = valTab + valtemp 
   
               return valTab
@@ -2537,12 +2541,20 @@ class Host:
            parse = re.search('categories-list(.*?)</header>', data, re.S)
            if parse:
               #printDBG( 'Host listsItems data2: '+parse.group(1) )
-              phCats = re.findall('href="(.*?)".*?"category ">(.*?)<', parse.group(1), re.S)
+              phCats = re.findall('="(/category/.*?)".*?">(.*?)<', parse.group(1), re.S)
               if phCats:
                  for (phUrl, phTitle) in phCats:
                      printDBG( 'Host listsItems phUrl: '  +phUrl )
                      printDBG( 'Host listsItems phTitle: '+phTitle )
                      valTab.append(CDisplayListItem(decodeHtml(phTitle),self.MAIN_URL+phUrl,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'PORNDOE-clips', '', phUrl)) 
+           self.SEARCH_proc='porndoe-search'
+           valTab.insert(0,CDisplayListItem('Historia wyszukiwania', 'Historia wyszukiwania', CDisplayListItem.TYPE_CATEGORY, [''], 'HISTORY', '', None)) 
+           valTab.insert(0,CDisplayListItem('Szukaj',  'Szukaj filmów',                       CDisplayListItem.TYPE_SEARCH,   [''], '',        '', None)) 
+           printDBG( 'Host listsItems end' )
+           return valTab
+        if 'porndoe-search' == name:
+           printDBG( 'Host listsItems begin name='+name )
+           valTab = self.listsItems(-1, 'http://porndoe.com/search?keywords=%s' % url, 'PORNDOE-clips')
            printDBG( 'Host listsItems end' )
            return valTab
         if 'PORNDOE-clips' == name:
@@ -2566,7 +2578,8 @@ class Host:
                  valTab.append(CDisplayListItem(decodeHtml(phTitle),'['+Time+']    '+decodeHtml(phTitle),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            match = re.search('page next"><a href="(.*?)"', data, re.S)
            if match:
-              phUrl = match.group(1)
+              phUrl = match.group(1).replace('amp;','')
+              printDBG( 'Host listsItems Next: '+phUrl ) 
               valTab.append(CDisplayListItem('Next ', 'Page: '+phUrl, CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl], name, '', catUrl))                
            printDBG( 'Host listsItems end' )
            return valTab
