@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.3.9"
+    XXXversion = "20.0.4.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -535,7 +535,7 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(.*?)" title="(.*?)".*?"duration">(.*?)<', data, re.S)
+           phMovies = re.findall('class="thumb".*?img src="(.*?)".*?href="(/video.*?)" title="(.*?)".*?<strong>(.*?)</strong>', data, re.S)
            if phMovies:
               for (phImage, phUrl, phTitle, Runtime ) in phMovies:
                   phTitle = decodeHtml(phTitle)
@@ -543,7 +543,7 @@ class Host:
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems Runtime: '+Runtime )
-                  valTab.append(CDisplayListItem(phTitle,Runtime.strip()+'  '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
+                  valTab.append(CDisplayListItem(phTitle,'['+Runtime.strip()+']  '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', self.MAIN_URL+phUrl, 1)], 0, phImage, None)) 
            next = re.search('pagination(.*?)>Next<', data, re.S)
            if next:
               match = re.findall('a href="(.*?)"', next.group(1), re.S)
