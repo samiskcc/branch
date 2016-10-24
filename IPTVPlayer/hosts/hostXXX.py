@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.5.0"
+    XXXversion = "20.0.6.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -614,14 +614,14 @@ class Host:
               printDBG( 'Host listsItems query error' )
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
-           #printDBG( 'Host listsItems data: '+data )
-           phCats = re.findall('<li\sclass=\'.*?\'><a\shref="/category/(.*?)">(.*?)</a', data, re.S)
+           printDBG( 'Host listsItems data: '+data )
+           phCats = re.findall('sublist-item\'><a href="(/category/.*?)".*?">(.*?)</a', data, re.S)
            if phCats:
               for (phUrl, phTitle) in phCats:
+                  phUrl = self.MAIN_URL+phUrl
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   #printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
-                  phUrl = self.MAIN_URL+"/category/" + phUrl
                   valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [phUrl],'fullyouporn-clips', '', None)) 
            valTab.sort(key=lambda poz: poz.name)
            valTab.insert(0,CDisplayListItem("--- Most Discussed ---",     "Most Discussed",     CDisplayListItem.TYPE_CATEGORY,["http://www.youporn.com/most_discussed/"],                   'fullyouporn-clips', '',None))
