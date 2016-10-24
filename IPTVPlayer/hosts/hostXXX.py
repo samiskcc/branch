@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.4.1"
+    XXXversion = "20.0.5.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -2759,17 +2759,16 @@ class Host:
               printDBG( 'Host listsItems query error url:'+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           parse = re.search('List\sof\stags(.*?)>Channels</', data, re.S) 
-           if parse:
-              genre = re.findall('<li>\s*<a\shref="(.*?empflix.com|.*?moviefap.com|)(.*?)(1.html|)".*?>(.*?)(<i>|</a></li>)', parse.group(1), re.S) 
-              if genre:
-                 for (dummy, phUrl, dummy, phTitle, dummy) in genre:
-                    phTitle = decodeHtml(phTitle)
-                    phUrl = phUrl+'1.html'
-                    printDBG( 'Host listsItems phUrl: '  +phUrl )
-                    printDBG( 'Host listsItems phTitle: '+phTitle )
-                    if not phTitle == "All": 
-                       valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'EMPFLIX-clips', '', None)) 
+           genre = re.findall('"thumb"\shref="(.*?)".*?src="(.*?)".*?title="(.*?)"', data, re.S) 
+           if genre:
+              for (phUrl, phImage, phTitle) in genre:
+                 phTitle = decodeHtml(phTitle)
+                 phImage = 'http:'+phImage
+                 printDBG( 'Host listsItems phUrl: '  +phUrl )
+                 printDBG( 'Host listsItems phTitle: '+phTitle )
+                 printDBG( 'Host listsItems phImage: '+phImage )
+                 if not phTitle == "All": 
+                    valTab.append(CDisplayListItem(phTitle,phTitle,CDisplayListItem.TYPE_CATEGORY, [self.MAIN_URL+phUrl],'EMPFLIX-clips', phImage, None)) 
            printDBG( 'Host listsItems end' )
            return valTab
         if 'EMPFLIX-clips' == name:
@@ -2782,20 +2781,19 @@ class Host:
               printDBG( 'Host listsItems query error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
-           phMovies = re.findall('class="video\s.*?<a\s{1,2}href="(.*?)"\sclass=".*?class="duringTime">(.*?)</span>.*?<img\ssrc="(.*?)"\sonMouseOver=.*?title="(.*?)"\salt=', data, re.S)  
+           phMovies = re.findall("data-vid='.*?data-name='(.*?)'.*?href='(.*?)'.*?data-original='(.*?)'.*?videoDuration\'>(.*?)<", data, re.S)  
            if phMovies:
-              for ( phUrl, phRuntime, phImage, phTitle ) in phMovies:
+              for ( phTitle, phUrl, phImage, phRuntime) in phMovies:
                   if phUrl[:2] == "//":
                      phUrl = "http:" + phUrl
                   else:
                      phUrl = self.MAIN_URL + phUrl
-                  phImage = "http:" + phImage 
                   printDBG( 'Host listsItems phUrl: '  +phUrl )
                   printDBG( 'Host listsItems phImage: '+phImage )
                   printDBG( 'Host listsItems phTitle: '+phTitle )
                   printDBG( 'Host listsItems phRuntime: '+phRuntime )
                   valTab.append(CDisplayListItem(phTitle,'['+phRuntime+'] '+phTitle,CDisplayListItem.TYPE_VIDEO, [CUrlItem('', phUrl, 1)], 0, phImage, None)) 
-           match = re.findall('</a><a class="navLink".*?href="(.*?)"', data, re.S)
+           match = re.findall('<a class="llNav".*?href="(.*?)"', data, re.S)
            if match:
               phUrl = match[0]
               printDBG( 'Host listsItems page phUrl: '+phUrl )
@@ -3623,25 +3621,9 @@ class Host:
            return ''
 
         if parser == 'https://www.empflix.com':
-           videoPage = re.search("config = '(.*?)'", data, re.S)  
+           videoPage = re.search('"contentUrl" content="(.*?)"', data, re.S)  
            if videoPage:
-              url = 'http:'+videoPage.group(1)
-              query_data = { 'url': url, 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True }
-              try:
-                 data = self.cm.getURLRequestData(query_data)
-              except:
-                 printDBG( 'Host listsItems query error' )
-                 printDBG( 'Host listsItems query error url: '+url )
-              #printDBG( 'Host listsItems data: '+data )
-              url = re.findall('CDATA\[(.*?)\]', data, re.S)
-              if url: 
-                 videoUrl = url[-1]
-                 if videoUrl[:2] == "//":
-                    videoUrl = "http:" + videoUrl
-                 serwer = re.search('fck-ce', videoUrl, re.S)
-                 if not serwer:
-                    videoUrl = videoUrl.replace('fck-c','fck-ce') 
-                 return videoUrl
+              return videoPage.group(1)
            return ''
 
         if parser == 'http://search.el-ladies.com':
