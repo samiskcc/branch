@@ -139,7 +139,7 @@ class IPTVHost(IHost):
     ###################################################
 
 class Host:
-    XXXversion = "20.0.6.0"
+    XXXversion = "20.0.7.0"
     XXXremote  = "0.0.0.0"
     currList = []
     MAIN_URL = ''
@@ -254,7 +254,7 @@ class Host:
            valTab.append(CDisplayListItem('BONGACAMS',     'https://pl.bongacams.com/', CDisplayListItem.TYPE_CATEGORY, ['https://pl.bongacams.com/'],'BONGACAMS', 'http://i.bongacams.com/images/bongacams_logo3_header.png', None)) 
            valTab.append(CDisplayListItem('RAMPANT',     'https://www.rampant.tv/channel/', CDisplayListItem.TYPE_CATEGORY, ['https://www.rampant.tv/channel/'],'RAMPANT', 'https://www.rampant.tv/new-images/rampant_logo.png', None)) 
            #valTab.append(CDisplayListItem('SHOWUP   - live cams',       'showup.tv',          CDisplayListItem.TYPE_CATEGORY, ['http://showup.tv'],                     'showup',  'http://3.bp.blogspot.com/-E6FltqaarDQ/UXbA35XtARI/AAAAAAAAAPY/5-eNrAt8Nyg/s1600/show.jpg', None)) 
-           valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'old.zbiornik.com',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
+           valTab.append(CDisplayListItem('ZBIORNIK - live cams',       'zbiornik.tv',       CDisplayListItem.TYPE_CATEGORY, ['http://zbiornik.com/live/'],            'zbiornik','http://static.zbiornik.com/images/zbiornikBig.png', None)) 
            valTab.append(CDisplayListItem('+++ XXXLIST +++',     'xxxlist.txt', CDisplayListItem.TYPE_CATEGORY, [''],'XXXLIST', '', None)) 
            printDBG( 'Host listsItems end' )
            return valTab
@@ -434,34 +434,35 @@ class Host:
         if 'zbiornik' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://zbiornik.com' 
-           try: data = self.cm.getURLRequestData({ 'url': 'http://old.zbiornik.com/live/', 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
+           try: data = self.cm.getURLRequestData({ 'url': 'http://zbiornik.tv', 'use_host': False, 'use_cookie': False, 'use_post': False, 'return_data': True })
            except:
-              printDBG( 'Host getResolvedURL query error' )
-              printDBG( 'Host getResolvedURL query error url: '+url )
+              printDBG( 'Host error url: '+url )
               return valTab
            #printDBG( 'Host listsItems data: '+data )
            sex = ''
-           ph1 = re.search('var streams=(.*?)}];', data, re.S)
-           if ph1: ph1 = ph1.group(1)+'}]'
-           result = simplejson.loads(ph1)
-           if result:
-              for item in result:
-                  if str(item["acctype"])=='1': sex = 'male'
-                  if str(item["acctype"])=='2': sex = 'female'
-                  if str(item["acctype"])=='3': sex = 'couple'
-                  printDBG( 'Host listsItems nick: '+item["nick"] )
-                  printDBG( 'Host listsItems broadcasturl: '+item["broadcasturl"] )
-                  printDBG( 'Host listsItems topic: '+item["topic"] )
-                  printDBG( 'Host listsItems goalDsc: '+item["goalDsc"] )
-                  phImage = 'http://ctn.zbiornik.com/cams/'+str(item["broadcasturl"])+'-224.jpg'
-                  printDBG( 'Host listsItems phImage: '+phImage )
-                  #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'+ ' flashVer=WIN 12,0,0,44 '
-                  streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/'+str(item["broadcasturl"])+' live=1'
-                  printDBG( 'Host listsItems streamUrl: '+streamUrl )
-                  if str(item["acctype"])<>'1':
-                     valTab.append(CDisplayListItem(str(item["nick"])+'    {'+sex+'}',str(item["topic"])+' ; '+str(item["goalDsc"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
-           printDBG( 'Host listsItems end' )
+           ph1 = re.search('var streams = (.*?)}];', data, re.S)
+           if ph1: 
+              ph1 = ph1.group(1)+'}]'
+              result = simplejson.loads(ph1)
+              if result:
+                 for item in result:
+                     if str(item["accType"])=='1': sex = 'male'
+                     if str(item["accType"])=='2': sex = 'female'
+                     if str(item["accType"])=='3': sex = 'couple'
+                     printDBG( 'Host listsItems nick: '+item["nick"] )
+                     printDBG( 'Host listsItems broadcasturl: '+item["broadcasturl"] )
+                     #printDBG( 'Host listsItems topic: '+item["topic"] )
+                     #printDBG( 'Host listsItems goalDesc: '+item["goalDesc"] )
+                     phImage = 'http://ctn.zbiornik.com/cams/'+str(item["broadcasturl"])+'-224.jpg'
+                     printDBG( 'Host listsItems phImage: '+phImage )
+                     #streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/? playpath='+str(item["broadcasturl"])+' swfUrl=http://old.zbiornik.com/wowza.swf?v42 pageUrl=http://old.zbiornik.com/live/# live=1'+ ' flashVer=WIN 12,0,0,44 '
+                     streamUrl = 'rtmp://'+str(item["server"])[0]+''+str(item["server"])[1:]+'/videochat/'+str(item["broadcasturl"])+' live=1'
+                     printDBG( 'Host listsItems streamUrl: '+streamUrl )
+                     if str(item["accType"])<>'1':
+                        valTab.append(CDisplayListItem(str(item["nick"])+'    {'+sex+'}',str(item["nick"]),CDisplayListItem.TYPE_VIDEO, [CUrlItem('', streamUrl, 0)], 0, phImage, None)) 
+              printDBG( 'Host listsItems end' )
            return valTab
+
         if 'showup' == name:
            printDBG( 'Host listsItems begin name='+name )
            self.MAIN_URL = 'http://showup.tv' 
